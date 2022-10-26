@@ -27,7 +27,7 @@ def main(autoload=True):
 
 	delete_ui()
 	cmds.workspaceControl(ValidatorMainWindow.CONTROL_NAME, retain=False, floating=True,
-						uiScript="python(\"import ta_validator.main as vld\\nvld.main(autoload = False)\");")
+						uiScript="python(\"import validator.main as vld\\nvld.main(autoload = False)\");")
 	control_widget = omui.MQtUtil.findControl(ValidatorMainWindow.CONTROL_NAME)
 	control_wrap = wrapInstance(int(control_widget), QWidget)
 	control_wrap.setAttribute(Qt.WA_DeleteOnClose)

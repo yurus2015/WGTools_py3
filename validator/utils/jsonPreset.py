@@ -1,7 +1,8 @@
 import json
-from ta_validator.gui.constants import PATHPRESET
+from validator.gui.constants import PATHPRESET
 import os
 dir = os.path.dirname(__file__)
+
 
 class PresetsJson():
 	def __init__(self):

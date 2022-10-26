@@ -8,7 +8,7 @@ import maya.cmds as cmds
 from constants import *
 #VERSION, PRESETOPTION, ISOLATEOPTION, PRESETS, LABEL
 from buttonPresetWidget import PresetButton, MenuBar, CheckButton, ProgressBar
-from ta_validator.utils.jsonPreset import PresetsJson
+from validator.utils.jsonPreset import PresetsJson
 from checkItemWidget import CheckWidget
 from collections import OrderedDict
 

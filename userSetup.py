@@ -31,8 +31,8 @@ except:
 	print('Load Modeling Toolset failed')
 
 try:
-	import ta_validator.main
-	maya.utils.executeDeferred('ta_validator.main.main()')
+	import validator.main
+	maya.utils.executeDeferred('validator.main.main()')
 except:
 	print('Load Validator failed')
 '''

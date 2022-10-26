@@ -15,8 +15,8 @@ AUTOLOADOPTION = 'validator_autoload_options'
 
 #preset path
 PATHPRESET = 'checks/presets.json'
-CHECKS_PATH = 'ta_validator.utils.checks.'
-CHECKS_PATH_SLASH = 'ta_validator/utils/checks'
+CHECKS_PATH = 'validator.utils.checks.'
+CHECKS_PATH_SLASH = 'validator/utils/checks'
 
 #progress bar
 MIN = 0
@@ -34,4 +34,3 @@ DEFAULT_COLOR = (68, 68, 68, 255)
 INACTIVE_COLOR = (78, 78, 78, 255)
 HOVER_COLOR = (0, 0, 0, 25)
 SCROLLAREA_COLOR = (53, 53, 53, 255)
-
