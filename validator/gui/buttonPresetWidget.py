@@ -85,6 +85,7 @@ class PresetButton(QPushButton):
         except:
             pass
         self.setText('Preset: ' + name)
+        print('test commit')
         cmds.optionVar(sv=(PRESETOPTION, name))
 
     def set_width_menu(self):
