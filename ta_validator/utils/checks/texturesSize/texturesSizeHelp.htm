@@ -1,0 +1,97 @@
+<!-- <html><head>
+<title>Untitled-2</title>
+<meta charset="windows-1251">
+</head>
+<body bgcolor="#000000" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+
+<table id="Table_01" width="422" height="382" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+		<td>
+			<img src="images/polyCountHelp_01.png" width="422" height="332" alt=""></td>
+	</tr>
+	<tr>
+		<td><font color="white"><center><strong>PolyCount</strong></center>
+
+<center>Polycount rules are described at <a href="https://confluence.wargaming.net/pages/viewpage.action?pageId=135355266#id-1.Tanks.%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5%D1%82%D1%80%D0%B5%D0%B1%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-%D0%9F%D0%BE%D0%BB%D0%B8%D0%BA%D0%B0%D1%83%D0%BD%D1%82%D0%B4%D0%BB%D1%8F%D0%BE%D0%B1%D0%BE%D0%B8%D1%85%D1%81%D0%BE%D1%81%D1%82%D0%BE%D1%8F%D0%BD%D0%B8%D0%B9">polycount</a></center></font>
+
+
+
+</td>
+	</tr>
+</tbody></table>
+
+</body></html>
+
+ -->
+
+<!doctype html>
+
+<html lang="en">
+
+	<head>
+		<meta charset = "utf-8">
+		<title>validator Help</title>
+
+		<style type="text/css">
+			body {margin: 0px 0px 0px 0px; background:#222;}
+			a:link    {text-decoration: none; color: #fff; font-weight: 400;}
+			a:visited {text-decoration: none; color: #fff; font-weight: 400;}
+			a:hover   {text-decoration: none; color: #fff; font-weight: 400;}
+			a:active  {text-decoration: none; color: #fff; font-weight: 400;}
+			.messageWrap{position: absolute;bottom: 0px;left: 0px;width: 100%;height: 100px;margin-left: 0px;z-index: 999;}
+			.messageBox{clear: both;float: left;background: #ff6666;width: 300px;height: 100%;margin-left: -290px;}
+			.messageTitle{clear: both;float: left;margin: 10px 0 0 20px;font-family: "Arial", sans-serif;font-size:14px;color: #444;}
+			.messageText{ clear: both;float: left;margin: 10px 0 0 20px;font-family: "Arial", sans-serif;font-size:14px;color: #222; width: 270px;}
+			img{float: left;}
+
+			/*CUSTOM CLASSES______________________*/
+			/*...*/
+
+		</style>
+		<script src="../../Libs/jquery-2.1.4.min.js"></script> <!-- JQuery -->
+
+
+
+
+
+	</head>
+
+	<body>
+		<!-- CONTENT DATA ####################################################################################### CONTENT DATA-->
+		<div id="mainWrap" width="381" height="359">
+
+			<img src="images/texturesSizeHelp.jpg" width="381" height="359" alt=""> <!-- IMG -->
+
+			<div class="messageWrap"> <!-- Message Box -->
+				<div class="messageBox">
+
+					<div class="messageTitle"><b>Textures valid names</b></div>
+
+					<div class="messageText">Please check out the <a href="https://confluence.wargaming.net/pages/viewpage.action?pageId=135355266#id-1.Tanks.%D0%A2%D0%B5%D1%85%D0%BD%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5%D1%82%D1%80%D0%B5%D0%B1%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-%D0%9F%D0%BE%D0%BB%D0%B8%D0%BA%D0%B0%D1%83%D0%BD%D1%82%D0%B4%D0%BB%D1%8F%D0%BE%D0%B1%D0%BE%D0%B8%D1%85%D1%81%D0%BE%D1%81%D1%82%D0%BE%D1%8F%D0%BD%D0%B8%D0%B9">documentation</a> to make sure textures name of your model is correct</div>
+				</div>
+			</div>
+		</div>
+		<!-- CONTENT DATA END ############################################################################### CONTENT DATA END-->
+
+
+
+
+
+
+
+		<!-- SCRIPTS -->
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$(".messageWrap").hover(
+					function(){
+						$(".messageBox").stop(true,false).animate({marginLeft: "0px"},200);
+					},
+					function(){
+						$(".messageBox").stop(true,false).animate({marginLeft: "-290px"},200);
+					}
+				);
+			});
+		</script>
+	</body>
+
+</html>

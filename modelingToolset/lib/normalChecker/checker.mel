@@ -1,0 +1,85 @@
+
+global proc string[] checkerMain_takeMaterial(string $checkerProc_selection[])
+{
+		hyperShade -smn;
+		return `ls -selection`;
+}
+
+global proc checkerMain_CheckTakeObjectMat(string $CheckMatSelectionProc)
+	{
+		
+			string $CheckColorNode[]=`listConnections -type file ($CheckMatSelectionProc+".color")`;
+			///
+			if (!(`objExists ($CheckColorNode[0] + ".Checker_main")`))
+				{
+
+					/////FIND ANOTHER CONNECTION WITH MATERIAL AND DELETE
+					string $fileNodeSel[] = `listConnections ($CheckMatSelectionProc+".color")`;
+					print $fileNodeSel;
+					delete $fileNodeSel;
+					
+					
+					
+					$DefaultMapPath = (`getenv "HOME"`+ "/maya/2014-x64/scripts/Checkers" + "/checkerblue_128.xpm");
+					$FileName=`shadingNode -asTexture file -name "Cheker_TFile"`;
+					$NodeName=`shadingNode -asUtility place2dTexture -name "Checker_place2dTextures"`;
+					setAttr -type "string" ($FileName + ".fileTextureName") $DefaultMapPath;
+					defaultNavigation -connectToExisting -source $NodeName -destination $FileName;
+					connectAttr -force ($FileName + ".outColor") ($CheckMatSelectionProc + ".color");
+
+					/////ADD ATTRIBUTE TO MATERIAL
+					addAttr -ln "Checker_main"  -at bool  $FileName;
+					setAttr -e-keyable true ($FileName + ".Checker_main");
+					
+					string $check2dNodeProc[] = `listConnections -type place2dTexture ($FileName + ".repeatUV")`;
+					setAttr ($check2dNodeProc[0] + ".repeatU") 16;
+					setAttr ($check2dNodeProc[0] + ".repeatV") 16;
+
+				}
+
+
+};
+
+global proc checkerMain_CheckChangeSizeOrTextures(int $CheckTextureSize,string $checkTexturePath)
+{
+			
+	//take objects and his material
+	
+	string $CheckSelection[] = `ls -sl`; //get selected objects
+	string $CheckMatSelection[] = checkerMain_takeMaterial(`ls -sl -fl`); 
+	
+
+	for ($i = 0; $i <= (`size($CheckMatSelection)`-1); $i++)
+		{
+			checkerMain_CheckTakeObjectMat($CheckMatSelection[$i]);
+				
+			
+			string $CheckColorNode[]=`listConnections -type file ($CheckMatSelection[$i]+".color")`;
+			string $Check2dNode[]=`listConnections -type place2dTexture ($CheckColorNode[0] + ".repeatUV")`;
+			
+			
+			if ($CheckTextureSize == 0)
+					{
+
+						setAttr -type "string" ($CheckColorNode[0] + ".fileTextureName") $checkTexturePath;
+						
+					}
+				else
+					{
+						setAttr ($Check2dNode[0] + ".repeatU") $CheckTextureSize;
+						setAttr ($Check2dNode[0] + ".repeatV") $CheckTextureSize;
+					};
+		};
+		
+	select -r $CheckSelection;
+	
+};
+
+global proc checkerMain_CheckCheckerNodeOFF()
+{
+	select -r "Cheker_TFile*";
+	delete;
+	select -r "Checker_place2dTextures*";
+	delete;
+	
+}

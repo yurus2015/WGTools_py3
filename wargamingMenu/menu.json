@@ -1,0 +1,244 @@
+[
+    {
+        "action_label": "Angle Tool",
+        "action_name": "angleTool",
+        "action_category": "Historical Tools",
+        "action_icon": null
+    },
+    {
+        "action_label": "Bake AO vertex color",
+        "action_icon": null,
+        "action_category": "Objects",
+        "action_name": "bakeAOvertexColor"
+    },
+    {
+        "action_label": "Baker",
+        "action_name": "bakeMenu",
+        "action_category": "Tank Tools",
+        "action_icon": "icon_bakeMenu.png"
+    },
+    {
+        "action_label": "Blueprint",
+        "action_icon": null,
+        "action_category": "Historical Tools",
+        "action_name": "blueprint"
+    },
+    {
+        "action_label": "Blueprint Share",
+        "action_name": "blueprintplus",
+        "action_category": "Historical Tools",
+        "action_icon": null
+    },
+    {
+        "action_label": "Blueprint Share",
+        "action_icon": null,
+        "action_category": "Historical Tools",
+        "action_name": "blueprintShare"
+    },
+    {
+        "action_label": "Collider Creation Toolset",
+        "action_icon": null,
+        "action_category": "TechArt Tools",
+        "action_name": "colliderCreationToolset"
+    },
+    {
+        "action_label": "Collider Material",
+        "action_name": "colliderMaterial",
+        "action_category": "TechArt Tools",
+        "action_icon": null
+    },
+    {
+        "action_label": "Combine",
+        "action_icon": "icon_combine.svg",
+        "action_category": "Main Tools",
+        "action_name": "combine"
+    },
+    {
+        "action_label": "Detach",
+        "action_icon": "icon_detach.svg",
+        "action_category": "Main Tools",
+        "action_name": "detach"
+    },
+    {
+        "action_label": "Environment Simplygon",
+        "action_name": "environmentSimplygon",
+        "action_category": "Objects",
+        "action_icon": null
+    },
+    {
+        "action_label": "Bake Hangar Shadow",
+        "action_icon": "icon_hangarShadow.png",
+        "action_category": "Tank Tools",
+        "action_name": "fakeShadow"
+    },
+    {
+        "action_label": "Full Metal Toolset",
+        "action_name": "fullMetalToolset",
+        "action_category": "TechArt Tools",
+        "action_icon": null
+    },
+    {
+        "action_label": "Import|Replace",
+        "action_icon": "icon_importReplace.svg",
+        "action_category": "Main Tools",
+        "action_name": "importReplace"
+    },
+    {
+        "action_label": "Interior Tool",
+        "action_name": "interiorTool",
+        "action_category": "Objects",
+        "action_icon": null
+    },
+    {
+        "action_label": "Map border to hard",
+        "action_icon": "icon_hardmap.svg",
+        "action_category": "Main Tools",
+        "action_name": "map2Hard"
+    },
+    {
+        "action_label": "Maya-PS Selection",
+        "action_name": "maya2Photoshop",
+        "action_category": "Main Tools",
+        "action_icon": "icon_psSelect.svg"
+    },
+    {
+        "action_label": "Modeling Toolset",
+        "action_icon": "icon_toolset.svg",
+        "action_category": "Main Tools",
+        "action_name": "modelingToolset"
+    },
+    {
+        "action_label": "Object Exporter",
+        "action_options": "objectExporter",
+        "action_name": "objectExporter",
+        "action_category": "Objects",
+        "action_icon": null
+    },
+    {
+        "action_label": "Object Lod Calc",
+        "action_icon": null,
+        "action_category": "Objects",
+        "action_name": "objectLodCalc"
+    },
+    {
+        "action_label": "Object Material Mask",
+        "action_name": "objectMaterialMask",
+        "action_category": "Objects",
+        "action_icon": null
+    },
+    {
+        "action_label": "Add...",
+        "action_icon": null,
+        "action_category": "Options",
+        "action_name": "opt_addAction"
+    },
+    {
+        "action_label": "Edit..",
+        "action_name": "opt_editAction",
+        "action_category": "Options",
+        "action_icon": null
+    },
+    {
+        "action_label": "Restart...",
+        "action_icon": null,
+        "action_category": "Options",
+        "action_name": "opt_restartMenu"
+    },
+    {
+        "action_label": "Rebuild Scene",
+        "action_name": "rebuildMesh",
+        "action_category": "Main Tools",
+        "action_icon": "icon_rebuildScene.svg"
+    },
+    {
+        "action_label": "Distance Tool",
+        "action_icon": null,
+        "action_category": "Historical Tools",
+        "action_name": "ruller"
+    },
+    {
+        "action_label": "Simplygon Tanks",
+        "action_name": "simplygonTanks",
+        "action_category": "Tank Tools",
+        "action_icon": "icon_simplygonTank.png"
+    },
+    {
+        "action_label": "Simplygon UI",
+        "action_icon": null,
+        "action_category": "Objects",
+        "action_name": "simplygonUI"
+    },
+    {
+        "action_label": "Spline Track",
+        "action_name": "splineTrack",
+        "action_category": "Tank Tools",
+        "action_icon": "icon_splineTrack.png"
+    },
+    {
+        "action_label": "Swap Object UV",
+        "action_icon": null,
+        "action_category": "Objects",
+        "action_name": "swapUV"
+    },
+    {
+        "action_label": "Tank Exporter",
+        "action_name": "tankExporter",
+        "action_category": "TechArt Tools",
+        "action_icon": null
+    },
+    {
+        "action_label": "Tank Exporter 2019 Beta",
+        "action_icon": "icon_tankExport.png",
+        "action_category": "Tank Tools",
+        "action_name": "tankExporter2019"
+    },
+    {
+        "action_label": "Map Percent",
+        "action_name": "uvInfo",
+        "action_category": "Main Tools",
+        "action_icon": "icon_mapPercent.png"
+    },
+    {
+        "action_label": "Validator",
+        "action_icon": "icon_validator.png",
+        "action_category": "Main Tools",
+        "action_name": "validator"
+    },
+    {
+        "action_label": "CoreX Collision",
+        "action_name": "coreXcolision",
+        "action_category": "TechArt Tools",
+        "action_icon": "icon_tankExport.png"
+    },
+    {
+        "action_label": "Tank Catalogizer",
+        "action_name": "tankCatalog",
+        "action_category": "Tank Tools",
+        "action_icon": "icon_tankExport.png"
+    },
+    {
+        "action_label": "CoreX Pefab Import",
+        "action_name": "prefabImport",
+        "action_category": "Objects",
+        "action_icon": null
+    },
+    {
+        "action_label": "Anim Export",
+        "action_options": "animExport",
+        "action_name": "animExport",
+        "action_category": "Animation",
+        "action_icon": null
+    },
+    {
+        "action_label": "Covid19",
+        "action_name": "covid",
+        "action_category": "Main Tools",
+        "action_icon": "icon_covid.svg"
+    },
+    {
+        "action_label": "CoreX Object Export",
+        "action_name": "corexObjExport",
+        "action_category": "Objects",
+        "action_icon": "icon_corexObjExport.svg"
+    }
+]

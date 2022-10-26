@@ -1,0 +1,331 @@
+
+global proc float UV_GetEdgeAngle(string $PA, string $PB)
+	{
+
+		float $PointA[] = `polyEditUV -q $PA`;
+		float $PointB[] = `polyEditUV -q $PB`;
+
+		float $DistU;
+		float $DistV;
+
+		if ($PointA[0] < $PointB[0])
+			 {
+				//$Left_Point = $PointA;
+				$DistU = ($PointB[0] - $PointA[0]);
+				$DistV = ($PointB[1] - $PointA[1]);
+			 }
+
+			 else
+			 {
+				$DistU = ($PointA[0] - $PointB[0] );
+				$DistV = ($PointA[1] - $PointB[1]);
+			 }
+
+
+			$Angle = `atan2d $DistV $DistU`;
+			$Angle = `abs $Angle`;
+		return $Angle;
+	}
+
+
+
+
+
+global proc string[] UV_CollectUVShellDots()
+{
+	PolySelectConvert 4;//convert selection to uv's
+	polySelectBorderShell 1;
+	string $UVs[] = `ls -sl -fl -l`;//base uv's
+	string $UVShell_Dots[] = {};
+
+	while (`size $UVs` > 0)
+		{
+			select $UVs[0];
+			stringArrayInsertAtIndex(0 , $UVShell_Dots, $UVs[0]);
+			polySelectBorderShell 1;
+			$UVs = stringArrayRemoveExact(`ls -sl -fl -l`, $UVs);
+
+		}//end while
+
+	return $UVShell_Dots;//returns
+}
+
+global proc UV_StraightenV()
+{
+	float $UV_Extents[] = `polyEvaluate -bc2`;//xmin xmax ymin ymax
+	float $UV_Center = (($UV_Extents[2] + $UV_Extents[3]) / 2 );
+	polyEditUV -relative false -v $UV_Center;//edit interior edges
+}
+
+
+global proc UV_StraightenU()
+{
+	float $UV_Extents[] = `polyEvaluate -bc2`;//xmin xmax ymin ymax
+	float $UV_Center = (($UV_Extents[0] + $UV_Extents[1]) / 2 );//find U center
+	polyEditUV -relative false -u $UV_Center;//move uv's to mid
+}
+
+global proc UV_StraightenUVSelection(string $Direction, string $atest)
+{
+	global int $UV_UIWidth;
+	ConvertSelectionToUVs;
+	$SelectedUVs =`ls -sl -fl -l`;
+	// string $Dots[] = UV_CollectUVShellDots();
+	string $Dots[] = $SelectedUVs;
+	int $AngleTest = int($atest);////////////////////////////////////`intSliderGrp -q -v ("UVStraighten_Angle" + $Parent)`;
+	// progressBar -height 10 -width 50 -bgc 1 0 0 "UVStraighten_progressbar";
+	global string $gMainProgressBar; 
+
+	// $startTime = `timerX`;
+	// text -e -l "Straighten Process: Collecting Data " -w $UV_UIWidth ("UVStraighten_process" + $Parent);
+	for ($x = 0; $x < `size $Dots`; $x++)
+	{
+		string $UVEdgeListArrayV[] = {};
+		string $UVEdgeListArrayH[] = {};
+		select $Dots[$x];
+		polySelectBorderShell 0;
+		string $Single_Shell[] = `ls -sl -fl -l`;
+		//string $Single_Shell[] = stringToStringArray($Shells[$x], ",");//convert the Shells into an Array
+		string $Edges[] = {};
+		if (`size $SelectedUVs` < `size $Single_Shell`)
+		{
+			$Edges = `polyListComponentConversion -toEdge  $SelectedUVs`;
+		}
+
+		else
+		{
+			$Edges = `polyListComponentConversion -toEdge  $Single_Shell`;
+        }//,.
+		$Edges = `ls -fl -l $Edges`;//flatten edge array
+
+		/////////Collect Edges
+		// progressBar -edit -pr 0 "UVStraighten_progressbar";//("UVStraighten_progressbar" + $Parent);
+		// progressBar -edit -maxValue `size $Edges` "UVStraighten_progressbar";//("UVStraighten_progressbar" + $Parent);
+		progressBar -edit    -beginProgress    -isInterruptable true    -status "Example Calculation ..."    -maxValue `size $Edges`    $gMainProgressBar;
+
+		for ($e = 0; $e < `size $Edges`; $e++)
+		{
+			$EdgeToUV = `polyListComponentConversion -toUV $Edges[$e]`;
+			$EdgeToUV = `ls -fl -l $EdgeToUV`;
+
+			//Check EdgeToUV to see if there are UVs in the orignial selection and in the Current UVShell
+			string $UVEdgeArray[] = {};
+			for ($c = 0; $c < `size $EdgeToUV`; $c++)
+				{
+     				if (stringArrayContains($EdgeToUV[$c], $SelectedUVs) && stringArrayContains($EdgeToUV[$c], $Single_Shell))
+					{
+						stringArrayInsertAtIndex(0, $UVEdgeArray, $EdgeToUV[$c]);
+                    }
+				}
+
+
+			//Check if there are only 2 points and Add the 2 points as a string to an Array
+			if (`size $UVEdgeArray` == 2 )
+			{
+				string $UVEdge = stringArrayToString($UVEdgeArray,",");
+				$Angle = eval ("UV_GetEdgeAngle " + $UVEdgeArray[0] + " " + $UVEdgeArray[1]);
+				if ($Angle <= 90 && $Angle >= (90 - $AngleTest) )
+					{
+
+						stringArrayInsertAtIndex(0, $UVEdgeListArrayV, $UVEdge);
+					}
+
+				if ($Angle >= 0 && $Angle <= $AngleTest)
+					{
+						stringArrayInsertAtIndex(0, $UVEdgeListArrayH, $UVEdge);
+					}
+
+            }//end if
+
+			//Check if there are 3 or 4 points
+			else //4 points and 3 poitns mean shared uV's in the same Shell
+			{
+				$EdgeToFace = `polyListComponentConversion -toFace $Edges[$e]`;
+				$EdgeToFace = `ls -fl -l $EdgeToFace`;
+				//select $EdgeToFace;
+
+				//iterate thru each face
+				for ($f = 0; $f < `size $EdgeToFace`; $f++)
+				{
+					$FaceToUV = `polyListComponentConversion -toUV $EdgeToFace[$f]`;
+					$FaceToUV = `ls -fl -l $FaceToUV`;
+					//will have 4 uv's
+
+					string $UVEdgeArrayPoints[] = {};
+					//iterate thru each faceUV
+					for ($p = 0; $p < `size $FaceToUV`; $p++)
+					{
+						//Compare FaceToUV and $UVEdgeArray
+						if (stringArrayContains($FaceToUV[$p], $UVEdgeArray))
+						{
+							stringArrayInsertAtIndex(0, $UVEdgeArrayPoints, $FaceToUV[$p]);
+						}
+
+                    }
+
+					if (`size $UVEdgeArrayPoints` == 2)
+						{
+							string $UVEdge = stringArrayToString($UVEdgeArrayPoints,",");
+							$Angle = eval ("UV_GetEdgeAngle " + $UVEdgeArrayPoints[0] + " " + $UVEdgeArrayPoints[1]);
+							if ($Angle <= 90 && $Angle >= (90 - $AngleTest) )
+								{
+
+									stringArrayInsertAtIndex(0, $UVEdgeListArrayV, $UVEdge);
+								}
+
+							if ($Angle >= 0 && $Angle <= $AngleTest)
+								{
+									stringArrayInsertAtIndex(0, $UVEdgeListArrayH, $UVEdge);
+								}
+
+						}//end if
+
+                }
+
+            }//end if
+			// progressBar -edit -step 1 "UVStraighten_progressbar";//("UVStraighten_progressbar" + $Parent);
+			progressBar -edit  -step 1 $gMainProgressBar;
+			//$totalTime = `timerX -startTime $startTime`;
+			//text -e -l ("Straighten Process: Collecting Data " + $totalTime) -w $UV_UIWidth ("UVStraighten_process" + $Parent);
+        }//end for e
+
+
+		if ($Direction == "Horizontal" || $Direction == "Both")
+		{
+			//Straigten U Horizontal
+			if (`size $UVEdgeListArrayH` != 0)
+			{
+				//progressBar -edit -pr 0 "UVStraighten_progressbar";//("UVStraighten_progressbar" + $Parent);
+				progressBar -edit -maxValue `size $UVEdgeListArrayH` $gMainProgressBar;//("UVStraighten_progressbar" + $Parent);
+			}
+			$UVEdgeListArrayH = `sort $UVEdgeListArrayH`;
+			while (`size $UVEdgeListArrayH` != 0)
+			{
+				string $TestedEdges[] = {};
+				string $Selected_UVs[] = `ls -sl -fl -l`;
+				//print `size $UVEdgeListArrayH`;
+				string $SingleUVEdgeA[] = stringToStringArray($UVEdgeListArrayH[0], ",");//convert the EdgeListArray into an Array
+				string $EdgeLoopListU[] = $SingleUVEdgeA;
+				string $RemoveArrayU[] = {};
+				stringArrayInsertAtIndex(0, $RemoveArrayU, $UVEdgeListArrayH[0]);
+
+				//find the EdgeLoop
+				int $SizeStart = 0;
+				int $SizeEnd = 10000000000;
+				do
+				{
+					$SizeStart = `size $Selected_UVs`;
+					for ($b = 0; $b < `size $UVEdgeListArrayH`; $b++)
+						{
+
+							if (stringArrayContains($UVEdgeListArrayH[$b], $TestedEdges) == 0)
+								{
+									string $SingleUVEdgeB[] = stringToStringArray($UVEdgeListArrayH[$b], ",");
+									if (stringArrayContains($SingleUVEdgeB[0], $EdgeLoopListU) || stringArrayContains($SingleUVEdgeB[1], $EdgeLoopListU))
+									{
+										//check if point Does Not Exist in the Edge loop array then add it to the edge loop
+										for ($p = 0; $p < `size $SingleUVEdgeB`; $p++)
+										{
+											if (stringArrayContains($SingleUVEdgeB[$p], $EdgeLoopListU) == 0)
+											{
+												stringArrayInsertAtIndex(0, $EdgeLoopListU, $SingleUVEdgeB[$p]);//add only the non existing point to the list
+												stringArrayInsertAtIndex(0, $TestedEdges, $UVEdgeListArrayH[$b]);
+												stringArrayInsertAtIndex(0, $RemoveArrayU, $UVEdgeListArrayH[$b]);
+												break;
+
+											}//end if
+										}//end for
+
+								   }
+								}
+
+
+						}//end for b
+						$UVEdgeListArrayH = stringArrayRemoveExact($RemoveArrayU, $UVEdgeListArrayH);
+						$SizeEnd = `size $EdgeLoopListU`;
+						$Selected_UVs = $EdgeLoopListU;
+
+				}//end do
+
+				while ($SizeStart != $SizeEnd);
+				select $EdgeLoopListU;
+				UV_StraightenV;
+				//$totalTime = `timerX -startTime $startTime`;
+				progressBar -edit -step `size $EdgeLoopListU` $gMainProgressBar; //("UVStraighten_progressbar" + $Parent);
+				//text -e -l ("Straighten Process: Straigten Horizontal " + $totalTime) ("UVStraighten_process" + $Parent);
+			}//end while
+		}//end if Straighten Horizontal
+
+
+		if ($Direction == "Vertical" || $Direction == "Both")
+		{
+			//Straighten V Vertical
+			if (`size $UVEdgeListArrayV` != 0)
+			{
+				//progressBar -edit -pr 0 "UVStraighten_progressbar"; //("UVStraighten_progressbar" + $Parent);
+				progressBar -edit -maxValue `size $UVEdgeListArrayV` $gMainProgressBar; //("UVStraighten_progressbar" + $Parent);
+			}
+			$UVEdgeListArrayV = `sort $UVEdgeListArrayV`;
+			while (`size $UVEdgeListArrayV` != 0)
+			{
+
+				string $RemoveArrayV[] = {};
+				string $TestedEdges[] = {};
+				string $Selected_UVs[] = `ls -sl -fl -l`;
+				string $SingleUVEdgeA[] = stringToStringArray($UVEdgeListArrayV[0], ",");//convert the EdgeListArray into an Array
+				string $EdgeLoopListV[] = $SingleUVEdgeA;
+				stringArrayInsertAtIndex(0, $RemoveArrayV, $UVEdgeListArrayV[0]);
+
+				int $SizeStart = 0;
+				int $SizeEnd = 10000000000;
+				do
+				{
+					$SizeStart = `size $Selected_UVs`;
+					for ($b = 0; $b < `size $UVEdgeListArrayV`; $b++)
+						{
+							if (stringArrayContains($UVEdgeListArrayV[$b], $TestedEdges) == 0)
+								{
+									string $SingleUVEdgeB[] = stringToStringArray($UVEdgeListArrayV[$b], ",");
+									if (stringArrayContains($SingleUVEdgeB[0], $EdgeLoopListV) || stringArrayContains($SingleUVEdgeB[1], $EdgeLoopListV))
+										{
+											//check if point Does Not Exist in the Edge loop array then add it to the edge loop
+											for ($p = 0; $p < `size $SingleUVEdgeB`; $p++)
+												{
+													if (stringArrayContains($SingleUVEdgeB[$p], $EdgeLoopListV) == 0)
+													{
+														stringArrayInsertAtIndex(0, $EdgeLoopListV, $SingleUVEdgeB[$p]);//add only the non existing point to the list
+														stringArrayInsertAtIndex(0, $TestedEdges, $UVEdgeListArrayV[$b]);
+														stringArrayInsertAtIndex(0, $RemoveArrayV, $UVEdgeListArrayV[$b]);
+														break;
+
+													}//end if
+												}//end for
+										}
+
+								}
+
+						}//end for b
+
+						$UVEdgeListArrayV = stringArrayRemoveExact($RemoveArrayV, $UVEdgeListArrayV);
+						$SizeEnd = `size $EdgeLoopListV`;
+						$Selected_UVs = $EdgeLoopListV;
+
+				}//end do
+
+				while ($SizeStart != $SizeEnd);
+				select $EdgeLoopListV;
+				UV_StraightenU;
+				//$totalTime = `timerX -startTime $startTime`;
+				progressBar -edit -step `size $EdgeLoopListV` $gMainProgressBar;// ("UVStraighten_progressbar" + $Parent);
+				//text -e -l ("Straighten Process: Straigten Vertical " + $totalTime) ("UVStraighten_process" + $Parent);
+			}//end while
+		}// end if Straigten Vertical
+
+	}//end for shell
+
+
+
+	progressBar -edit    -endProgress    $gMainProgressBar;
+	//$totalTime = `timerX -startTime $startTime`;
+	//text -e -l ("Straighten Process: Done " + $totalTime) -w $UV_UIWidth ("UVStraighten_process" + $Parent);
+}//end proc

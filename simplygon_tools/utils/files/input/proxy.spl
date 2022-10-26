@@ -1,0 +1,49 @@
+{
+  "Header": {
+    "SPLVersion": "8.0",
+    "ClientName": "Simplygon",
+    "ClientVersion": "8.2.375.4",
+    "SimplygonVersion": "8.0"
+  },
+  "ProcessGraph": {
+    "Type": "ContainerNode",
+    "Name": "Node",
+    "Children": [
+      {
+        "Processor": {
+          "RemeshingSettings": {
+            "CuttingPlaneSelectionSetName": "",
+            "HardEdgeAngleInRadians": 3.1415926535897931,
+            "EmptySpaceOverride": 0.0,
+            "MaxTriangleSize": 32,
+            "MergeDistance": 4,
+            "OnScreenSize": 20,
+            "ProcessSelectionSetName": "",
+            "SurfaceTransferMode": "SG_SURFACETRANSFER_ACCURATE",
+            "TransferColors": false,
+            "TransferNormals": false,
+            "UseCuttingPlanes": true,
+            "UseEmptySpaceOverride": false,
+            "Enabled": true
+          },
+          "CuttingPlaneSettings": null,
+          "Type": "RemeshingProcessor"
+        },
+        "MaterialCaster": [],
+        "OutputMaterialName": "SimplygonMaterial",
+        "DefaultTBNType": "SG_TANGENTSPACEMETHOD_ORTHONORMAL",
+        "AllowGPUAcceleration": false,
+        "Type": "ProcessNode",
+        "Name": "Node",
+        "Children": [
+          {
+            "Format": "ssf",
+            "Type": "WriteNode",
+            "Name": "outputlod_0",
+            "Children": []
+          }
+        ]
+      }
+    ]
+  }
+}

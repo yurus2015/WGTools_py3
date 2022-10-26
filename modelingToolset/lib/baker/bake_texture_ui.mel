@@ -1,0 +1,1173 @@
+global proc bake_texture_ui()
+{
+wg_BakeTextureWnd;
+python("import wg_modelingToolset.lib.utl_baker.bake_texture as bt; reload(bt)");
+}
+
+global proc baker_initSetting()
+{
+	if (!`optionVar -exists "triangulateBaker"`)
+		optionVar -iv "triangulateBaker" 1;
+	//peview
+	if (!`optionVar -exists "previewBaker"`)
+		optionVar -iv "previewBaker" 0;
+
+	if (!`optionVar -exists "qualityBaker"`)
+		optionVar -iv "qualityBaker" 3;
+
+	if (!`optionVar -exists "surfaceAlphaBaker"`)
+		optionVar -iv "surfaceAlphaBaker" 1;
+
+	if (!`optionVar -exists "surfaceModeAlphaBaker"`)
+		optionVar -iv "surfaceModeAlphaBaker" 1;
+
+	if (!`optionVar -exists "geometryAlphaBaker"`)
+		optionVar -iv "geometryAlphaBaker" 1;
+
+	if (!`optionVar -exists "geometryModeAlphaBaker"`)
+		optionVar -iv "geometryModeAlphaBaker" 1;
+	//mapWidthBaker
+	//mapHeightBaker
+	if (!`optionVar -exists "mapWBaker"`)
+		optionVar -iv "mapWBaker" 3;
+	if (!`optionVar -exists "mapHBaker"`)
+		optionVar -iv "mapHBaker" 3;
+
+	if (!`optionVar -exists "matchTypeBaker"`)
+		optionVar -iv "matchTypeBaker" 3;
+
+	if (!`optionVar -exists "frameMoveBaker"`)
+		optionVar -iv "frameMoveBaker" 0;
+
+}
+
+global proc baker_loadSetting()
+{
+	optionMenuGrp -e -sl (`optionVar -q "mapWBaker"`) bakerWidthNormalMenu;
+	optionMenuGrp -e -sl (`optionVar -q "mapHBaker"`) bakerHightNormalMenu;
+	checkBoxGrp -e -v1 (`optionVar -q "triangulateBaker"`) triangulate_CB;
+	//checkBoxGrp -e -v1 (`optionVar -q "previewBaker"`) preview_CB;
+	optionMenuGrp -e -sl (`optionVar -q "qualityBaker"`) bakerQualityNormalMenu;
+	checkBoxGrp -e -v1 (`optionVar -q "surfaceAlphaBaker"`) alphaSurfaceCB;
+	checkBoxGrp -e -v1 (`optionVar -q "geometryAlphaBaker"`) alphaGeometryCB;
+	optionMenuGrp -e -sl (`optionVar -q "surfaceModeAlphaBaker"`) surfaceAlphaMask;
+	optionMenuGrp -e -sl (`optionVar -q "geometryModeAlphaBaker"`) geometryAlphaMask;
+	optionMenuGrp -e -sl (`optionVar -q "matchTypeBaker"`) surfaceSamplingMatchTypeMenu;
+	//checkBoxGrp -e -v1 (`optionVar -q "frameMoveBaker"`) frameSet_CB;
+}
+
+global proc baker_saveSetting()
+{
+	optionVar -iv "mapWBaker" (`optionMenuGrp -q -sl bakerWidthNormalMenu`);
+	optionVar -iv "mapHBaker" (`optionMenuGrp -q -sl bakerHightNormalMenu`);
+	optionVar -iv "triangulateBaker"  (`checkBoxGrp -q -v1 triangulate_CB`);
+	//optionVar -iv "previewBaker"  (`checkBoxGrp -q -v1 preview_CB`);
+	optionVar -iv "qualityBaker" (`optionMenuGrp -q -sl bakerQualityNormalMenu`);
+	optionVar -iv "surfaceAlphaBaker" (`checkBoxGrp -q -v1 alphaSurfaceCB`);
+	optionVar -iv "geometryAlphaBaker" (`checkBoxGrp -q -v1 alphaGeometryCB`);
+	optionVar -iv "surfaceModeAlphaBaker" (`optionMenuGrp -q -sl surfaceAlphaMask`);
+	optionVar -iv "geometryModeAlphaBaker" (`optionMenuGrp -q -sl geometryAlphaMask`);
+	optionVar -iv "matchTypeBaker" (`optionMenuGrp -q -sl surfaceSamplingMatchTypeMenu`);
+	//optionVar -iv "frameMoveBaker" (`checkBoxGrp -q -v1 frameSet_CB`);
+	//bakeAllBut
+}
+
+
+global proc bakeGenerator(int $bake_value)
+{
+	string $evalTransferMap = "";
+	string $evalSurfaceTransferMap = "";
+	string $surfaceSamplerCMD;
+	string $geometryCmdSampler;
+	string $surfaceCmdSampler ;
+
+	string $surfaceMap;
+	int $searchMethod;
+	int $mapWight = `optionMenuGrp -q -v bakerWidthNormalMenu`;
+
+  	int $mapHeight = `optionMenuGrp -q -v bakerHightNormalMenu`;
+
+
+	//int $match = `optionMenuGrp -q -sl surfaceSamplingMatchTypeMenu`;
+	int $match = 1;
+	int $quality = `optionMenuGrp -q -sl bakerQualityNormalMenu` - 1;
+	int $peview;
+	int $alphaSurface = `checkBoxGrp -q -value1 alphaSurfaceCB`;
+	int $alphaGeometry = `checkBoxGrp -q -value1 alphaGeometryCB`;
+	//replace match check
+	if (($alphaSurface == 1)  && ($alphaGeometry == 1))
+		$match = 1;
+	if (($alphaSurface == 1)  && ($alphaGeometry == 0))
+		$match = 3;
+	if (($alphaSurface == 0)  && ($alphaGeometry == 1))
+		$match = 2;
+
+	int $alphaGeoType = `optionMenuGrp -q -sl geometryAlphaMask`;
+	int $alphaSurfaceType = `optionMenuGrp -q -sl surfaceAlphaMask`;
+	int $tris = `checkBoxGrp -q -value1 triangulate_CB`;
+	//int $setFrame2 = `checkBoxGrp -q -value1 frameSet_CB`;
+	int $normalmethod = `checkBoxGrp -q -value1 angleArea_CB`;
+	//int $peview = `checkBoxGrp -q -value1 triangulate_CB`;
+	//if (`checkBoxGrp -q -value1 preview_CB`)
+	//	$peview = 0;
+	//else
+	//	$peview = 2;
+
+	string $attributeValue[6];
+	string $frames[] = `columnLayout -q -ca bakeTextureTargetSourceSurfaceLayout`;
+	string $forAllAttributes[] = `rowColumnLayout  -q -ca allBakeTextureTargetSourceHeadings`;
+		int $allValue = `checkBox -q -v $forAllAttributes[0]`;
+		for ($frame = 1; $frame < size($frames); $frame++)
+		{
+			string $allTargets = "";
+			int $valid = 0;
+			string $frameTransferMap = "";
+			$surfaceSamplerCMD = " surfaceSampler ";// First part
+			string $targetList = "";//Second part
+			string $sourceList = "";//Third part
+			string $index[] = `python("'" +$frames[$frame]+"'.split('_')[-1:]")`;
+			string $strokes[] = `columnLayout -q -ca ("columnLP_UI_" + $index[0])`;
+				for ($stroke in $strokes)
+				{
+					string $widgets[] = `rowColumnLayout -q -ca $stroke`;
+					if (!$allValue)
+					{
+						$attributeValue[0] = `checkBox -q -v $widgets[0]`;
+						$attributeValue[1] = `text -q -l $widgets[1]`;
+						$attributeValue[2] = `text -q -l $widgets[2]`;
+						$attributeValue[3] = `floatSliderGrp -q -v $widgets[3]`;
+						$attributeValue[4] = `floatSliderGrp -q -v $widgets[4]`;
+						$attributeValue[5] = `text -q -l $widgets[5]`;
+					}
+					else
+					{
+						$attributeValue[0] = `checkBox -q -v $widgets[0]`;
+						$attributeValue[1] = `text -q -l $widgets[1]`;
+						$attributeValue[2] = `text -q -l $forAllAttributes[2]`;
+						$attributeValue[3] = `floatSliderGrp -q -v $forAllAttributes[3]`;
+						$attributeValue[4] = `floatSliderGrp -q -v $forAllAttributes[4]`;
+						$attributeValue[5] = `text -q -l $forAllAttributes[5]`;
+					}
+						int $searchMethod;
+						if ($attributeValue[5] == "Closest Envelope")
+							$searchMethod = 0;
+						if ($attributeValue[5] == "Inside-Outside Envelope")
+							$searchMethod = 1;
+						if ($attributeValue[5] == "Inside Envelope Only")
+							$searchMethod = 2;
+
+						if ((int)$attributeValue[0] > 0)
+						{
+							$valid = 1;
+							float $radius = surfaceSamplingBoundingRadius( $attributeValue[1] );
+							float $offset = (float)$attributeValue[3];
+							$offset *= $radius * 0.01;
+							float $maxSearchDistance = (float)$attributeValue[4];
+							$maxSearchDistance *= $radius * 0.01;
+							string $bake = (" -target " + $attributeValue[1] +" -searchOffset " + $offset +" -maxSearchDistance "+ $maxSearchDistance);
+							string $oneTargetAttr = (" -target " + $attributeValue[1] +" -searchOffset " + $offset +" -maxSearchDistance "+ $maxSearchDistance);//Second part
+							$targetList += $oneTargetAttr;
+							$frameTransferMap += $bake;
+							$allTargets += $attributeValue[1];
+							$allTargets += " ";
+							//print ("ETUT\n" + $frameTransferMap);
+						}
+							// +"-target w_L0Shape1 -uvSet map1 -searchOffset 0.2335116771 -maxSearchDistance 0.6065238366  -source w_L0Shape2 -source track_LShape -mapOutput normal -mapWidth 2048 -mapHeight 2048 -max 1 -mapSpace tangent -mapMaterials 0 -shadows 1 -filename "D:/test/maya_01" -fileFormat "tga" -ignoreTransforms true -superSampling 2 -filterType 0 -filterSize 3 -overscan 3 -searchMethod 0 -useGeometryNormals 1 -ignoreMirroredFaces 1 -flipU 0 -flipV 0;
+
+				//$evalTransferMap =
+				}
+			string $hpWidgets[] = `columnLayout -q -ca ("columnHP_UI_" + $index[0])`;
+				for ($widget in $hpWidgets)
+				{
+					$hp = `text -q -l $widget`;
+					$frameTransferMap += (" -source " + $hp);
+					$sourceList += (" -source " + $hp);
+				}
+			$frameTransferMap = " surfaceSampler " + $frameTransferMap;
+			string $surfaceTransfermap = $frameTransferMap;
+			//string $dirMaps = `textFieldGrp -q -text normalMapPathField`;
+			string $dirMaps = `internalVar -utd`;
+			string $normalMapName = $dirMaps + "nm_" + $index[0];
+			string $alphaMapName = $dirMaps + "alpha_" + $index[0];
+			string $alphaHardMapName = $dirMaps + "hard_alpha";
+			string $linkingName = $dirMaps + "link";
+			string $colorMaskName = $dirMaps + "colorMask_" + $index[0];
+			string $alpha = " -mapOutput alpha -mapWidth " +$mapWight+" -mapHeight "+$mapHeight+" -max 1 -mapSpace tangent -mapMaterials 0 -shadows 0 -filename \"" + $dirMaps + "alpha_" + $index[0] + "\" -fileFormat \"png\"";
+			string $outputAlphaMap = " -mapOutput alpha -mapWidth " +$mapWight+" -mapHeight "+$mapHeight+" -max 1 -mapSpace tangent -mapMaterials 0 -shadows 0 -filename \"" + $dirMaps + "alpha_" + $index[0] + "\" -fileFormat \"png\"";
+
+			string $outputNormalsMap = " -mapOutput normal -mapWidth " +$mapWight+ " -mapHeight " + $mapHeight+ " -max 1 -mapSpace tangent -mapMaterials 0 -shadows 0 -filename \"" + $dirMaps + "nm_" + $index[0] + "\" -fileFormat \"tga\"";
+			//int $geometryNormalState;
+			string $colorMaskSettings = " -mapOutput diffuseRGB -mapWidth " +$mapWight+ " -mapHeight " + $mapHeight+ " -max 1 -mapSpace tangent -mapMaterials 0 -shadows 0 -filename \"" + $dirMaps + "colorMask_" + $index[0] + "\" -fileFormat \"tga\"";
+			string $outputColorMap = " -mapOutput diffuseRGB -mapWidth " +$mapWight+ " -mapHeight " + $mapHeight+ " -max 1 -mapSpace tangent -mapMaterials 0 -shadows 0 -filename \"" + $dirMaps + "colorMask_" + $index[0] + "\" -fileFormat \"tga\"";
+
+			string $additionalAttr = " -ignoreTransforms false -superSampling " + $quality + " -filterType 0 -filterSize 3 -overscan 5 -searchMethod " + $searchMethod + " -ignoreMirroredFaces 0 -flipU 0 -flipV 0 ";
+			//-useGeometryNormals 1
+			$surfaceSamplerCMD += $targetList;
+			$surfaceSamplerCMD += $sourceList;
+			$surfaceSamplerCMD += $additionalAttr;
+			string $pythonNormalSCMD = " python(\"bt.javascriptNormalSurface(\\\"" + $normalMapName + "\\\")\");" ;
+			string $pythonNormalGCMD = " python(\"bt.javascriptNormalGeometry(\\\"" + $normalMapName + "\\\")\");" ;
+			string $pythonNormalACMD = " python(\"bt.javascriptAlpha(\\\""+ $alphaMapName +"\\\", \\\"2\\\")\");" ;
+			string $pythonNormalCCMD = " python(\"bt.javascriptColorMask(\\\""+ $colorMaskName +"\\\")\");" ;
+			//string $pythonHardACMD = " python(\"bake_texture.mayaShop_snapshot(" +$mapWight +", "+ $mapHeight + ", \\\""+ $alphaHardMapName + "\\\"); bake_texture.javascriptHardAlpha(\\\"" + $alphaHardMapName + "\\\")\");";
+			string $pythonHardACMD = " python(\"bt.mayaQtSnapshot(" +$mapWight +", "+ $mapHeight + ", \\\""+ $alphaHardMapName + ".png\\\"); bt.javascriptHardAlpha(\\\"" + $alphaHardMapName + "\\\")\");";
+			string $pythonNormalsLink = " python(\"bt.javascriptLinkingNormal(\\\""+ $linkingName +"\\\")\");" ;
+			//mayaQtSnapshot
+			if ($match == 1)
+			{
+				$geometryCmdSampler = $surfaceSamplerCMD;
+				$surfaceCmdSampler = $surfaceSamplerCMD;
+				$geometryCmdSampler += "-useGeometryNormals 1" + $outputNormalsMap;
+				$surfaceCmdSampler += "-useGeometryNormals 0" + $outputNormalsMap;
+
+				if ($alphaGeometry == 1 && $alphaGeoType == 2 && $alphaSurface == 1 && $alphaSurfaceType == 1)
+				{
+					$surfaceCmdSampler += $outputAlphaMap  + "; " + $pythonNormalSCMD + $pythonNormalACMD;
+					$geometryCmdSampler += "; " + $pythonNormalGCMD + $pythonNormalACMD;
+				}
+
+				else if ($alphaGeometry == 1 && $alphaGeoType == 3 && $alphaSurface == 1 && $alphaSurfaceType == 2)
+				{
+					$surfaceCmdSampler += $outputColorMap  + "; " + $pythonNormalSCMD + $pythonNormalCCMD;
+					$geometryCmdSampler += "; " + $pythonNormalGCMD + $pythonNormalCCMD;
+				}
+
+				else
+				{
+					if ($alphaGeometry == 1 && $alphaGeoType == 1)
+					{
+						$geometryCmdSampler += "; " + $pythonNormalGCMD + $pythonHardACMD;
+					}
+
+					if ($alphaGeometry == 1 && $alphaGeoType == 2)
+					{
+						$geometryCmdSampler += $outputAlphaMap + "; " + $pythonNormalGCMD + $pythonNormalACMD;
+					}
+
+					if ($alphaGeometry == 1 && $alphaGeoType == 3)
+					{
+						$geometryCmdSampler += $outputColorMap + "; " + $pythonNormalGCMD + $pythonNormalCCMD;
+					}
+
+					if ($alphaSurface == 1 && $alphaSurfaceType == 1)
+					{
+						$surfaceCmdSampler += $outputAlphaMap + "; " + $pythonNormalSCMD + $pythonNormalACMD;
+					}
+
+					if ($alphaSurface == 1 && $alphaSurfaceType == 2)
+					{
+						$surfaceCmdSampler += $outputColorMap + "; " + $pythonNormalSCMD + $pythonNormalCCMD;
+					}
+				}
+
+				print ("Surf \n" + $surfaceCmdSampler);
+				print ("\nGeom \n" + $geometryCmdSampler);
+				$surfaceSamplerCMD = $surfaceCmdSampler + $geometryCmdSampler;
+				//$surfaceSamplerCMD += $geometryCmdSampler;
+
+
+
+			}
+
+			if ($match == 2)
+				{
+					$surfaceSamplerCMD += "-useGeometryNormals 1" + $outputNormalsMap;
+
+					if ($alphaGeometry == 1 && $alphaGeoType == 1)
+					{
+						$surfaceSamplerCMD += "; " + $pythonNormalGCMD + $pythonHardACMD;
+					}
+
+					if ($alphaGeometry == 1 && $alphaGeoType == 2)
+					{
+						$surfaceSamplerCMD += $outputAlphaMap + "; " + $pythonNormalGCMD + $pythonNormalACMD;
+					}
+
+					if ($alphaGeometry == 1 && $alphaGeoType == 3)
+					{
+						$surfaceSamplerCMD += $outputColorMap + "; " + $pythonNormalGCMD + $pythonNormalCCMD;
+					}
+				}
+
+			if ($match == 3)
+			{
+				$surfaceSamplerCMD += "-useGeometryNormals 0" + $outputNormalsMap;
+				if ($alphaSurface == 1 && $alphaSurfaceType == 1)
+				{
+					$surfaceSamplerCMD += $outputAlphaMap + "; " + $pythonNormalSCMD + $pythonNormalACMD;
+				}
+
+				if ($alphaSurface == 1 && $alphaSurfaceType == 2)
+				{
+					$surfaceSamplerCMD += $outputColorMap + "; " + $pythonNormalSCMD + $pythonNormalCCMD;
+				}
+			}
+
+
+			print ("\nNEW SAMPLER \n" + $surfaceSamplerCMD);
+
+
+			if($valid == 1)
+			{
+				if ($normalmethod == 1)
+				{
+					$array = stringToStringArray($allTargets, " ");
+					for ($target in $array)
+					{
+						//polyTriangulate -ch 0 $target;
+						setAttr ($target+".vertexNormalMethod") 3;
+						//normalmethod
+					}
+				}
+				else
+				{
+					$array = stringToStringArray($allTargets, " ");
+					for ($target in $array)
+					{
+
+						setAttr ($target+".vertexNormalMethod") 0;
+
+					}
+				}
+
+				if ($tris == 1)
+				{
+					$array = stringToStringArray($allTargets, " ");
+					for ($target in $array)
+					{
+						polyTriangulate -ch 0 $target;
+						//setAttr "hull_56_1|polySurfaceShape1.vertexNormalMethod" 3;
+						//normalmethod
+					}
+				}
+
+			 //if ($setFrame2 == 1)
+			//	{
+			//		currentTime 2;
+			//	}
+				///EXECUTE BAKING
+				if ($bake_value == 1)
+					{
+						eval ("select " + $allTargets);
+						//$array = stringToStringArray($allTargets, " ");
+						//python("bake_texture.moveShellToSquare(\"" + $allTargets + "\")");
+						eval $surfaceSamplerCMD;
+					}
+				if ($bake_value == 0)
+				{
+					string $tmpDir = `internalVar -userTmpDir`;
+					string $filePath = $tmpDir +"bakindData.txt" ;
+					//$exampleFileName = ( `internalVar -userTmpDir` + "example.tmp" );
+					$fileId=`fopen $filePath "a"`;
+					fprint $fileId ($surfaceSamplerCMD+"\n");
+					fclose $fileId;
+					//python("bake_texture.writeMultiBakeFile(\"" + $surfaceSamplerCMD + "\")");
+				}
+
+
+				//if ($setFrame2 == 1)
+				//{
+				//	currentTime 1;
+				//}
+			}
+
+		}
+	print ("\nETUT\n" + $evalTransferMap);
+	//eval $evalTransferMap;
+}
+
+
+global proc bakeAllFrame()
+{
+	string $attributeValue[6];
+	string $frames[] = `columnLayout -q -ca bakeTextureTargetSourceSurfaceLayout`;
+	int $activeCheck[];
+	int $number = 0;
+		for ($frame = 1; $frame < size($frames); $frame++)
+		{
+			//int $valid = 0;
+			//string $frameTransferMap = "";
+			string $index[] = `python("'" +$frames[$frame]+"'.split('_')[-1:]")`;
+			string $strokes[] = `columnLayout -q -ca ("columnLP_UI_" + $index[0])`;
+				for ($stroke in $strokes)
+				{
+					string $widgets[] = `rowColumnLayout -q -ca $stroke`;
+					$attributeValue[0] = `checkBox -q -v $widgets[0]`;
+					$activeCheck[$number] = $attributeValue[0];
+					$number++;
+					checkBox -e -v 1 $widgets[0];
+					print ("WIDGET_ONE " + $widgets[0] + "\n");
+				}
+		}
+	bakeGenerator 1;
+	print $activeCheck;
+
+	$number = 0;
+		for ($frame = 1; $frame < size($frames); $frame++)
+		{
+			//int $valid = 0;
+			//string $frameTransferMap = "";
+			string $index[] = `python("'" +$frames[$frame]+"'.split('_')[-1:]")`;
+			string $strokes[] = `columnLayout -q -ca ("columnLP_UI_" + $index[0])`;
+				for ($stroke in $strokes)
+				{
+					string $widgets[] = `rowColumnLayout -q -ca $stroke`;
+					//$attributeValue[0] = `checkBox -q -v $widgets[0]`;
+					//$activeCheck[$number] = $attributeValue[0];
+
+					checkBox -e -v $activeCheck[$number] $widgets[0];
+					$number++;
+					print ("WIDGET_TWO " + $widgets[0] + "\n");
+				}
+		}
+
+	print $activeCheck;
+}
+
+global proc float surfaceSamplingBoundingRadius( string $shape )
+//
+// Description:
+//   Find the bounding radius for a given target shape
+//
+{
+	float $min[] = `getAttr ($shape + ".boundingBoxMin")`;
+	float $max[] = `getAttr ($shape + ".boundingBoxMax")`;
+	float $invtm[] = `getAttr ($shape + ".inverseMatrix")`;
+	$min = pointMatrixMult( $min, $invtm);
+	$max = pointMatrixMult( $max, $invtm);
+	vector $vec = << $max[0] - $min[0], $max[1] - $min[1], $max[2] - $min[2] >>;
+	return mag( $vec ) * 0.5;
+}
+
+
+global proc addLP_attributes(string $shape)
+{
+	global int $frameUI_index;
+
+
+	string $nameAttr = ("bakerFrame_"+ (string)$frameUI_index);
+
+	if (`attributeExists $nameAttr $shape`) {
+      print "Attribute exists\n";
+  } else {
+      print "Attribute does not exist\n";
+
+
+	addAttr -longName $nameAttr -dt "string" $shape;
+	setAttr -type "string" ($shape+"." +$nameAttr)  "0_Mesh_0.0_0.0_Closest";
+}
+}
+
+global proc addHP_attributes(string $shape, string $index)
+{
+	//global int $frameUI_index;
+
+
+	string $nameAttr = ("bakerHPFrame_"+ $index);
+
+	if (`attributeExists $nameAttr $shape`) {
+      print "Attribute exists\n";
+  }
+   else {
+      print "Attribute does not exist\n";
+
+
+	addAttr -longName $nameAttr -dt "string" $shape;
+	//setAttr -type "string" ($shape+"." +$nameAttr)  "0_Mesh_0.0_0.0_Closest";
+}
+}
+
+proc string[] getShapes( string $xform )
+{
+   string $shapes[];
+
+   $shapes[0] = $xform;
+
+   if ( "transform" == `nodeType $xform` )
+   // If given node is not a transform, assume it is a shape
+   // and pass it through
+   {
+      $shapes = `listRelatives -fullPath -shapes $xform`;
+   }
+
+   return $shapes;
+}
+
+
+global proc addSelectedLPTarget()
+{
+	string $lps[] = `filterExpand -sm 12`;
+	int $ch = `columnLayout -q -nch bakeTextureTargetSourceSurfaceLayout`;
+
+
+
+
+		print ("zuko\n" + $ch + "\n") ;
+			buildCommonConnectSettingsWidgets $lps;
+
+}
+
+global proc addSelectedHPSource(string $widget, string $index)
+{
+	string $hps[] = `filterExpand -sm 12`;
+	//hyperShade -assign lambert1;
+	//int $ch = `columnLayout -q -nch bakeTextureTargetSourceSurfaceLayout`;
+		//print ("huko\n" + $ch + "\n") ;
+		string $shapes[] = `listRelatives -fullPath -shapes $hps`;
+		for ($s in $shapes)
+					{
+						$sE=`listConnections -t shadingEngine $s`;
+							if (!`size($sE)`)
+							{
+								delete $s;
+							}
+					}
+		for ($x = 0; $x < size($hps); $x++)
+		{
+			$shapes = `listRelatives -fullPath -shapes $hps[$x]`;
+			string $hp_shapeName = `text -al "left" -w 100 -label $shapes[0] -bgc 0.5 0.5 0.5 -p $widget`;
+			popupMenu -p $hp_shapeName; ////popup
+					//menuItem -label "Add LP Target" -c ("addLPFrame " + $parentWidget); ////popup
+					menuItem -label "Select HP Target" -c ("select " + $shapes[0]); ////popup
+					menuItem -label "Remove HP Target" -c ("deleteUI " + $hp_shapeName); ////popup
+
+			addHP_attributes $shapes[0] $index;
+		}
+}
+
+
+proc buildTargetSourceSurfaceFrame()
+{
+	frameLayout
+			-borderVisible true -collapse 0 -collapsable 1
+		  -label "Target/Source Meshes" -labelVisible 1
+			-mw 2 -mh 6
+			-bs "out"
+			-p bakeTextureFormFrame
+			frameTargetSourceLayout;
+
+	columnLayout;
+	columnLayout bakeTextureTargetSourceSurfaceLayout;
+		rowColumnLayout  -cat 1 "left" 20 -nc 6
+							-columnWidth 1 160
+							-columnWidth 2 60
+							-columnWidth 3 150
+							-columnWidth 4 150
+							-columnWidth 5 150
+							-columnWidth 6 150
+							bakeTextureTargetSourceHeadings;
+
+		button -al "left" -w 100 -label "Add Layer"  -c ("addSelectedLPTarget") popupNameMenu;
+		text -al "left" -fn "boldLabelFont" -label "Display";
+		text -al "left" -fn "boldLabelFont" -label "Search envelope (%)";
+		text -al "left" -fn "boldLabelFont" -label "Max search depth (%)";
+		text -al "left" -fn "boldLabelFont" -label "Search method";
+		text -al "left" -fn "boldLabelFont" -label "Source Name";
+		//getchildren
+		//int $shildren =
+		//popupMenu -p popupNameMenu;
+			//menuItem -label "Add LP Layer" -c ("addSelectedLPTarget");
+
+		setParent ..;
+		setParent ..;
+		setParent ..;
+		setParent ..;
+}
+
+proc buildSourceTargetSurfaceFrame()
+{
+	frameLayout
+			-borderVisible true -collapse 0 -collapsable 1 -w 832
+		  -label "All Settings" -labelVisible 1
+			-mw 2 -mh 6
+			-bs "out"
+			-p bakeTextureFormFrame
+			frameSourceTargetLayout;
+
+	rowColumnLayout  -cat 1 "left" 10 -nc 6
+							-columnWidth 1 30
+							-columnWidth 2 140
+							-columnWidth 3 55
+							-columnWidth 4 150
+							-columnWidth 5 150
+							-columnWidth 6 100
+							//-w 800
+
+							allBakeTextureTargetSourceHeadings;
+		checkBox -l "";
+		text -al "left" -fn "boldLabelFont" -label "For all";
+		string $envelop_all = `text -al "left" -label "Mesh" -bgc 0.4 0.1 0.1 `;
+		popupMenu -p $envelop_all; ////popup
+			menuItem -label "Mesh" -c ("text -e -label \"Mesh\" " + $envelop_all +";"); //envelopEditAttr \"mesh\" " + $shape + " " +(string)$frameUI_index);
+			menuItem -label "Envelope" -c ("text -e -label \"Envelope\" " + $envelop_all +";"); //envelopEditAttr \"envelope\" " + $shape + " " +(string)$frameUI_index);
+			menuItem -label "Both" -c ("text -e -label \"Both\" " + $envelop_all +";"); //envelopEditAttr \"both\" " + $shape + " " +(string)$frameUI_index);
+
+			floatSliderGrp -min 0.0 -max 100.0 -value 0.0
+				-width 131
+				-cw3 1 50 80 -ct2 "both" "both"
+				-columnWidth 1 50
+				-columnWidth 2 65
+				-field true -fieldMinValue 0.0 -fieldMaxValue 100.0;
+				//-dragCommand ("surfaceSamplingUpdateSearchOffset " + (string)$target)
+				//-changeCommand ("surfaceSamplingUpdateSearchOffset " + (string)$target) ("surfaceSamplingSearchOffsetSlider" + (string)$target);
+			floatSliderGrp -min 0.0 -max 100.0 -value 0.0
+				-width 131
+				-cw3 1 50 80 -ct2 "both" "both"
+				-columnWidth 1 50
+				-columnWidth 2 65
+				-field true -fieldMinValue 0.0 -fieldMaxValue 100.0;
+				//-dragCommand ("surfaceSamplingUpdateSearchOffset " + (string)$target)
+				//-changeCommand ("surfaceSamplingUpdateSearchOffset " + (string)$target) ("surfaceSamplingSearchOffsetSlider" + (string)$target);
+				string $search_all = `text -al "left" -label "Closest Envelope" -bgc 0.4 0.1 0.1 `;
+
+		popupMenu -p $search_all; ////popup;
+			menuItem -label "Closest Envelope" -c ("text -e -label \"Closest Envelope\" " + $search_all +";");// envelopEditAttr \"closest\" " + $shape + " " +(string)$frameUI_index);
+			menuItem -label "Inside-Outside Envelope" -c ("text -e -label \"Inside-Outside Envelope\" " + $search_all +";");// envelopEditAttr \"inout\" " + $shape + " " +(string)$frameUI_index);
+			menuItem -label "Inside Envelope Only" -c ("text -e -label \"Inside Envelope Only\" " + $search_all +";");// envelopEditAttr \"inside\" " + $shape + " " +(string)$frameUI_index);
+
+
+			//setParent ..;
+			setParent ..;
+			setParent ..;
+			setParent ..;
+
+
+}
+
+global proc deleteLPFrame(string $parentWidget, string $shape, string $index)
+{
+	string $grandParent = `rowColumnLayout -q -p $parentWidget`;
+	int $child = `columnLayout -q -nch $grandParent`;
+
+		//string $children[] = `columnLayout -q -ca $widget`;
+		//print ("\n" + $child +"\n" + $children[0]+"\n" + $children[1]);
+
+		if ($child > 1)
+		{
+		deleteUI $parentWidget;
+	}
+		else
+		{
+		string $grandParent = `rowColumnLayout -q -p $parentWidget`;
+		string $grand_grandParent = `columnLayout -q -p $grandParent`;
+		string $grand_grand_grandParent = `rowColumnLayout -q -p $grand_grandParent`;
+		deleteUI $grand_grand_grandParent;
+		print ("FRAME_UI\n" + $grand_grand_grandParent);
+	}
+	string $nameAttr = ("bakerFrame_"+ $index);
+	deleteAttr ($shape+"." +$nameAttr);
+}
+
+global proc addLPFrame(string $parentWidget)
+{
+	string $lps[] = `filterExpand -sm 12`;
+	//hyperShade -assign lambert1;
+	//string $shapes[] = `listRelatives -fullPath -shapes $lps`;
+	string $grand_rowColumnLP = `rowColumnLayout -q -p $parentWidget`;
+		print ("FRAME_UI\n" + $grand_rowColumnLP);
+	for ($lp in $lps)
+		{
+			string $shapes[] = `listRelatives -fullPath -shapes $lp`;
+			buildWidget($shapes[0], $grand_rowColumnLP);
+
+		}
+
+}
+
+
+global proc envelopEditAttr(string $case, string $shape, string $index)
+{
+	string $nameAttr = ("bakerFrame_"+ $index);
+	string $attribute = `getAttr ($shape + "." + $nameAttr)`;
+	string $allAttr[] = `python("'" +$attribute+"'.split('_')")`;
+	//string $words[] = `python("'" +$path+"'.split('/')")`;
+	if ($case == "on")
+		$allAttr[0] = "1";
+	if ($case == "off")
+		$allAttr[0] = "0";
+	if ($case == "mesh")
+		$allAttr[1] = "Mesh";
+	if ($case == "envelope")
+		$allAttr[1] = "Envelope";
+	if ($case == "both")
+		$allAttr[1] = "Both";
+	if ($case == "closest")
+	$allAttr[4] = "Closest";
+	if ($case == "inout")
+	$allAttr[4] = "Inout";
+	if ($case == "inside")
+	$allAttr[4] = "Inside";
+
+	$attribute = $allAttr[0] + "_" + $allAttr[1] + "_" + $allAttr[2] + "_" + $allAttr[3] + "_" + $allAttr[4];
+	setAttr -type "string" ($shape+"." +$nameAttr)  $attribute;
+}
+
+global proc changeSearchSlider(string $widget, string $shape, string $index)
+{
+	string $nameAttr = ("bakerFrame_"+ $index);
+	string $attribute = `getAttr ($shape + "." + $nameAttr)`;
+	string $allAttr[] = `python("'" +$attribute+"'.split('_')")`;
+	//string $words[] = `python("'" +$path+"'.split('/')")`;
+	float $value = `floatSliderGrp -q -v $widget`;
+		$allAttr[2] = (string)$value;
+
+	$attribute = $allAttr[0] + "_" + $allAttr[1] + "_" + $allAttr[2] + "_" + $allAttr[3] + "_" + $allAttr[4];
+	setAttr -type "string" ($shape+"." +$nameAttr)  $attribute;
+}
+
+global proc changeDepthSlider(string $widget, string $shape, string $index)
+{
+	string $nameAttr = ("bakerFrame_"+ $index);
+	string $attribute = `getAttr ($shape + "." + $nameAttr)`;
+	string $allAttr[] = `python("'" +$attribute+"'.split('_')")`;
+	//string $words[] = `python("'" +$path+"'.split('/')")`;
+	float $value = `floatSliderGrp -q -v $widget`;
+		$allAttr[3] = (string)$value;
+
+	$attribute = $allAttr[0] + "_" + $allAttr[1] + "_" + $allAttr[2] + "_" + $allAttr[3] + "_" + $allAttr[4];
+	setAttr -type "string" ($shape+"." +$nameAttr)  $attribute;
+}
+
+global proc buildWidget(string $shape, string $parentWidget)
+{
+	global int $frameUI_index;
+	string $rowColumnLP = `rowColumnLayout   -nc 6  -co 3 "left" 20 -p $parentWidget
+							-columnWidth 1 20
+							-columnWidth 2 110
+							-columnWidth 3 75
+							-columnWidth 4 150
+							-columnWidth 5 150
+							-columnWidth 6 120`;
+
+
+
+		checkBox -l "" -onc ("envelopEditAttr \"on\" " + $shape + " " +(string)$frameUI_index) -ofc ("envelopEditAttr \"off\" " + $shape + " " +(string)$frameUI_index);
+		string $shortName[] = `ls -sn $shape`;
+		string $shapeName = `text -al "left" -bgc 0.4 0.1 0.1 -label $shortName[0]`; ;
+				popupMenu -p $shapeName; ////popup
+					menuItem -label "Add LP Target" -c ("addLPFrame " + $rowColumnLP); ////popup
+					menuItem -label "Select LP Target" -c ("select " + $shape); ////popup
+					menuItem -label "Delete LP Target" -c ("deleteLPFrame " + $rowColumnLP + " " + $shape + " " +(string)$frameUI_index); ////popup
+
+		string $envelop = `text -al "left" -label "Mesh" -bgc 0.4 0.1 0.1 `;
+		popupMenu -p $envelop; ////popup
+			menuItem -label "Mesh" -c ("text -e -label \"Mesh\" " + $envelop +"; envelopEditAttr \"mesh\" " + $shape + " " +(string)$frameUI_index);
+			menuItem -label "Envelope" -c ("text -e -label \"Envelope\" " + $envelop +"; envelopEditAttr \"envelope\" " + $shape + " " +(string)$frameUI_index);
+			menuItem -label "Both" -c ("text -e -label \"Both\" " + $envelop +"; envelopEditAttr \"both\" " + $shape + " " +(string)$frameUI_index);
+			string $searchEnvelope = `floatSliderGrp -min 0.0 -max 100.0 -value 0.0
+				-width 131
+				-cw3 1 50 80 -ct2 "both" "both"
+				-columnWidth 1 50
+				-columnWidth 2 65
+				-field true -fieldMinValue 0.0 -fieldMaxValue 100.0`;
+				floatSliderGrp -e
+				-cc ("changeSearchSlider " + $searchEnvelope + " " + $shape + " " +(string)$frameUI_index)
+				-dc ("changeSearchSlider " + $searchEnvelope + " " + $shape + " " +(string)$frameUI_index)
+				$searchEnvelope;
+
+				//-dragCommand ("surfaceSamplingUpdateSearchOffset " + (string)$target)
+				//-changeCommand ("surfaceSamplingUpdateSearchOffset " + (string)$target) ("surfaceSamplingSearchOffsetSlider" + (string)$target);
+			string $depthEnvelope = `floatSliderGrp -min 0.0 -max 100.0 -value 0.0
+				-width 131
+				-cw3 1 50 80 -ct2 "both" "both"
+				-columnWidth 1 50
+				-columnWidth 2 65
+				-field true -fieldMinValue 0.0 -fieldMaxValue 100.0`;
+				floatSliderGrp -e
+				-cc ("changeDepthSlider " + $depthEnvelope + " " + $shape + " " +(string)$frameUI_index)
+				-dc ("changeDepthSlider " + $depthEnvelope + " " + $shape + " " +(string)$frameUI_index)
+				$depthEnvelope;
+
+				//-dragCommand ("surfaceSamplingUpdateSearchOffset " + (string)$target)
+				//-changeCommand ("surfaceSamplingUpdateSearchOffset " + (string)$target) ("surfaceSamplingSearchOffsetSlider" + (string)$target);
+		string $search = `text -al "left" -label "Closest Envelope" -bgc 0.4 0.1 0.1 `;
+		popupMenu -p $search; ////popup;
+			menuItem -label "Closest Envelope" -c ("text -e -label \"Closest Envelope\" " + $search +"; envelopEditAttr \"closest\" " + $shape + " " +(string)$frameUI_index);
+			menuItem -label "Inside-Outside Envelope" -c ("text -e -label \"Inside-Outside Envelope\" " + $search +"; envelopEditAttr \"inout\" " + $shape + " " +(string)$frameUI_index);
+			menuItem -label "Inside Envelope Only" -c ("text -e -label \"Inside Envelope Only\" " + $search +"; envelopEditAttr \"inside\" " + $shape + " " +(string)$frameUI_index);
+
+		addLP_attributes($shape);
+
+		}
+
+
+global proc selectLPShape(string $tsl)
+{
+	string $objs[] =`textScrollList -q -si $tsl`;
+	select $objs;
+}
+
+
+global proc buildCommonConnectSettingsWidgets(string $lps[])
+{
+	global int $frameUI_index;
+	$frameUI_index = $frameUI_index+1;
+	string $frameLP = `frameLayout
+			-borderVisible true -collapse 0 -collapsable 1
+			-label "" -labelVisible 0
+			-mw 2 -mh 6
+			//-w 830
+			-bs "out"
+			-p bakeTextureTargetSourceSurfaceLayout
+
+			("frameUI_" + (string)($frameUI_index))`;
+
+
+
+			string $rowColumnFrameLP = `rowColumnLayout -nc 2 -co 1 "left" 10
+							-columnWidth 1 655
+							-columnWidth 2 160`;
+
+			string $columnLayoutLP_currentWidget = `columnLayout -p $rowColumnFrameLP ("columnLP_UI_" + (string)($frameUI_index))`;
+
+
+			string $shapes[] = `listRelatives -fullPath -shapes $lps`;
+
+		//paneLayout;
+			//int $height = `size($lps)`*18;
+		//string $tsl = `textScrollList -numberOfRows 1 -h $height -aas true -allowMultiSelection true`;
+		//textScrollList -e -sc ("selectLPShape " + $tsl) $tsl;
+
+			string $shapes[] = `listRelatives -fullPath -shapes $lps`;
+			//string $shapes[] = `listRelatives -s -path`;
+				for ($s in $shapes)
+					{
+						$sE=`listConnections -t shadingEngine $s`;
+							if (!`size($sE)`)
+							{
+								delete $s;
+							}
+					}
+
+				for ($x = 0; $x < size($lps); $x++)
+					{
+
+						string $shapes[] = `listRelatives -fullPath -shapes $lps[$x]`;
+
+						//textScrollList -e  -a $shapes[0] $tsl;
+
+						buildWidget($shapes[0], $columnLayoutLP_currentWidget);
+					}
+
+			string $rowColumnFrameHP = `rowColumnLayout -nc 2  -p $rowColumnFrameLP
+							-columnWidth 1 120
+							-columnWidth 2 40`;
+
+			string $columnLayoutHP_currentWidget = `columnLayout -rowSpacing 5 ("columnHP_UI_" + (string)($frameUI_index))`;
+
+			setParent..;
+			string $button_add_HP_Source = `button -l "add HP" -al "center" -w 40 -h 20 -c ("addSelectedHPSource " + $columnLayoutHP_currentWidget + " " + (string)($frameUI_index))`;
+
+		}
+global proc int surfaceSamplingMakePowerOfTwo(int $sz)
+//Discription
+//			This adjusts the movment of Size X and Size Y slider to the values of
+//			power of 2.
+//
+{
+	int $prevSize = 0, $nextSize = 1;
+	while ($nextSize < $sz ){
+	   $prevSize = $nextSize;
+	   $nextSize = $nextSize * 2;
+	}
+
+	int $newSize;
+
+	if(($sz - $prevSize) < ($nextSize - $sz)){
+			$newSize = $prevSize;
+	}else{
+		$newSize = $nextSize;
+	}
+	return $newSize;
+
+}
+
+global proc normalMapChangeXResolutionDragCmd(int $sz)
+//Discription
+//			This gets exected when the slider is moved with the left
+//			mouse button. This is callback command
+//
+{
+	int $newSize = surfaceSamplingMakePowerOfTwo($sz);
+	intSliderGrp -e -value $newSize surfaceSamplingWidthField;
+
+}
+
+global proc normalMapChangeYResolutionDragCmd(int $sz)
+//Discription
+//			This gets exected when the slider is moved with the left
+//			mouse button. This is callback command
+//
+{
+	int $newSize = surfaceSamplingMakePowerOfTwo($sz);
+	intSliderGrp -e -value $newSize surfaceSamplingHeightField;
+
+}
+
+proc string getDefaultDir()
+{
+	string $dir = `file -q -sn`;
+	//string $file = `file -q -shn`;
+	string $fileDir[] = `python("'" +$dir+"'.split('/')")`;
+	string $fileName[] = `python("'" +$dir+"'.split('/')[-1:]")`;
+	$fileDir = stringArrayRemove($fileName, $fileDir);
+	$dir = stringArrayToString($fileDir, "/");
+
+	return fromNativePath( $dir);
+}
+
+global proc onOk(string $dirpath,string $type) {
+		textFieldGrp -e
+		-text $dirpath
+		normalMapPathField;
+		}
+
+global proc setRootDir()
+{
+	string $dir = getDefaultDir();
+	if ($dir != "")
+	{
+		workspace -dir $dir;
+	}
+
+}
+
+global proc bakeCreateCMD()
+{
+
+}
+
+proc normalMapSettingsFrame()
+{
+	frameLayout
+
+			-borderVisible true -collapse 0 -collapsable 1
+		  -label "Normal Map Settings" -labelVisible 1
+			-mw 2 -mh 6
+			-w 832
+			-bs "out"
+			frameNormalMapLayout;
+	string $formNormalFrameLayout = `formLayout bakeTextureNormalFormFrame`;
+
+		checkBoxGrp
+		//-label "Triangulate"
+		-cc ("baker_saveSetting;")
+		-value1 1
+		triangulate_CB;
+
+		text -al "left" -fn "boldLabelFont" -label "Tris" bakerTriText;
+
+		optionMenuGrp  -vis 1 -cc ("baker_saveSetting;") bakerQualityNormalMenu;
+	{
+		menuItem -label "1x1" baker1QualityNormalMenu;
+		menuItem -label "2x2" baker2QualityNormalMenu;
+		menuItem -label "4x4" baker4QualityNormalMenu;
+		menuItem -label "8x8" baker8QualityNormalMenu;
+	}
+		//checkBoxGrp
+		//-cc ("baker_saveSetting;")
+		//-value1 0
+		//preview_CB;
+
+		text -al "left" -fn "boldLabelFont" -label "Quality" bakerPreviewText;
+
+		checkBoxGrp
+		-cc ("baker_saveSetting;")
+		-value1 1
+		angleArea_CB;
+
+		text -al "left" -fn "boldLabelFont" -label "AngleArea" bakerAngleAreaText;
+
+		text -al "left" -fn "boldLabelFont" -label "W" bakerWidthText;
+
+		optionMenuGrp  -vis 1 -cc ("baker_saveSetting;") bakerWidthNormalMenu;
+	{
+		menuItem -label "256" baker256WidthNormalMenu;
+		menuItem -label "512" baker512WidthNormalMenu;
+		menuItem -label "1024" baker1024WidthNormalMenu;
+		menuItem -label "2048" baker2048WidthNormalMenu;
+		menuItem -label "4096" baker4096WidthNormalMenu;
+	}
+	optionMenuGrp -e -sl 3 bakerWidthNormalMenu;
+
+	text -al "left" -fn "boldLabelFont" -label "H" bakerHightText;
+
+	optionMenuGrp  -vis 1 -cc ("baker_saveSetting;") bakerHightNormalMenu;
+	{
+		menuItem -label "256" baker256HightNormalMenu;
+		menuItem -label "512" baker512HightNormalMenu;
+		menuItem -label "1024" baker1024HightNormalMenu;
+		menuItem -label "2048" baker2048HightNormalMenu;
+		menuItem -label "4096" baker4096HightNormalMenu;
+	}
+	optionMenuGrp -e -sl 3 bakerHightNormalMenu;
+
+	optionMenuGrp -cc ("baker_saveSetting;") surfaceSamplingMatchTypeMenu;
+	{
+		menuItem -label "Surface + Geometry Normals " surfaceSamplingSGeometryNormalsItem;
+		menuItem -label "Only Geometry Normals " surfaceSamplingGeometryNormalsItem;
+		menuItem -label "Only Surface Normals" surfaceSamplingSurfaceNormalsItem;
+	}
+	optionMenuGrp -e -vis 0 -sl 1 surfaceSamplingMatchTypeMenu;
+
+	checkBoxGrp
+		//-label "Surface Alpha"
+		-value1 1
+		-cc ("baker_saveSetting;")
+		alphaSurfaceCB;
+	text -al "left" -fn "boldLabelFont" -label "SA" bakerSAText;
+
+	optionMenuGrp -cc ("baker_saveSetting;") surfaceAlphaMask;
+	{
+		menuItem -label "Shell" surfaceShellAlphaMask;
+		menuItem -label "Color" surfaceColorAlphaMask;
+	}
+	optionMenuGrp -e -sl 1 surfaceAlphaMask;
+
+	checkBoxGrp
+
+		-value1 1
+		-cc ("baker_saveSetting;")
+		alphaGeometryCB;
+	text -al "left" -fn "boldLabelFont" -label "GA" bakerGAText;
+
+	optionMenuGrp -cc ("baker_saveSetting;") geometryAlphaMask;
+	{
+		menuItem -label "Edge" geometryEdgeAlphaMask;
+		menuItem -label "Shell" geometryShellAlphaMask;
+		menuItem -label "Color" geometryColorAlphaMask;
+	}
+	optionMenuGrp -e -sl 1 geometryAlphaMask;
+
+	string $bakeSelectedButton = `button -l "Bake Sel" -al "center" -w 60 -h 21 -c "bakeGenerator 1" bakeSelBut`;
+	string $bakeAllButton = `button -l "Bake All" -al "center" -w 60 -h 21 -c "bakeAllFrame" bakeAllBut`;
+	//string $createCmdButton = `button -l "Create CMD" -al "center" -w 60 -h 21 -c "bakeGenerator 0" bakeCMDBut`;
+
+	//checkBoxGrp
+	//	//-label "Triangulate"
+	//	-cc ("baker_saveSetting;")
+	//	-value1 0
+	//	frameSet_CB;
+//
+	//text -al "left" -fn "boldLabelFont" -label "Frame2" bakerFrameMove;
+
+	formLayout  -e
+
+		-attachForm triangulate_CB "top" 4
+		-attachForm triangulate_CB "left" 10
+
+		-af bakerTriText "top" 4
+		-ac bakerTriText "left" 0 triangulate_CB
+
+		-af angleArea_CB "top" 4
+		-ac angleArea_CB "left" 5 bakerTriText
+
+		-af bakerAngleAreaText "top" 4
+		-ac bakerAngleAreaText "left" 0 angleArea_CB
+
+		-af bakerQualityNormalMenu "top" 0
+		-ac bakerQualityNormalMenu "left" 10 bakerAngleAreaText
+
+		-af bakerPreviewText "top" 4
+		-ac bakerPreviewText "left" 0 bakerQualityNormalMenu
+
+		-af bakerWidthText "top" 4
+		-ac bakerWidthText "left" 15 bakerPreviewText
+
+		-af bakerWidthNormalMenu "top" 0
+		-ac bakerWidthNormalMenu "left" 2 bakerWidthText
+
+		-af bakerHightText "top" 4
+		-ac bakerHightText "left" 2 bakerWidthNormalMenu
+
+		-af bakerHightNormalMenu "top" 0
+		-ac bakerHightNormalMenu "left" 2 bakerHightText
+
+		-af surfaceSamplingMatchTypeMenu "top" 0
+		-ac surfaceSamplingMatchTypeMenu "left" 5 bakerHightNormalMenu
+
+		-af alphaSurfaceCB "top" 4
+		-ac alphaSurfaceCB "left" 4 surfaceSamplingMatchTypeMenu
+
+		-af bakerSAText "top" 4
+		-ac bakerSAText "left" 0 alphaSurfaceCB
+
+		-af surfaceAlphaMask "top" 0
+		-ac surfaceAlphaMask "left" 2 bakerSAText
+
+		-af alphaGeometryCB "top" 4
+		-ac alphaGeometryCB "left" 5 surfaceAlphaMask
+
+		-af bakerGAText "top" 4
+		-ac bakerGAText "left" 2 alphaGeometryCB
+
+		-af geometryAlphaMask "top" 0
+		-ac geometryAlphaMask "left" 2 bakerGAText
+
+		-af bakeSelBut "top" 1
+		-ac bakeSelBut "left" 5 geometryAlphaMask
+
+		-af bakeAllBut "top" 1
+		-ac bakeAllBut "left" 5 bakeSelBut
+
+		//-af bakeCMDBut "top" 1
+		//-ac bakeCMDBut "left" 5 bakeAllBut
+
+		//-af frameSet_CB "top" 1
+		//-ac frameSet_CB "left" 5 bakeAllBut
+
+		//-af bakerFrameMove "top" 4
+		//-ac bakerFrameMove "left" 0 frameSet_CB
+
+		bakeTextureNormalFormFrame;
+
+	baker_initSetting;
+	baker_loadSetting;
+}
+
+global proc wg_BakeTextureWnd()
+{
+if (`window -exists bakeTextureWin`)
+		deleteUI -window bakeTextureWin;
+		window -w 800 -h 300 -s 1 -rtf 0 -title "Transfer Map" -menuBar 1 bakeTextureWin;
+			menu -label "Layers" -tearOff 0 helpMenu;
+				menuItem -l "New Layers";
+				menuItem -l "Delete All Layers";
+			menu -label "Hard" -tearOff 0 -pmc ("python (\"bt.borderEdgeToHard()\")") hardBorderMenu;
+			menu -label "Hard C++" -tearOff 0 -pmc ("python (\"bt.mapToHard()\")") mapBorderMenu;
+			menu -label "Bake" -tearOff 0 -pmc "bakeGenerator 1" bakeMenu;
+
+		//string $scrollLayout = `scrollLayout`;
+
+		string $formLayout = `formLayout bakeTextureFormFrame`;
+		normalMapSettingsFrame();
+		buildTargetSourceSurfaceFrame();
+
+		buildSourceTargetSurfaceFrame();
+
+		//normalMapSettingsFrame();
+
+
+		formLayout -e -w 832
+
+		-attachForm frameNormalMapLayout "top" 0
+		-attachForm frameNormalMapLayout "left" 0
+		-attachPosition frameNormalMapLayout "right" 0 70
+
+		-attachControl frameTargetSourceLayout "top" 0 frameNormalMapLayout
+		-attachForm frameTargetSourceLayout "left" 0
+		-attachPosition frameTargetSourceLayout "right" 0 70
+
+		-attachControl frameSourceTargetLayout "top" 0 frameTargetSourceLayout
+		-attachForm frameSourceTargetLayout "left" 0
+		-attachPosition frameSourceTargetLayout "right" 0 70
+
+
+		bakeTextureFormFrame;
+
+
+		global int $frameUI_index = 0;
+
+
+	showWindow bakeTextureWin;
+}

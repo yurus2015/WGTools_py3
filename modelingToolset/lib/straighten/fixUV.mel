@@ -1,0 +1,81 @@
+global proc UV_UnfoldSelected(string $UV)
+{
+	PolySelectConvert 4;
+	$UnfoldIterations = 1000;//`floatField -q -v Unfold_Iterations`;
+	if ($UV == "U")
+	{
+		unfold -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  2 -us off;
+
+	}
+
+	if ($UV == "V")
+	{
+		unfold -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  1 -us off;
+	}
+
+}
+
+
+global proc UV_SelectInteriorUVs()
+{
+
+	PolySelectConvert 4;
+	polySelectBorderShell 0;
+	$selUV = `ls -sl -fl`;
+
+	SelectUVBorder;
+	$BorderUV= `ls -sl -fl`;
+	select $selUV ;
+	select -d $BorderUV;
+	//InvertSelection;
+}
+
+global proc UV_QuickFix()
+{
+	$Unfold_Accuracy = 1000;//`floatField -q -v Unfold_Iterations`;
+
+	string $Selected[] = `ls -sl -fl`;
+	string $obj_name[];
+	tokenize $Selected[0] "." $obj_name;//get object name
+	string $Mesh_Name;
+
+	if (`size $obj_name` != 0)
+	{
+		$Mesh_Name = $obj_name[0];
+	}
+
+	if (`size $obj_name` == 0)
+	{
+		$Mesh_Name = $Selected[0];
+	}
+
+	int $Total_Uvs[] = `polyEvaluate -uv $Mesh_Name`;
+	$selection = `ls -sl -fl`;
+	PolySelectConvert 4;
+	string $sel_Uvs[] = `ls -sl -fl`;
+
+	if (`size $sel_Uvs` == $Total_Uvs[0])
+	{
+		select -d $sel_Uvs[0];
+    }
+
+	unfold -i $Unfold_Accuracy -ss 0.001 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  0 -us off;
+	//polyOptUvs -i 1000 -ss 0.001 -gb 0 -gmb 0.0 -pub 0 -ps  0 -oa  0 -us off;
+	select -r $selection;
+
+}
+
+
+
+global proc UV_UV_QuickFixBorder()
+{
+	PolySelectConvert 4;
+	polySelectBorderShell 1;
+	UV_QuickFix;
+}
+
+global proc UV_UV_QuickFixInterior()
+{
+	UV_SelectInteriorUVs;
+	UV_QuickFix;
+}

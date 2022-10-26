@@ -1,0 +1,1108 @@
+global proc string[] NinjaUV_CollectUVShellDots()
+{
+	PolySelectConvert 4;//convert selection to uv's
+	polySelectBorderShell 1;
+	string $UVs[] = `ls -sl -fl -l`;//base uv's
+	string $UVShell_Dots[] = {};
+
+	while (`size $UVs` > 0)
+		{
+			select $UVs[0];
+			stringArrayInsertAtIndex(0 , $UVShell_Dots, $UVs[0]);
+			polySelectBorderShell 1;
+			$UVs = stringArrayRemoveExact(`ls -sl -fl -l`, $UVs);
+
+		}//end while
+
+	return $UVShell_Dots;//returns
+}
+
+
+global proc QuickScale(float $pixRat, float $texSize)
+{
+
+
+	$DeleteHistory = 1;
+	if ($DeleteHistory == 1)
+	{
+		$Obj = `ls -hl`;
+		delete -ch $Obj;
+    }
+
+    // set pixel ratio
+    float $PixelRatio = $pixRat; //by default
+    float $UnitRatio = 1;  //by meters   for cm = 100, for mm = 1000
+    // $ScaleU = 2.05; //Map Size U
+    // $ScaleV = 2.05; //Mpa Size V
+    float $TextureU = $texSize; //Tex Width
+    float $TextureV = $texSize; //Tex Height
+    float $Map_ScaleU = (($TextureU / $PixelRatio) * $UnitRatio);
+    float $Map_ScaleV = (($TextureV / $PixelRatio) * $UnitRatio);
+
+    PolySelectConvert 4;
+    string $Selection[] =`ls -sl -fl`;
+	string $UVs[] = `ls -sl -fl`;//base uv's
+	string $Test_UVs[] = `ls -sl -fl` ;
+	string $Shell[]={};
+	string $Shell_string;
+	string $Bad_Array[]={};
+	string $zero_uv = "0";
+	float $MSU;
+	float $MSV;
+
+
+
+	$UnfoldIterations = 1000;
+	$UV_ExtentsGroup =`polyEvaluate -bc2`;//get the uv extents
+	$XMidGroup = (($UV_ExtentsGroup[1] + $UV_ExtentsGroup[0]) / 2);
+	$YMidGroup = (($UV_ExtentsGroup[3] + $UV_ExtentsGroup[2]) / 2);
+
+	string $Dots[] = NinjaUV_CollectUVShellDots(); 
+
+	for ($s = 0; $s < `size $Dots`; $s++)
+	{
+			$zero_uv = "0";
+			select $Dots[$s];
+			polySelectBorderShell 0;
+			string $Shell[] = `ls -sl -fl -l`;
+			//work on shell
+			//
+			$ASS = 1;
+			if ($ASS == 1)
+			{
+				ConvertSelectionToFaces;
+				//NinjaUV_GetTextureSize("diffuse"); //change TextureU V and change Map_ScaleU V 
+				select -r $Shell;
+			}//end if ass = 1
+
+			$Old_UV_Extents =`polyEvaluate -bc2`;//get the uv extents
+			$XMid = (($Old_UV_Extents[1] + $Old_UV_Extents[0]) / 2);
+			$YMid = (($Old_UV_Extents[3] + $Old_UV_Extents[2]) / 2);
+			$XStart = $Old_UV_Extents[0];
+			$YStart = $Old_UV_Extents[2];
+			$OX = ($Old_UV_Extents[1] - $Old_UV_Extents[0]);
+			$OY = ($Old_UV_Extents[3] - $Old_UV_Extents[2]);
+			
+
+			// string $UnitScale = `currentUnit -q -l`;
+			// if ($UnitScale == "m")
+			// {
+			$MSU = 0.01 / $Map_ScaleU;//get the U scale Value in meters
+			$MSV = 0.01 / $Map_ScaleV;//get the V scale Value in meters
+			// }
+
+			float $New_UV_Y_Extents[];
+			float $New_UV_X_Extents[];
+			float $New_XScale_Value;
+			float $New_YScale_Value;
+
+			string $Temp_Triangulate[] = {};
+
+			string $Temp_Divisions[] = {};
+			if (`size $Shell` <= 4)
+			{
+
+				ConvertSelectionToFaces;
+				$Temp_Triangulate = `polyTriangulate -ch 1`;
+				$Temp_Divisions =`polySubdivideFacet -dv 2 -m 0 -ch 1` ;
+				select -r $UVs[$s];
+				polySelectBorderShell 0;
+				select $Shell;
+			}
+
+			//polyEditUV -pu $XMid -pv $YMid -su 1.1 -sv 1.1 ;
+
+			//calculate scale U
+			$XU = `unfold -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps 0 -oa 2 -us on -s $MSU`;
+			//$XU = `polyOptUvs -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps 0 -oa 2 -us on -s $MSU`;
+			$New_UV_X_Extents =`polyEvaluate -bc2 `;
+			$NX = ($New_UV_X_Extents[1] - $New_UV_X_Extents[0]);
+			$New_XScale_Value = ($NX/$OX);
+			undo;//use undo if using unfold
+			//delete $XU;
+			//
+			
+			///calculate Scale V
+			$YU = `unfold -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  1 -us on -s $MSV`;
+			//$YU = `polyOptUvs -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps 0 -oa 1 -us on -s $MSV`;
+			$New_UV_Y_Extents =`polyEvaluate -bc2 `;//check the V extents of the shell
+			$NY = ($New_UV_Y_Extents[3] - $New_UV_Y_Extents[2]);//find the difference in the V extents
+			$New_YScale_Value = ($NY/$OY); //calculate the ratio
+			undo ;//use undo if using unfold
+			//delete $YU;
+			//
+			
+			int $Scale_Location =1; //Center, 2- bottomleft, 3 - group
+
+			if ($Scale_Location == 1)
+				{
+					polyEditUV  -pu $XMid -pv $YMid -su $New_XScale_Value -sv $New_YScale_Value;//set x scale
+				}
+
+			if ($Scale_Location == 2)
+				{
+					polyEditUV -pu $XStart -pv $YStart -su $New_XScale_Value -sv $New_YScale_Value;//set x scale
+				}
+
+
+			if ($Scale_Location == 3)
+				{
+					polyEditUV  -pu $XMidGroup -pv $YMidGroup -su $New_XScale_Value -sv $New_YScale_Value;//set x scale
+				}
+
+			if (`size $Temp_Divisions` != 0)
+			{
+				delete $Temp_Triangulate;
+				delete $Temp_Divisions;
+
+			}
+	}
+	select -r $Selection;
+
+//refresh;
+}//end proc
+
+
+
+global proc NinjaUV_SetUToZero()
+{
+	PolySelectConvert 4;
+	$SelUV = `ls- sl -fl`;
+	$UV_Bounds = `polyEvaluate -bc2`; //xmin xmax ymin ymax
+
+	float $CenterOffset = 0;
+	$SnapOrgin = `radioButtonGrp -q -select Snap_Point`;
+	if ($SnapOrgin == 2)
+	{
+		float $DistDiff = ($UV_Bounds[0] - $UV_Bounds[1]);
+		$CenterOffset = (sqrt($DistDiff * $DistDiff) /2 );
+    }
+
+	$Offset_OrginU = ($UV_Bounds[0] * -1);
+	polyEditUV  -u ($Offset_OrginU - $CenterOffset);
+	select $SelUV;
+}
+///////////////////////////////////////////////////////////////////////////
+global proc NinjaUV_SetVToZero()
+{
+	PolySelectConvert 4;
+	$SelUV = `ls- sl -fl`;
+	$UV_Bounds = `polyEvaluate -bc2`;//xmin xmax ymin ymax
+
+	float $CenterOffset = 0;
+	$SnapOrgin = `radioButtonGrp -q -select Snap_Point`;
+	if ($SnapOrgin == 2)
+	{
+		float $DistDiff = ($UV_Bounds[2] - $UV_Bounds[3]);
+		$CenterOffset = (sqrt($DistDiff * $DistDiff) /2 );
+		//print $CenterOffset;
+    }
+
+	$Offset_OrginV = ($UV_Bounds[2] * -1);
+	polyEditUV  -v ($Offset_OrginV - $CenterOffset);
+	select $SelUV;
+}
+
+
+
+global proc NinjaUV_QuickFix()
+{
+	$Unfold_Accuracy = 1000;//`floatField -q -v Unfold_Iterations`;
+
+	string $Selected[] = `ls -sl -fl`;
+	string $obj_name[];
+	tokenize $Selected[0] "." $obj_name;//get object name
+	string $Mesh_Name;
+
+	if (`size $obj_name` != 0)
+	{
+		$Mesh_Name = $obj_name[0];
+	}
+
+	if (`size $obj_name` == 0)
+	{
+		$Mesh_Name = $Selected[0];
+	}
+
+	int $Total_Uvs[] = `polyEvaluate -uv $Mesh_Name`;
+	$selection = `ls -sl -fl`;
+	PolySelectConvert 4;
+	string $sel_Uvs[] = `ls -sl -fl`;
+
+	if (`size $sel_Uvs` == $Total_Uvs[0])
+	{
+		select -d $sel_Uvs[0];
+    }
+
+	unfold -i $Unfold_Accuracy -ss 0.001 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  0 -us off;
+	//polyOptUvs -i 1000 -ss 0.001 -gb 0 -gmb 0.0 -pub 0 -ps  0 -oa  0 -us off;
+	select -r $selection;
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////Quick Unfold
+global proc NinjaUV_UnfoldShells()
+{
+	$Unfold_Accuracy = 1000;//`floatField -q -v Unfold_Iterations`;
+	// $ASS = `checkBox -q -value AutoSetSize`;
+	// if ($ASS ==1)
+	// 	{
+	// 		ConvertSelectionToFaces;//set to face selection
+	// 		NinjaUV_GetTextureSize("diffuse");
+	// 		PolySelectConvert 4;
+	// 	}//end if ass
+
+	int $HoldEdge = 1;//(`checkBox -q -v Hold_Edge`);
+	$M_HV = 2; //(`radioButtonGrp  -q  -select Map_HV`);
+	// $M_HV1 =(`radioButtonGrp  -q  -select Map_HV1`);
+
+	// float $mayaVersion = `getApplicationVersionAsFloat` ;
+	// if ($M_HV1 == 2)//Horz Vert
+	// {
+	// 	if ($mayaVersion <= 2012)
+	// 	{
+	// 		unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub $HoldEdge -ps  0 -oa  2 -us off ;//unfold horz
+	// 		unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub $HoldEdge -ps  0 -oa  1 -us off ;//unfold vert
+
+ //        }
+
+	// 	if ($mayaVersion >= 2013)
+	// 	{
+	// 		unfold -i $Unfold_Accuracy  -ss 0 -gb 0 -gmb 1 -pub $HoldEdge -ps  0 -oa  2 -us off ;
+	// 		unfold -i $Unfold_Accuracy  -ss 0 -gb 0 -gmb 1 -pub $HoldEdge -ps  0 -oa  1 -us off ;
+ //        }
+
+	// }
+
+	// if ($M_HV1 == 3)//Horz Strip
+	// {
+	// 	unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  2 -us off;
+	// 	unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub 1 -ps  0 -oa  1 -us off;
+	// }
+
+	// if ($M_HV1 == 4)//Horz
+	// {
+	// 	unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub $HoldEdge -ps  0 -oa  2 -us off;
+	// }
+
+
+	// if ($M_HV == 1)//Both
+	// {
+
+
+	// 	if ($mayaVersion <= 2012)
+	// 	{
+	// 		unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub $HoldEdge -ps  0 -oa  0 -us off;
+
+ //        }
+
+	// 	if ($mayaVersion >= 2013)
+	// 	{
+	// 		unfold -i $Unfold_Accuracy -ss 0.001 -gb 0 -gmb 0 -pub $HoldEdge -ps  0 -oa 0 -us off;
+
+ //        }
+
+	// }
+
+	if ($M_HV == 2)//Vert Horz
+	{
+		// if ($mayaVersion <= 2012)
+		// {
+		// 	unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub $HoldEdge -ps  0 -oa  1 -us off;
+		// 	unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub $HoldEdge -ps  0 -oa  2 -us off;
+
+  //       }
+
+		// if ($mayaVersion >= 2013)
+		// {
+			unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 1 -pub $HoldEdge -ps  0 -oa  1 -us off ;
+			unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 1 -pub $HoldEdge -ps  0 -oa  2 -us off ;
+
+        // }
+
+	}
+
+	// if ($M_HV == 3)//Vert Strip
+	// {
+
+	// 	unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  1 -us off;
+	// 	unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub 1 -ps  0 -oa  2 -us off;
+
+	// }//end if
+
+	// if ($M_HV == 4)//Vert
+	// {
+
+	// 	unfold -i $Unfold_Accuracy -ss 0 -gb 0 -gmb 0 -pub $HoldEdge  -ps 0 -oa  1 -us off;
+
+	// }//end if
+
+
+	//error;
+	// $AS = `checkBox -q -value QM_Adjust_Scale`;
+	// if ($AS == 1)
+	// {
+	// 	QuickScale();
+	// }
+
+}//end proc
+
+
+
+global proc NinjaUV_QuickUnfold()
+{
+	$AutoUnfold = 1;// `checkBox -q -value NinjaUV_QuickUnfold_Auto_unfold`;//checks if auto unfold is checked or not
+
+	if ($AutoUnfold == 0)
+		{
+			$Selection = `ls -sl -fl`;
+			string $Dots[] = NinjaUV_CollectUVShellDots();
+			for ($s = 0; $s < `size $Dots`; $s++)
+				{
+					//string $Single_Shell[];
+					//tokenize $Shells[$s] "," $Single_Shell;
+					//select -r $Single_Shell;
+					select $Dots[$s];
+					polySelectBorderShell 0;
+					string $Single_Shell[] = `ls -sl -fl -l`;
+					NinjaUV_UnfoldShells();
+				}
+		}
+
+	if ($AutoUnfold == 1)
+		{
+
+			$Selection = `ls -sl -fl`;
+			string $Dots[] = NinjaUV_CollectUVShellDots();
+
+			for ($s = 0; $s < `size $Dots`; $s++)
+				{
+
+					select $Dots[$s];
+					polySelectBorderShell 0;
+					string $Single_Shell[] = `ls -sl -fl -l`;
+
+					string $Temp_Divisions[] = {};
+					if (`size $Single_Shell` <= 4)
+					{
+						ConvertSelectionToFaces;
+						$Temp_Divisions =`polySubdivideFacet -dv 2 -m 0 -ch 1` ;
+						PolySelectConvert 4;
+					}
+
+					// NinjaUV_SetAutoUnfold();
+					NinjaUV_UnfoldShells();
+					if (`size $Temp_Divisions` != 0)
+					{
+						delete $Temp_Divisions;
+                    }
+
+				}//end for s
+		}//end if
+}//end quick unfold
+
+
+
+
+global proc NinjaMapping(float $pixRat, float $texSize)
+{	
+	global string $UVEdgeSelection[];
+	$DeleteHistory = 0;//`checkBox -q -v cb_UVDeleteHistory`;
+	if ($DeleteHistory == 1)
+	{
+		$Obj = `ls -hl`;
+		delete -ch $Obj;
+    }
+
+	$UVEdgeSelection = {};
+	string $Total_Selection[] = `ls -sl -fl`;
+	string $nodes[] = `selectedNodes`;
+	string $Sel_Edges[] = `filterExpand -sm 32`;
+	string $Sel_Faces[] = `filterExpand -sm 34`;
+	string $Sel_UVs[] = `filterExpand -sm 35`;
+	$UVEdgeSelection =`filterExpand -sm 32`;
+	//Get texture size and set settings
+	// $ASS = `checkBox -q -value AutoSetSize`;
+	// if ($ASS == 1)
+	// 	{
+	// 		NinjaUV_GetTextureSize("diffuse");//gets the diffuse texture size
+	// 	}
+
+	if (`size $Sel_Faces` == 0 && `size $Sel_UVs` == 0)
+	{
+		select $nodes;
+		ConvertSelectionToFaces;
+		$Sel_Faces = `ls - sl`;
+    }
+
+	if (`size $Sel_Faces` == 0 && `size $Sel_UVs` != 0)
+	{
+		ConvertSelectionToFaces;
+		$Sel_Faces = `ls - sl`;
+    }
+
+	$Total_nodes = `size $nodes`;
+
+	float $PixelRatio = $pixRat; //by default
+    float $UnitRatio = 1;  //by meters   for cm = 100, for mm = 1000
+    float $TextureU = $texSize; //Tex Width
+    float $TextureV = $texSize; //Tex Height
+    float $MSU = (($TextureU / $PixelRatio) * $UnitRatio);
+    float $MSV = (($TextureV / $PixelRatio) * $UnitRatio);
+
+	// $MSU = (`floatField -q -v Map_ScaleU`);
+	// $MSV = (`floatField -q -v Map_ScaleV`);
+	// $HE = (`checkBox -q -v Hold_Edge`);
+	// $M_HV =(`radioButtonGrp  -q  -select Map_HV`);
+	// $M_HV1 =(`radioButtonGrp  -q  -select Map_HV1`);
+
+	//Get Current Camera Name
+	string $panel = `getPanel -wf`;
+	string $camera;
+		if (startsWith ($panel, "modelPanel") == 1)
+			{
+				$camera = `modelPanel -q -camera $panel`;
+			}
+
+		else
+			{
+				print ("Selected Panel is not a valid camera using persp");
+				$camera = "persp";
+			}
+
+	//Freeze Camera and get its rotation values
+	makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 $camera;
+	float $cam_X = getAttr ($camera + ".rotateX");
+	float $cam_Y = getAttr ($camera + ".rotateY");
+	float $cam_Z = getAttr ($camera + ".rotateZ");
+
+	$UpAxis = `upAxis -q -axis`;
+	//print $UpAxis;
+	string $base_mapper[];
+	$MapType = 1;//`radioButtonGrp -q -select Map_Gizmo`;   //Planar or Best Fit
+	if ($MapType == 1)
+		{
+			$base_mapper = `polyProjection -type Planar -md x $Sel_Faces`;
+
+			$X_loc = getAttr ($base_mapper[0]+ ".projectionCenterX");
+			$Y_loc = getAttr ($base_mapper[0]+ ".projectionCenterY");
+			$Z_loc = getAttr ($base_mapper[0]+ ".projectionCenterZ");
+			$Total_Mappers = `size $base_mapper`;
+
+			//Set UV Gizmo Rotation if Y is up
+
+			if ($UpAxis == "y")
+			{
+				int $Y_rotations = ($cam_Y /360 );
+				float $Y_multiplier =(($cam_Y /360) - $Y_rotations);
+				float $Y_rotation = ($Y_multiplier * 360);
+				if ($Y_rotation < 0)
+					{
+						$Y_rotation = (360 + $Y_rotation);
+					}
+
+				int $X_rotations = ($cam_X /360 );
+				float $X_multiplier =(($cam_X /360) - $X_rotations);
+				float $X_rotation = ($X_multiplier * 360);
+				if ($X_rotation < 0)
+				{
+					$X_rotation = (360 + $X_rotation);
+				}
+
+				for ($m = $Total_Mappers; $m >= 1; $m--)
+				{
+					if ($Y_rotation >= 0 && $Y_rotation <= 45)
+						{
+							//print "front";
+							setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+							setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+							setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+						}
+
+					if ($Y_rotation >= 315 && $Y_rotation <= 360)
+						{
+							//print "front";
+							setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+							setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+							setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+
+						}
+
+					if ($Y_rotation >= 45 && $Y_rotation <= 135)
+						{
+							//print "right";
+							setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+							setAttr ($base_mapper[$m - 1] + ".rotateY") 90;
+							setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+
+						}
+
+					if ($Y_rotation >= 135 && $Y_rotation <= 225)
+						{
+							//print "back";
+							//print "front";
+							setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+							setAttr ($base_mapper[$m - 1] + ".rotateY") 180;
+							setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+
+						}
+
+					if ($Y_rotation >= 225 && $Y_rotation <= 315)
+						{
+							//print "left";
+							setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+							setAttr ($base_mapper[$m - 1] + ".rotateY") -90;
+							setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+
+						}
+
+					if ($X_rotation >= 225 && $X_rotation <= 315)
+								{
+									//print "top";
+									setAttr ($base_mapper[$m - 1] + ".rotateX") -90;
+								}
+					if ($X_rotation >= 45 && $X_rotation <= 135)
+								{
+									//print "bottom";
+									setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+								}
+
+					setAttr ($base_mapper[$m - 1] + ".projectionCenterX") $X_loc;
+					setAttr ($base_mapper[$m - 1] + ".projectionCenterY") $Y_loc;
+					setAttr ($base_mapper[$m - 1] + ".projectionCenterZ") $Z_loc;
+					setAttr ($base_mapper[$m - 1] + ".projectionWidth") $MSU;
+					setAttr ($base_mapper[$m - 1] + ".projectionHeight") $MSV;
+
+				}//end for $m
+
+            }//end if up is y
+
+			//Set UV Gizmo Rotation if Z is up
+			if ($UpAxis == "z")
+			{
+				for ($m = $Total_Mappers; $m >= 1; $m--)
+				{
+				if ($cam_Z >= -45 && $cam_Z <= 45)
+					{
+						//print "front";
+						setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+						setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+						setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+					}
+
+
+
+				if ($cam_Z >= 45 && $cam_Z <= 135)
+					{
+						//print "right";
+						setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+						setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+						setAttr ($base_mapper[$m - 1] + ".rotateZ") 90;
+
+					}
+
+				if ($cam_Z >= 135 && $cam_Z <= 180)
+					{
+						//print "back";
+						setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+						setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+						setAttr ($base_mapper[$m - 1] + ".rotateZ") 180;
+
+					}
+
+				if ($cam_Z <= -135 && $cam_Z >= -225)
+					{
+						//print "back";
+						setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+						setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+						setAttr ($base_mapper[$m - 1] + ".rotateZ") 180;
+
+					}
+
+
+				if ($cam_Z >= -135 && $cam_Z <= -45)
+					{
+						//print "left";
+						setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+						setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+						setAttr ($base_mapper[$m - 1] + ".rotateZ") 270;
+
+					}
+
+
+				if ($cam_X > -45 && $cam_X < 45)
+							{
+								//print " top";
+								setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+
+							}
+
+				if ($cam_X > 135 && $cam_X < 225 )
+							{
+								//print " bottom";
+								setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+							}
+
+					setAttr ($base_mapper[$m - 1] + ".projectionCenterX") $X_loc;
+					setAttr ($base_mapper[$m - 1] + ".projectionCenterY") $Y_loc;
+					setAttr ($base_mapper[$m - 1] + ".projectionCenterZ") $Z_loc;
+					setAttr ($base_mapper[$m - 1] + ".projectionWidth") $MSU;
+					setAttr ($base_mapper[$m - 1] + ".projectionHeight") $MSV;
+
+				}//end for
+            }//end if up is z
+
+		}//end if Mapping is Planar
+
+					// if ($MapType == 2)//best fit
+					// 	{
+					// 		$base_mapper = `polyProjection -ch 1 -type Planar -ibd on -md b $Sel_Faces`;
+					// 		$X_loc = getAttr ($base_mapper[0]+ ".projectionCenterX");
+					// 		$Y_loc = getAttr ($base_mapper[0]+ ".projectionCenterY");
+					// 		$Z_loc = getAttr ($base_mapper[0]+ ".projectionCenterZ");
+					// 		$Total_Mappers = `size $base_mapper`;
+
+					// 	}
+
+	//Cuts selected edges
+	if (`size $Sel_Edges` != 0)
+		{
+			polyMapCut -ch 0 -name "NUV_CutEdge" $Sel_Edges ;
+		}
+
+	//Unfold
+	select -r $Sel_Faces;
+	NinjaUV_QuickUnfold();
+
+	//Fix edges
+	$FixEdges = 1;//`checkBox -q -value Fix_CutEdges`;
+	if (`size $Sel_Edges` > 0  && $FixEdges == 1)
+		{
+			select -r $Sel_Edges;
+			NinjaUV_QuickFix();//fix cut edges
+		}
+
+
+	string $unitScale = "m";//`currentUnit -q -l`;
+	// if ($unitScale == "m")
+	// 	{
+	// 		$MSU = (.01 /(`floatField -q -v Map_ScaleU`));//get the U scale Value in meters
+	// 	}
+
+	// if ($unitScale == "cm")
+	// 	{
+	// 		$MSU = (1 / (`floatField -q -v Map_ScaleU`));//get the U scale Value in cm
+	// 	}
+
+
+	// float $TexScaleU = `floatField -q -v Tex_ScaleU` ;
+	// float $TexScaleV = `floatField -q -v Tex_ScaleV`;
+
+	$UnfoldBoth = 1;//`radioButtonGrp -q -sl Map_HV`;
+	if ($UnfoldBoth == 1)
+	{
+		//scale uv's
+		select $Sel_Faces;
+
+		// QuickScale($pixRat, $texSize);
+
+    }
+
+	$LayoutUV = 0;//`checkBox -q -v cb_LayoutUVs`;
+	if ($LayoutUV == 1)
+	{
+		polyMultiLayoutUV -lm 1 -sc 1 -rbf 0 -fr 1 -ps 0.8 -l 2 -psc 0 -su 1 -sv 1 -ou 0 -ov 0;
+    }
+
+	else
+	{
+		// scale uv's
+		//unfold -i 0 -ss 0.001 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  0 -us on -s $MSU;
+      	select $Sel_Faces;
+		//if ($TexScaleU != $TexScaleV)
+		//{
+		// QuickScale($pixRat, $texSize);// scale uv's
+
+        //}
+    }
+
+	///set uvs to start at zero
+	$SZ = 0;//`checkBox -q -value Set_Zero`;
+	if ($SZ == 1)
+	{
+		select $Sel_Faces;
+		polySelectBorderShell 0;
+		NinjaUV_SetUToZero();
+		NinjaUV_SetVToZero();
+	}
+
+	//reselect intial selection
+	select $nodes $Sel_Faces $Sel_Edges;
+	if( !`exists doMenuComponentSelection` ) eval( "source dagMenuProc" );
+	for ($s = 0; $s < `size $nodes`; $s++)
+		{
+			doMenuComponentSelection($nodes[$s], "facet");
+		}
+
+	if ($DeleteHistory == 1)
+	{
+		$Obj = `ls -hl`;
+		delete -ch $Obj;
+    }
+
+
+
+
+	// global string $UVEdgeSelection[];
+	// $DeleteHistory = 1;
+	// if ($DeleteHistory == 1)
+	// {
+	// 	$Obj = `ls -hl`;
+	// 	delete -ch $Obj;
+ //    }
+
+	// $UVEdgeSelection = {};
+	// string $Total_Selection[] = `ls -sl -fl`;
+	// string $nodes[] = `selectedNodes`;
+	// string $Sel_Edges[] = `filterExpand -sm 32`;
+	// string $Sel_Faces[] = `filterExpand -sm 34`;
+	// string $Sel_UVs[] = `filterExpand -sm 35`;
+	// $UVEdgeSelection =`filterExpand -sm 32`;
+	// //Get texture size and set settings
+	// // $ASS = `checkBox -q -value AutoSetSize`;
+	// // if ($ASS == 1)
+	// // 	{
+	// // 		NinjaUV_GetTextureSize("diffuse");//gets the diffuse texture size
+	// // 	}
+
+	// if (`size $Sel_Faces` == 0 && `size $Sel_UVs` == 0)
+	// {
+	// 	select $nodes;
+	// 	ConvertSelectionToFaces;
+	// 	$Sel_Faces = `ls - sl`;
+ //    }
+
+	// if (`size $Sel_Faces` == 0 && `size $Sel_UVs` != 0)
+	// {
+	// 	ConvertSelectionToFaces;
+	// 	$Sel_Faces = `ls - sl`;
+ //    }
+
+	// $Total_nodes = `size $nodes`;
+	// // $MSU = (`floatField -q -v Map_ScaleU`);
+	// // $MSV = (`floatField -q -v Map_ScaleV`);
+
+	// // set pixel ratio
+ //    float $PixelRatio = $pixRat; //by default
+ //    float $UnitRatio = 1;  //by meters   for cm = 100, for mm = 1000
+ //    // $ScaleU = 2.05; //Map Size U
+ //    // $ScaleV = 2.05; //Mpa Size V
+ //    float $TextureU = $texSize; //Tex Width
+ //    float $TextureV = $texSize; //Tex Height
+ //    float $MSU = (($TextureU / $PixelRatio) * $UnitRatio);
+ //    float $MSV = (($TextureV / $PixelRatio) * $UnitRatio);
+    
+	// // $HE = (`checkBox -q -v Hold_Edge`);
+	// // $M_HV =2;//(`radioButtonGrp  -q  -select Map_HV`);
+	// // $M_HV1 =(`radioButtonGrp  -q  -select Map_HV1`);
+
+	// //Get Current Camera Name
+	// string $panel = `getPanel -wf`;
+	// string $camera;
+	// 	if (startsWith ($panel, "modelPanel") == 1)
+	// 		{
+	// 			$camera = `modelPanel -q -camera $panel`;
+	// 		}
+
+	// 	else
+	// 		{
+	// 			print ("Selected Panel is not a valid camera using persp");
+	// 			$camera = "persp";
+	// 		}
+
+	// //Freeze Camera and get its rotation values
+	// makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 $camera;
+	// float $cam_X = getAttr ($camera + ".rotateX");
+	// float $cam_Y = getAttr ($camera + ".rotateY");
+	// float $cam_Z = getAttr ($camera + ".rotateZ");
+
+	// $UpAxis = `upAxis -q -axis`;
+	// //print $UpAxis;
+	// string $base_mapper[];
+	// $MapType = 1;//`radioButtonGrp -q -select Map_Gizmo`;
+	// if ($MapType == 1)
+	// 	{
+	// 		$base_mapper = `polyProjection -type Planar -md x $Sel_Faces`;
+
+	// 		$X_loc = getAttr ($base_mapper[0]+ ".projectionCenterX");
+	// 		$Y_loc = getAttr ($base_mapper[0]+ ".projectionCenterY");
+	// 		$Z_loc = getAttr ($base_mapper[0]+ ".projectionCenterZ");
+	// 		$Total_Mappers = `size $base_mapper`;
+
+	// 		//Set UV Gizmo Rotation if Y is up
+
+	// 		if ($UpAxis == "y")
+	// 		{
+	// 			int $Y_rotations = ($cam_Y /360 );
+	// 			float $Y_multiplier =(($cam_Y /360) - $Y_rotations);
+	// 			float $Y_rotation = ($Y_multiplier * 360);
+	// 			if ($Y_rotation < 0)
+	// 				{
+	// 					$Y_rotation = (360 + $Y_rotation);
+	// 				}
+
+	// 			int $X_rotations = ($cam_X /360 );
+	// 			float $X_multiplier =(($cam_X /360) - $X_rotations);
+	// 			float $X_rotation = ($X_multiplier * 360);
+	// 			if ($X_rotation < 0)
+	// 			{
+	// 				$X_rotation = (360 + $X_rotation);
+	// 			}
+
+	// 			for ($m = $Total_Mappers; $m >= 1; $m--)
+	// 			{
+	// 				if ($Y_rotation >= 0 && $Y_rotation <= 45)
+	// 					{
+	// 						//print "front";
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+	// 					}
+
+	// 				if ($Y_rotation >= 315 && $Y_rotation <= 360)
+	// 					{
+	// 						//print "front";
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+
+	// 					}
+
+	// 				if ($Y_rotation >= 45 && $Y_rotation <= 135)
+	// 					{
+	// 						//print "right";
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateY") 90;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+
+	// 					}
+
+	// 				if ($Y_rotation >= 135 && $Y_rotation <= 225)
+	// 					{
+	// 						//print "back";
+	// 						//print "front";
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateY") 180;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+
+	// 					}
+
+	// 				if ($Y_rotation >= 225 && $Y_rotation <= 315)
+	// 					{
+	// 						//print "left";
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateY") -90;
+	// 						setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+
+	// 					}
+
+	// 				if ($X_rotation >= 225 && $X_rotation <= 315)
+	// 							{
+	// 								//print "top";
+	// 								setAttr ($base_mapper[$m - 1] + ".rotateX") -90;
+	// 							}
+	// 				if ($X_rotation >= 45 && $X_rotation <= 135)
+	// 							{
+	// 								//print "bottom";
+	// 								setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+	// 							}
+
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionCenterX") $X_loc;
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionCenterY") $Y_loc;
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionCenterZ") $Z_loc;
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionWidth") $MSU;
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionHeight") $MSV;
+
+	// 			}//end for $m
+
+ //            }//end if up is y
+
+	// 		//Set UV Gizmo Rotation if Z is up
+	// 		if ($UpAxis == "z")
+	// 		{
+	// 			for ($m = $Total_Mappers; $m >= 1; $m--)
+	// 			{
+	// 			if ($cam_Z >= -45 && $cam_Z <= 45)
+	// 				{
+	// 					//print "front";
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateZ") 0;
+	// 				}
+
+
+
+	// 			if ($cam_Z >= 45 && $cam_Z <= 135)
+	// 				{
+	// 					//print "right";
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateZ") 90;
+
+	// 				}
+
+	// 			if ($cam_Z >= 135 && $cam_Z <= 180)
+	// 				{
+	// 					//print "back";
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateZ") 180;
+
+	// 				}
+
+	// 			if ($cam_Z <= -135 && $cam_Z >= -225)
+	// 				{
+	// 					//print "back";
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateZ") 180;
+
+	// 				}
+
+
+	// 			if ($cam_Z >= -135 && $cam_Z <= -45)
+	// 				{
+	// 					//print "left";
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateX") 90;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateY") 0;
+	// 					setAttr ($base_mapper[$m - 1] + ".rotateZ") 270;
+
+	// 				}
+
+
+	// 			if ($cam_X > -45 && $cam_X < 45)
+	// 						{
+	// 							//print " top";
+	// 							setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+
+	// 						}
+
+	// 			if ($cam_X > 135 && $cam_X < 225 )
+	// 						{
+	// 							//print " bottom";
+	// 							setAttr ($base_mapper[$m - 1] + ".rotateX") 0;
+	// 						}
+
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionCenterX") $X_loc;
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionCenterY") $Y_loc;
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionCenterZ") $Z_loc;
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionWidth") $MSU;
+	// 				setAttr ($base_mapper[$m - 1] + ".projectionHeight") $MSV;
+
+	// 			}//end for
+ //            }//end if up is z
+
+	// 	}//end if Mapping is Planar
+
+	// if ($MapType == 2)//best fit
+	// 	{
+	// 		$base_mapper = `polyProjection -ch 1 -type Planar -ibd on -md b $Sel_Faces`;
+	// 		$X_loc = getAttr ($base_mapper[0]+ ".projectionCenterX");
+	// 		$Y_loc = getAttr ($base_mapper[0]+ ".projectionCenterY");
+	// 		$Z_loc = getAttr ($base_mapper[0]+ ".projectionCenterZ");
+	// 		$Total_Mappers = `size $base_mapper`;
+
+	// 	}
+
+	// //Cuts selected edges
+	// if (`size $Sel_Edges` != 0)
+	// 	{
+	// 		polyMapCut -ch 0 -name "NUV_CutEdge" $Sel_Edges ;
+	// 	}
+
+	// //Unfold
+	// select -r $Sel_Faces;
+	// NinjaUV_QuickUnfold();
+
+	// //Fix edges
+	// $FixEdges = 1;//`checkBox -q -value Fix_CutEdges`;
+	// if (`size $Sel_Edges` > 0  && $FixEdges == 1)
+	// 	{
+	// 		select -r $Sel_Edges;
+	// 		NinjaUV_QuickFix();//fix cut edges
+	// 	}
+
+
+	// string $unitScale = "m";//`currentUnit -q -l`;
+	// if ($unitScale == "m")
+	// 	{
+	// 		$MSU = (.01 /$MSU);//get the U scale Value in meters
+	// 	}
+
+	// // if ($unitScale == "cm")
+	// // 	{
+	// // 		$MSU = (1 / $MSU);//get the U scale Value in cm
+	// // 	}
+
+
+	// // float $TexScaleU = `floatField -q -v Tex_ScaleU` ;
+	// // float $TexScaleV = `floatField -q -v Tex_ScaleV`;
+
+	// // $UnfoldBoth = `radioButtonGrp -q -sl Map_HV`;
+	// // if ($UnfoldBoth == 1)
+	// // {
+	// // 	//scale uv's
+	// // 	select $Sel_Faces;
+	// // 	//unfold -i 0 -ss 0.001 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  0 -us on -s $MSU;
+ // //        //if ($TexScaleU != $TexScaleV)
+	// // 	//{
+	// // 		QuickScale();// scale uv's
+
+ // //        //}
+	// // 	//NinjaUV_QuickFix();
+ // //    }
+
+	// // $LayoutUV = `checkBox -q -v cb_LayoutUVs`;
+	// // if ($LayoutUV == 1)
+	// // {
+	// // 	polyMultiLayoutUV -lm 1 -sc 1 -rbf 0 -fr 1 -ps 0.8 -l 2 -psc 0 -su 1 -sv 1 -ou 0 -ov 0;
+ // //    }
+
+	// // else
+	// // {
+	// 	// scale uv's
+	// 	//unfold -i 0 -ss 0.001 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  0 -us on -s $MSU;
+ //      	select $Sel_Faces;
+	// 	//if ($TexScaleU != $TexScaleV)
+	// 	//{
+	// 		QuickScale();// scale uv's
+
+ //        //}
+ //    // }
+
+	// //set uvs to start at zero
+	// $SZ = 1;
+	// if ($SZ == 1)
+	// {
+	// 	select $Sel_Faces;
+	// 	polySelectBorderShell 0;
+	// 	NinjaUV_SetUToZero();
+	// 	NinjaUV_SetVToZero();
+	// }
+
+	// //reselect intial selection
+	// select $nodes $Sel_Faces $Sel_Edges;
+	// if( !`exists doMenuComponentSelection` ) eval( "source dagMenuProc" );
+	// for ($s = 0; $s < `size $nodes`; $s++)
+	// 	{
+	// 		doMenuComponentSelection($nodes[$s], "facet");
+	// 	}
+
+	// if ($DeleteHistory == 1)
+	// {
+	// 	$Obj = `ls -hl`;
+	// 	delete -ch $Obj;
+ //    }
+
+}

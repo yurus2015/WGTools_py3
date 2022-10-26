@@ -1,0 +1,32 @@
+[
+    {
+        "value": 540,
+        "rgb": "128, 64, 0",
+        "tip": "540-590 Minimal for details",
+	"name": "550"
+    },
+    {
+        "value": 590,
+        "rgb": "200, 200, 0",
+        "tip": "590-690 Wood and fabrics",
+	"name": "600"
+    },
+    {
+        "value": 690,
+        "rgb": "0, 200, 0",
+        "tip": "690-790",
+	"name": "700"
+    },
+    {
+        "value": 790,
+        "rgb": "0, 200, 200",
+        "tip": "790-990 Lattices wo Alpha",
+	"name": "800"
+    },
+    {
+        "value": 990,
+        "rgb": "200, 200, 200",
+        "tip": "990+ Lamps",
+	"name": "1000+"
+    }
+]

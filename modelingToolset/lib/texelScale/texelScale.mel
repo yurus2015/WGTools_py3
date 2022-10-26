@@ -1,0 +1,162 @@
+
+global proc string[] UV_CollectUVShellDots()
+{
+	PolySelectConvert 4;//convert selection to uv's
+	polySelectBorderShell 1;
+	string $UVs[] = `ls -sl -fl -l`;//base uv's
+	string $UVShell_Dots[] = {};
+
+	while (`size $UVs` > 0)
+		{
+			select $UVs[0];
+			stringArrayInsertAtIndex(0 , $UVShell_Dots, $UVs[0]);
+			polySelectBorderShell 1;
+			$UVs = stringArrayRemoveExact(`ls -sl -fl -l`, $UVs);
+
+		}//end while
+
+	return $UVShell_Dots;//returns
+}
+
+
+global proc texelScale(float $pixRat, float $texSize)
+{
+
+	$DeleteHistory = 1;
+	if ($DeleteHistory == 1)
+	{
+		$Obj = `ls -hl`;
+		delete -ch $Obj;
+    }
+
+    // set pixel ratio
+    float $PixelRatio = $pixRat; //by default
+    float $UnitRatio = 1;  //by meters   for cm = 100, for mm = 1000
+    // $ScaleU = 2.05; //Map Size U
+    // $ScaleV = 2.05; //Mpa Size V
+    float $TextureU = $texSize; //Tex Width
+    float $TextureV = $texSize; //Tex Height
+    float $Map_ScaleU = (($TextureU / $PixelRatio) * $UnitRatio);
+    float $Map_ScaleV = (($TextureV / $PixelRatio) * $UnitRatio);
+
+    PolySelectConvert 4;
+    string $Selection[] =`ls -sl -fl`;
+	string $UVs[] = `ls -sl -fl`;//base uv's
+	string $Test_UVs[] = `ls -sl -fl` ;
+	string $Shell[]={};
+	string $Shell_string;
+	string $Bad_Array[]={};
+	string $zero_uv = "0";
+	float $MSU;
+	float $MSV;
+
+
+
+	$UnfoldIterations = 1000;
+	$UV_ExtentsGroup =`polyEvaluate -bc2`;//get the uv extents
+	$XMidGroup = (($UV_ExtentsGroup[1] + $UV_ExtentsGroup[0]) / 2);
+	$YMidGroup = (($UV_ExtentsGroup[3] + $UV_ExtentsGroup[2]) / 2);
+
+	string $Dots[] = UV_CollectUVShellDots(); 
+
+	for ($s = 0; $s < `size $Dots`; $s++)
+	{
+			$zero_uv = "0";
+			select $Dots[$s];
+			polySelectBorderShell 0;
+			string $Shell[] = `ls -sl -fl -l`;
+			//work on shell
+			//
+			$ASS = 1;
+			if ($ASS == 1)
+			{
+				ConvertSelectionToFaces;
+				//UV_GetTextureSize("diffuse"); //change TextureU V and change Map_ScaleU V 
+				select -r $Shell;
+			}//end if ass = 1
+
+			$Old_UV_Extents =`polyEvaluate -bc2`;//get the uv extents
+			$XMid = (($Old_UV_Extents[1] + $Old_UV_Extents[0]) / 2);
+			$YMid = (($Old_UV_Extents[3] + $Old_UV_Extents[2]) / 2);
+			$XStart = $Old_UV_Extents[0];
+			$YStart = $Old_UV_Extents[2];
+			$OX = ($Old_UV_Extents[1] - $Old_UV_Extents[0]);
+			$OY = ($Old_UV_Extents[3] - $Old_UV_Extents[2]);
+			
+
+			// string $UnitScale = `currentUnit -q -l`;
+			// if ($UnitScale == "m")
+			// {
+			$MSU = 0.01 / $Map_ScaleU;//get the U scale Value in meters
+			$MSV = 0.01 / $Map_ScaleV;//get the V scale Value in meters
+			// }
+
+			float $New_UV_Y_Extents[];
+			float $New_UV_X_Extents[];
+			float $New_XScale_Value;
+			float $New_YScale_Value;
+
+			string $Temp_Triangulate[] = {};
+
+			string $Temp_Divisions[] = {};
+			if (`size $Shell` <= 4)
+			{
+
+				ConvertSelectionToFaces;
+				$Temp_Triangulate = `polyTriangulate -ch 1`;
+				$Temp_Divisions =`polySubdivideFacet -dv 2 -m 0 -ch 1` ;
+				select -r $UVs[$s];
+				polySelectBorderShell 0;
+				select $Shell;
+			}
+
+			//polyEditUV -pu $XMid -pv $YMid -su 1.1 -sv 1.1 ;
+
+			//calculate scale U
+			$XU = `unfold -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps 0 -oa 2 -us on -s $MSU`;
+			//$XU = `polyOptUvs -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps 0 -oa 2 -us on -s $MSU`;
+			$New_UV_X_Extents =`polyEvaluate -bc2 `;
+			$NX = ($New_UV_X_Extents[1] - $New_UV_X_Extents[0]);
+			$New_XScale_Value = ($NX/$OX);
+			undo;//use undo if using unfold
+			//delete $XU;
+			//
+			
+			///calculate Scale V
+			$YU = `unfold -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps  0 -oa  1 -us on -s $MSV`;
+			//$YU = `polyOptUvs -i $UnfoldIterations -ss 0 -gb 0 -gmb 0 -pub 0 -ps 0 -oa 1 -us on -s $MSV`;
+			$New_UV_Y_Extents =`polyEvaluate -bc2 `;//check the V extents of the shell
+			$NY = ($New_UV_Y_Extents[3] - $New_UV_Y_Extents[2]);//find the difference in the V extents
+			$New_YScale_Value = ($NY/$OY); //calculate the ratio
+			undo ;//use undo if using unfold
+			//delete $YU;
+			//
+			
+			int $Scale_Location =1; //Center, 2- bottomleft, 3 - group
+
+			if ($Scale_Location == 1)
+				{
+					polyEditUV  -pu $XMid -pv $YMid -su $New_XScale_Value -sv $New_YScale_Value;//set x scale
+				}
+
+			if ($Scale_Location == 2)
+				{
+					polyEditUV -pu $XStart -pv $YStart -su $New_XScale_Value -sv $New_YScale_Value;//set x scale
+				}
+
+
+			if ($Scale_Location == 3)
+				{
+					polyEditUV  -pu $XMidGroup -pv $YMidGroup -su $New_XScale_Value -sv $New_YScale_Value;//set x scale
+				}
+
+			if (`size $Temp_Divisions` != 0)
+			{
+				delete $Temp_Triangulate;
+				delete $Temp_Divisions;
+
+			}
+	}
+	select -r $Selection;
+
+}

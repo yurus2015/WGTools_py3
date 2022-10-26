@@ -1,0 +1,339 @@
+global proc string one(string $array[])
+{
+if (`size $array` > 0)
+	return $array[0];
+else
+	return "";
+}
+
+global proc string currCam()
+{
+string $panel = `getPanel -withFocus`;
+//$panel = "";
+string $panelType = `getPanel -typeOf $panel`;
+//print $panelType
+//size $panelType
+global string $gLastCamera;
+if ($panelType != "modelPanel")
+	return $gLastCamera;
+else
+	return (`modelPanel -q -cam $panel`);
+}
+
+
+global proc string currCamShape()
+{
+string $panel = `getPanel -withFocus`;
+//$panel = "";
+string $panelType = `getPanel -typeOf $panel`;
+//print $panelType
+//size $panelType
+global string $gLastCamera;
+if ($panelType != "modelPanel")
+	{
+	if ($gLastCamera != "")
+		return (one(`listRelatives -s $gLastCamera`));
+	else
+		return "";
+	}
+else
+	{
+	string $camera = `modelPanel -q -cam $panel`;
+	return (one(`listRelatives -s $camera`));
+	}
+}
+
+global proc vector rotationToVector(string $objSel, vector $vec)
+{
+//$objSel = sel1();
+float $rotated[] = `xform -q -ws -ro $objSel`;
+$rotated[0] = deg_to_rad($rotated[0]);
+$rotated[1] = deg_to_rad($rotated[1]);
+$rotated[2] = deg_to_rad($rotated[2]);
+$vec = `rot $vec <<1,0,0>> $rotated[0]`;
+$vec = `rot $vec <<0,1,0>> $rotated[1]`;
+$vec = `rot $vec <<0,0,1>> $rotated[2]`;
+return $vec;
+}
+
+global proc float[] vectorToFloat(vector $vector)
+{
+return {($vector.x), ($vector.y), ($vector.z)};
+}
+
+global proc int maxOfNum(float $nums[])
+{
+//float $nums[] = {-2,-1,0,1,2,3,4,5};
+if (`size $nums` == 1)
+	return 0;
+float $max = $nums[0];
+int $count = 0;
+int $maxNum = 0;
+for ($num in $nums)
+	{
+	if ($num > $max)
+		{
+		$max = $num;
+		$maxNum = $count;
+		}
+	$count ++;
+	}
+return $maxNum;
+}
+
+
+global proc int forInNum(string $item, string $array[])
+{
+//$item = "b";
+//$array = {"a", "b", "c"};
+$c = 0;
+for (; $c < `size $array`; $c++)
+	{
+	if ($array[$c] == $item)
+		break;
+	}
+if ($c == `size $array`)
+	return -1;
+return $c;
+}
+
+
+global proc string camAxis(string $direction)
+{
+//camAxis left
+/*
+$direction =
+h, v, f
+- closest horisontal, vertical, and foward axis to the current camera
+left, right, up, down, forward, backward
+- the same but with "+" or "-" on result, at example - "+x" or "-z"
+*/
+
+string $cam = currCam();
+if ($cam == "")
+	return "";
+if ($direction == "xyz")
+	return "xyz";
+if (forInNum ($direction, {"v", "h", "f", "left", "right", "up", "down", "forward", "backward"}) == -1)
+	{
+	printInWindow "wrong argument for procedure \"camAxis\"";
+	return "";
+	}
+
+float $vect[];
+if ($direction == "h")
+	$vect = {-1,0,0};
+else if ($direction == "v")
+	$vect = {0,1,0};
+else if ($direction == "f")
+	$vect = {0,0,-1};
+
+else if ($direction == "left")
+	$vect = {-1,0,0};
+else if ($direction == "right")
+	$vect = {1,0,0};
+else if ($direction == "up")
+	$vect = {0,1,0};
+else if ($direction == "down")
+	$vect = {0,-1,0};
+else if ($direction == "forward")
+	$vect = {0,0,-1};
+else if ($direction == "backward")
+	$vect = {0,0,1};
+
+$vector = `unit(rotationToVector($cam, $vect))`;
+
+float $axises[] = vectorToFloat($vector);
+
+int $maxAxisNum = maxOfNum({`abs $axises[0]`,`abs $axises[1]`,`abs $axises[2]`});
+
+string $plusMinusString = "+";
+
+if ($axises[$maxAxisNum] < 0)
+	$plusMinusString = "-";
+
+string $axisesString[] = {"x", "y", "z"};
+string $result;
+
+if (forInNum ($direction, {"v", "h", "f"}) != -1)
+	$result = $axisesString[$maxAxisNum];
+else
+	$result = ($plusMinusString + $axisesString[$maxAxisNum]);
+return $result;
+}
+
+
+global proc string[] selMask(string $mask)
+{
+/*
+Handle  0
+Nurbs Curves  9
+Nurbs Surfaces  10
+Nurbs Curves On Surface  11
+Polygon  12
+Locator XYZ  22
+Orientation Locator  23
+Locator UV  24
+Control Vertices (CVs)  28
+Edit Points  30
+Polygon Vertices  31
+Polygon Edges  32
+Polygon Face  34
+Polygon UVs  35
+Subdivision Mesh Points  36
+Subdivision Mesh Edges  37
+Subdivision Mesh Faces  38
+Curve Parameter Points  39
+Curve Knot  40
+Surface Parameter Points  41
+Surface Knot  42
+Surface Range  43
+Trim Surface Edge  44
+Surface Isoparms  45
+Lattice Points  46
+Particles  47
+Scale Pivots  49
+Rotate Pivots  50
+Select Handles  51
+Subdivision Surface  68
+Polygon Vertex Face  70
+NURBS Surface Face  72
+Subdivision Mesh UVs  73
+
+$mask = "v";
+*/
+int $maskInt;
+if ($mask == "v")
+	$maskInt = 31;
+else if ($mask == "e")
+	$maskInt = 32;
+else if ($mask == "f")
+	$maskInt = 34;
+else if ($mask == "u")
+	$maskInt = 35;
+else if ($mask == "vf")
+	$maskInt = 70;
+else if ($mask == "poly")
+	$maskInt = 12;
+else
+	$maskInt = $mask;
+
+string $sel[] = `filterExpand -sm $maskInt`;
+return $sel;
+}
+
+
+global proc float twoVerticesDistance(string $vertex1, string $vertex2)
+{
+float $v1[] = `pointPosition $vertex1`;
+float $v2[] = `pointPosition $vertex2`;
+float $distance = sqrt(pow(($v1[0] - $v2[0]), 2) + pow(($v1[1] - $v2[1]), 2) + pow(($v1[2] - $v2[2]), 2));
+return $distance;
+}
+
+global proc vector vectorByVertices (string $v1, string $v2)
+{
+float $_1v[] = `pointPosition $v1`;
+float $_2v[] = `pointPosition $v2`;
+vector $vector = <<$_1v[0] - $_2v[0], $_1v[1] - $_2v[1], $_1v[2] - $_2v[2]>>;
+return $vector;
+}
+
+global proc vector floatToVector(float $float[])
+{
+return <<$float[0], $float[1], $float[2]>>;
+}
+
+
+global proc float angleD (vector $v1, vector $v2)
+{
+$angle = rad_to_deg(`angle $v1 $v2`);
+return $angle;
+}
+
+global proc float hipoAngleToCatet (float $hipo, float $angle)
+{
+//$angle = 33.690068;
+//$hipo = 1.802776;
+$cosinus = cos (deg_to_rad ($angle));
+if ($cosinus < 0.00001)
+	$cosinus = 0.00001;
+float $catet = $hipo * $cosinus;
+return $catet;
+}
+
+global proc verticesInLine()
+{
+
+string $camera = currCamShape(); //get shape of the curent camera
+int $ortho = `getAttr ($camera + ".orthographic")`; // 1 or 0
+string $skipAxis = "";
+string $moveComponentNode = "";
+
+if ($ortho) ///if ortho
+{
+  $skipAxis = camAxis("f");
+  $moveComponentNode = one(`polyMoveVertex -ch 1`); //return [0] of array
+  setAttr ($moveComponentNode + ".s" + $skipAxis) 0;
+}
+
+string $sel[] = `ls -sl -fl`; //get selected vertices
+
+if (`size (selMask("e"))` > 0) /// if we selected edges
+	ConvertSelectionToVertices; //convert selection
+
+string $vertices[] = `ls -sl -fl`; //list of selected vertices
+string $vertex; 
+float $bestDist = 0; //
+int $pairNums[] = {};
+string $pair[] = {};
+int $count = 0;
+
+for ($vertex in $vertices) // for each vertex from list
+	{
+//$vertex = $vertices[0];
+	string $vertex2;
+	int $count2 = 0;
+	for ($vertex2 in $vertices) // for each vertex from list
+		{
+	//$vertex2 = $vertices[1];
+		float $dist = twoVerticesDistance($vertex, $vertex2); //distance between v1 v2
+		if ($dist > $bestDist) //if dist > 0 ... etc
+			{
+			$bestDist = $dist; // bestDist = new value
+			$pairNums = {$count, $count2}; //pair
+			}
+		$count2++;
+		}
+	$count++;
+	}
+
+$pair = {$vertices[$pairNums[0]], $vertices[$pairNums[1]]};
+//select $pair;
+$vertices = stringArrayRemove($pair, $vertices);
+
+vector $vector = vectorByVertices($pair[1], $pair[0]);
+$vector = `unit $vector`;
+string $vertex;
+
+for ($vertex in $vertices) //for each vertex
+	{
+//$vertex = $vertices[0];
+	vector $vector2 = vectorByVertices($vertex, $pair[0]);
+	float $angle = angleD($vector, $vector2);
+	float $hipo = $vector2;
+	float $dist = hipoAngleToCatet ($hipo, $angle);
+	float $pos[] = vectorToFloat(floatToVector(`pointPosition($pair[0])`) + ($vector * $dist));
+	move $pos[0] $pos[1] $pos[2] $vertex;
+	}
+select $sel;
+
+if ($ortho) // top left front
+	{
+	setAttr ($moveComponentNode + ".s" + $skipAxis) 1;
+	delete $moveComponentNode;
+	}
+}
+
+
+verticesInLine();

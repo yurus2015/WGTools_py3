@@ -1,0 +1,249 @@
+import maya.cmds as cmds
+import maya.mel as mel
+import maya.OpenMaya as OpenMaya
+
+from PySide2 import QtGui, QtCore, QtWidgets
+from PySide2.QtGui import *
+from PySide2.QtCore import *
+from PySide2.QtWidgets import *
+import os
+import re
+import math
+
+import modelingToolset2019.utils.scene as scene_u
+import modelingToolset2019.utils.std as std_u
+
+
+description = "Select uv / uv shell / a couple of uvs that share the same edge"
+buttonType = "opt"
+beautyName = "UV Shell alignment"
+iconName = "Align UV Shell"
+
+
+class ToolOptions(QWidget):
+
+    def __init__(self, parent = None):
+
+        super(ToolOptions, self).__init__(parent)
+
+
+        self.setLayout(self.createUI())
+
+    def createUI(self):
+
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(5,5,5,5)
+        self.mainLayout.setSpacing(10) #layout
+        self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
+
+        html = '''
+        <b>Description:</b>
+        <p style="color: #aaa;">Allows user rotate a UV shell so an edge with <br>the highest length value becomes vertical <br>or horizontal based on its original angle</p>
+        <p style="color: #aaa;">In order to make it work well, do next:</p>
+        <ul style="color: #888;">
+            <li><b style="color: #fff;">Select just one uv or any other component</b><br>It will find the longest edge on <br>the entire UV Shell of our component</li>
+            <li style=" margin-top: 10px;"><b style="color: #fff;">Select two uvs that share the same edge</b><br>It will align UV shell making the <br>edge (that is shared by these uvs)<br> vertical  or horizontal based on its initial angle</li>
+            <li style=" margin-top: 10px;"><b style="color: #fff;">Select a whole object</b><br>It will align all UV shells on this object</li>
+
+        </ul>
+        <br>
+        <br>
+        <br>
+
+        '''
+        self.label  = QLabel(html)
+
+        self.mainLayout.addWidget(self.label)
+
+
+        return self.mainLayout
+
+
+    def applyAutoRotate(self):
+        selection = cmds.ls(sl=1,l=1,fl=1)
+        if not selection: return
+
+        denisevichPath = str(os.path.dirname(__file__)) + "\\autoRotate.mel"
+        fix =  denisevichPath.replace("\\", "/")
+        mel.eval('source "'+fix+'"')
+        mel.eval('rotateUvShells()')
+
+
+    def findLongestEdgeUVsInShell(self, uvShell):
+        #conver it to edges
+        selectedEdgeList = cmds.ls(cmds.polyListComponentConversion(uvShell, fuv=1, te=1), l=1, fl=1)
+        cmds.select(selectedEdgeList)
+
+        highestLength = 0
+        uvCouple = []
+
+        for i in selectedEdgeList:
+
+            edgeUVs = cmds.ls(cmds.polyListComponentConversion(i, fe=1, tuv=1), l=1, fl=1)
+            ourTwoUVs = std_u.matchLists(edgeUVs, uvShell)
+
+            if len(ourTwoUVs) == 2:
+                uvA = cmds.polyEditUV(ourTwoUVs[0], q=1, u=1, v=1)
+                uvA[0] = float(round(uvA[0],3))
+                uvA[1] = float(round(uvA[1],3))
+                uvB = cmds.polyEditUV(ourTwoUVs[1], q=1, u=1, v=1)
+                uvB[0] = float(round(uvB[0],3))
+                uvB[1] = float(round(uvB[1],3))
+
+                length = math.sqrt((uvB[0] - uvA[0])*(uvB[0] - uvA[0]) + (uvB[1] - uvA[1])*(uvB[1] - uvA[1]))
+                if length > highestLength:
+                    highestLength = length
+                    uvCouple = ourTwoUVs
+
+        if len(uvCouple) == 2:
+            return [uvCouple[0], uvCouple[1]]
+        else:
+            return [uvShell[0], uvShell[1]]
+
+    def twoUVNotConnected(self):
+        selection = cmds.ls(sl=1,l=1,fl=1)
+        if not len(selection) == 2: return
+
+        #vectorA  = (1,0,0)
+        vectorA = OpenMaya.MVector(OpenMaya.MVector.xAxis)
+
+        #first uv from list
+        uv1 = cmds.polyEditUV(selection[0], q=1, u=1, v = 1)
+        uv1[0] = round(uv1[0], 3)
+        uv1[1] = round(uv1[1], 3)
+
+        #second uv from list
+        uv2 = cmds.polyEditUV(selection[1], q=1, u=1, v = 1)
+        uv2[0] = round(uv2[0], 3)
+        uv2[1] = round(uv2[1], 3)
+
+        #calculate vectorB.  PointA.y > PointB.y
+        pointA, pointB = None, None
+        if uv1[1] > uv2[1]:
+            pointA = OpenMaya.MPoint(uv1[0], uv1[1], 0)
+            pointB = OpenMaya.MPoint(uv2[0], uv2[1], 0)
+        elif uv2[1] > uv1[1]:
+            pointA = OpenMaya.MPoint(uv2[0], uv2[1], 0)
+            pointB = OpenMaya.MPoint(uv1[0], uv1[1], 0)
+
+        #VectorB = B->A (A always higher)
+        vectorB = OpenMaya.MVector(pointA.x - pointB.x, pointA.y - pointB.y, pointA.z - pointB.z)
+        vectorB.normalize()
+        angleBetweenRad = vectorA.angle(vectorB)
+        angleBetweenEul =  (vectorA.angle(vectorB) * 180)/3.14159265359
+
+        selectedUVs = cmds.ls(cmds.polyListComponentConversion(selection, tuv=1), l=1, fl=1)
+        uvShells = scene_u.getUVShells(selectedUVs)
+
+        cmds.select(d=1)
+        for i in uvShells:
+            cmds.select(i, add=1)
+
+        rotate = 0
+        if angleBetweenEul > 45 and angleBetweenEul < 135:
+            print("90 deg alignment")
+            if angleBetweenEul > 90:
+                rotate = -1 * (angleBetweenEul - 90)
+            elif angleBetweenEul < 90:
+                rotate = 90 - angleBetweenEul
+        else:
+            print("0 deg alignment")
+            if angleBetweenEul < 45:
+                rotate = -1 * angleBetweenEul
+            if angleBetweenEul > 135:
+                rotate = 180 - angleBetweenEul
+
+        cmds.polyEditUVShell(rot = 1, angle = rotate, pu = pointB.x, pv = pointB.y)
+        cmds.select(selection)
+
+
+    def main(self):
+
+        scene_u.cleanup()
+
+        #get the selection
+        selection = cmds.ls(sl=1,l=1,fl=1)
+
+        #nothing is selected - cancel operation
+        if not selection: return
+
+
+        #check if user selected two adjacent UVs or an edge
+        if len(selection) == 2 and ".map[" in selection[0] and ".map[" in selection[1]:
+            edgelistA = cmds.ls(cmds.polyListComponentConversion(selection[0], te=1), l=1, fl=1)
+            edgelistB = cmds.ls(cmds.polyListComponentConversion(selection[1], te=1), l=1, fl=1)
+            vtx = cmds.ls(cmds.polyListComponentConversion(selection, tv=1), l=1, fl=1)
+            if std_u.matchLists(edgelistA, edgelistB) and len(vtx) != 1:
+                print("uvs are connected")
+                self.applyAutoRotate()
+                selectedUVs = cmds.ls(cmds.polyListComponentConversion(selection, tuv=1), l=1, fl=1)
+                uvShells = scene_u.getUVShells(selectedUVs)
+                cmds.select(d=1)
+                for i in uvShells:
+                    cmds.select(i, add=1)
+                return
+            else:
+                print("uvs are not connected")
+                self.twoUVNotConnected()
+                selectedUVs = cmds.ls(cmds.polyListComponentConversion(selection, tuv=1), l=1, fl=1)
+                uvShells = scene_u.getUVShells(selectedUVs)
+                cmds.select(d=1)
+                for i in uvShells:
+                    cmds.select(i, add=1)
+                return
+
+        elif len(selection) == 1 and ".e[" in selection[0]:
+            twoUVs = cmds.ls(cmds.polyListComponentConversion(selection[0], tuv=1), l=1, fl=1)
+            if len(twoUVs) == 2:
+                self.applyAutoRotate()
+                selectedUVs = cmds.ls(cmds.polyListComponentConversion(selection, tuv=1), l=1, fl=1)
+                uvShells = scene_u.getUVShells(selectedUVs)
+                cmds.select(d=1)
+                for i in uvShells:
+                    cmds.select(i, add=1)
+
+            if len(twoUVs) > 2:
+                uvShells = scene_u.getUVShells(twoUVs)
+                if uvShells:
+                    for i in uvShells:
+                        match = std_u.matchLists(i, twoUVs)
+                        if len(match) == 2:
+                            cmds.select(match)
+                            self.applyAutoRotate()
+                cmds.select(d=1)
+                for i in uvShells:
+                    cmds.select(i, add=1)
+
+            # cmds.select(selection)
+            return
+
+
+        #if user selected object - show confirm dialog
+        if ".vtx[" not in selection[0] and ".f[" not in selection[0] and ".e[" not in selection[0] and ".map[" not in selection[0]:
+            # cmds.inViewMessage(amg= '<hl>You have selected a whole mesh</hl>' , pos = 'midCenter', fade = True, fot = 1000)
+            result = cmds.confirmDialog(
+                        title='Warning',\
+                        button=['Continue','Cancel'],\
+                        message='You have selected a polygonal mesh. <b style="color: #fff">It can take time to align all UV shells</b>. <br><br>Do you want to continue?',\
+                        cancelButton='Cancel',\
+                        dismissString='Cancel')
+            if result == 'Cancel':
+                return
+
+
+        #whatever is selected convert selection to UV Shells and work on each shell separately
+        selectedUVs = cmds.ls(cmds.polyListComponentConversion(selection, tuv=1), l=1, fl=1)
+        uvShells = scene_u.getUVShells(selectedUVs)
+
+        for i in uvShells:
+            twoUVs = self.findLongestEdgeUVsInShell(i)
+            if twoUVs:
+                cmds.select(twoUVs)
+                self.applyAutoRotate()
+
+        cmds.select(d=1)
+        for i in uvShells:
+            cmds.select(i, add=1)
+
+        cmds.selectMode(co=1)
+        cmds.selectType(puv=1, alc=0)

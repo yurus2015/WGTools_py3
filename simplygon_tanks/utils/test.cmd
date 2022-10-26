@@ -1,0 +1,1 @@
+"c:\Program Files\Autodesk\Maya2018\bin\mayapy.exe" d:\ART_MAIN\game\bin\tools\devtools\scripts\maya2018\simplygon\utils\proxyImport.py d:\Project\Wargaming\Experiment\test_112\UnitsItalian\It04_Fiat_3000\06_Model_2015\Export\Fiat_3000.mb

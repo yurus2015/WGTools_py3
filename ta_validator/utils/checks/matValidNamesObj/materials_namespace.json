@@ -1,0 +1,7 @@
+{
+    "names": [
+        "^(n_|s_|d_)(wood|stone|metal)\\d*_\\d*\\Z",
+        "^lambert1\\Z",
+        "^particleCloud1\\Z"
+        ]
+}

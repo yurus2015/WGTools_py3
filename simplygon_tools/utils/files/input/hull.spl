@@ -1,0 +1,230 @@
+{
+  "Header": {
+    "SPLVersion": "8.0",
+    "ClientName": "Simplygon",
+    "ClientVersion": "8.2.375.4",
+    "SimplygonVersion": "8.0"
+  },
+  "ProcessGraph": {
+    "Type": "ContainerNode",
+    "Name": "Node",
+    "Children": [
+      {
+        "Processor": {
+          "ReductionSettings": {
+            "AllowDegenerateTexCoords": true,
+            "CreateGeomorphGeometry": false,
+            "DataCreationPreferences": "SG_DATACREATIONPREFERENCES_PREFER_OPTIMIZED_RESULT",
+            "EdgeSetImportance": 1.0,
+            "GenerateGeomorphData": false,
+            "GeometryImportance": 1.0,
+            "GroupImportance": 1.0,
+            "InwardMoveMultiplier": 1.0,
+            "KeepSymmetry": false,
+            "MaterialImportance": 1.0,
+            "MaxDeviation": 1.0,
+            "MaxEdgeLength": 2147483647.0,
+            "OnScreenSize": 300,
+            "OutwardMoveMultiplier": 1.0,
+            "ProcessSelectionSetName": "",
+            "ReductionHeuristics": "SG_REDUCTIONHEURISTICS_FAST",
+            "ReductionTargets": "SG_REDUCTIONTARGET_TRIANGLERATIO",
+            "ShadingImportance": 1.0,
+            "SkinningImportance": 1.0,
+            "StopCondition": "SG_STOPCONDITION_ALL",
+            "SymmetryAxis": 1,
+            "SymmetryDetectionTolerance": 0.0004,
+            "SymmetryOffset": 0.0,
+            "TextureImportance": 1.0,
+            "TriangleCount": 16115,
+            "TriangleRatio": 0.51,
+            "UseAutomaticSymmetryDetection": false,
+            "UseHighQualityNormalCalculation": true,
+            "UseSymmetryQuadRetriangulator": true,
+            "UseVertexWeights": false,
+            "VertexColorImportance": 1.0,
+            "Enabled": true
+          },
+         
+          "Type": "ReductionProcessor"
+        },
+        "MaterialCaster": [],
+        "OutputMaterialName": "SimplygonMaterial",
+        "DefaultTBNType": "SG_TANGENTSPACEMETHOD_ORTHONORMAL",
+        "AllowGPUAcceleration": false,
+        "Type": "ProcessNode",
+        "Name": "Node",
+        "Children": [
+          {
+            "Format": "ssf",
+            "Type": "WriteNode",
+            "Name": "outputlod_0",
+            "Children": []
+          },
+          {
+            "Processor": {
+              "ReductionSettings": {
+                "AllowDegenerateTexCoords": true,
+                "CreateGeomorphGeometry": false,
+                "DataCreationPreferences": "SG_DATACREATIONPREFERENCES_PREFER_OPTIMIZED_RESULT",
+                "EdgeSetImportance": 1.0,
+                "GenerateGeomorphData": false,
+                "GeometryImportance": 1.0,
+                "GroupImportance": 1.0,
+                "InwardMoveMultiplier": 1.0,
+                "KeepSymmetry": false,
+                "MaterialImportance": 1.0,
+                "MaxDeviation": 1.0,
+                "MaxEdgeLength": 2147483647.0,
+                "OnScreenSize": 300,
+                "OutwardMoveMultiplier": 1.0,
+                "ProcessSelectionSetName": "",
+                "ReductionHeuristics": "SG_REDUCTIONHEURISTICS_FAST",
+                "ReductionTargets": "SG_REDUCTIONTARGET_TRIANGLERATIO",
+                "ShadingImportance": 1.0,
+                "SkinningImportance": 1.0,
+                "StopCondition": "SG_STOPCONDITION_ALL",
+                "SymmetryAxis": 1,
+                "SymmetryDetectionTolerance": 0.0004,
+                "SymmetryOffset": 0.0,
+                "TextureImportance": 1.0,
+                "TriangleCount": 9707,
+                "TriangleRatio": 0.5,
+                "UseAutomaticSymmetryDetection": false,
+                "UseHighQualityNormalCalculation": true,
+                "UseSymmetryQuadRetriangulator": true,
+                "UseVertexWeights": false,
+                "VertexColorImportance": 1.0,
+                "Enabled": true
+              },
+              
+              "Type": "ReductionProcessor"
+            },
+            "MaterialCaster": [],
+            "OutputMaterialName": "SimplygonMaterial",
+            "DefaultTBNType": "SG_TANGENTSPACEMETHOD_ORTHONORMAL",
+            "AllowGPUAcceleration": false,
+            "Type": "ProcessNode",
+            "Name": "Node",
+            "Children": [
+              {
+                "Format": "ssf",
+                "Type": "WriteNode",
+                "Name": "outputlod_1",
+                "Children": []
+              },
+              {
+                "Processor": {
+                  "ReductionSettings": {
+                    "AllowDegenerateTexCoords": true,
+                    "CreateGeomorphGeometry": false,
+                    "DataCreationPreferences": "SG_DATACREATIONPREFERENCES_PREFER_OPTIMIZED_RESULT",
+                    "EdgeSetImportance": 1.0,
+                    "GenerateGeomorphData": false,
+                    "GeometryImportance": 1.0,
+                    "GroupImportance": 1.0,
+                    "InwardMoveMultiplier": 1.0,
+                    "KeepSymmetry": false,
+                    "MaterialImportance": 1.0,
+                    "MaxDeviation": 1.0,
+                    "MaxEdgeLength": 2147483647.0,
+                    "OnScreenSize": 300,
+                    "OutwardMoveMultiplier": 1.0,
+                    "ProcessSelectionSetName": "",
+                    "ReductionHeuristics": "SG_REDUCTIONHEURISTICS_FAST",
+                    "ReductionTargets": "SG_REDUCTIONTARGET_TRIANGLERATIO",
+                    "ShadingImportance": 1.0,
+                    "SkinningImportance": 1.0,
+                    "StopCondition": "SG_STOPCONDITION_ALL",
+                    "SymmetryAxis": 1,
+                    "SymmetryDetectionTolerance": 0.0004,
+                    "SymmetryOffset": 0.0,
+                    "TextureImportance": 1.0,
+                    "TriangleCount": 5000,
+                    "TriangleRatio": 0.5,
+                    "UseAutomaticSymmetryDetection": false,
+                    "UseHighQualityNormalCalculation": true,
+                    "UseSymmetryQuadRetriangulator": true,
+                    "UseVertexWeights": false,
+                    "VertexColorImportance": 1.0,
+                    "Enabled": true
+                  },
+                  
+                  "Type": "ReductionProcessor"
+                },
+                "MaterialCaster": [],
+                "OutputMaterialName": "SimplygonMaterial",
+                "DefaultTBNType": "SG_TANGENTSPACEMETHOD_ORTHONORMAL",
+                "AllowGPUAcceleration": false,
+                "Type": "ProcessNode",
+                "Name": "Node",
+                "Children": [
+                  {
+                    "Format": "ssf",
+                    "Type": "WriteNode",
+                    "Name": "outputlod_2",
+                    "Children": []
+                  },
+                  {
+                    "Processor": {
+                      "ReductionSettings": {
+                        "AllowDegenerateTexCoords": true,
+                        "CreateGeomorphGeometry": false,
+                        "DataCreationPreferences": "SG_DATACREATIONPREFERENCES_PREFER_OPTIMIZED_RESULT",
+                        "EdgeSetImportance": 1.0,
+                        "GenerateGeomorphData": false,
+                        "GeometryImportance": 1.0,
+                        "GroupImportance": 1.0,
+                        "InwardMoveMultiplier": 1.0,
+                        "KeepSymmetry": false,
+                        "MaterialImportance": 1.0,
+                        "MaxDeviation": 1.0,
+                        "MaxEdgeLength": 2147483647.0,
+                        "OnScreenSize": 300,
+                        "OutwardMoveMultiplier": 1.0,
+                        "ProcessSelectionSetName": "",
+                        "ReductionHeuristics": "SG_REDUCTIONHEURISTICS_FAST",
+                        "ReductionTargets": "SG_REDUCTIONTARGET_TRIANGLECOUNT",
+                        "ShadingImportance": 1.0,
+                        "SkinningImportance": 1.0,
+                        "StopCondition": "SG_STOPCONDITION_ALL",
+                        "SymmetryAxis": 1,
+                        "SymmetryDetectionTolerance": 0.0004,
+                        "SymmetryOffset": 0.0,
+                        "TextureImportance": 1.0,
+                        "TriangleCount": 50,
+                        "TriangleRatio": 0.5,
+                        "UseAutomaticSymmetryDetection": false,
+                        "UseHighQualityNormalCalculation": true,
+                        "UseSymmetryQuadRetriangulator": true,
+                        "UseVertexWeights": false,
+                        "VertexColorImportance": 1.0,
+                        "Enabled": true
+                      },
+                      
+                      "Type": "ReductionProcessor"
+                    },
+                    "MaterialCaster": [],
+                    "OutputMaterialName": "SimplygonMaterial",
+                    "DefaultTBNType": "SG_TANGENTSPACEMETHOD_ORTHONORMAL",
+                    "AllowGPUAcceleration": false,
+                    "Type": "ProcessNode",
+                    "Name": "Node",
+                    "Children": [
+                      {
+                        "Format": "ssf",
+                        "Type": "WriteNode",
+                        "Name": "outputlod_3",
+                        "Children": []
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+    "names": [
+        "^(n_|d_)(wood|stone|metal)\\Z",
+        "^.*_havok\\Z"
+        ]
+}

@@ -1,0 +1,66 @@
+global proc NinjaMesh_MatchVertex(float $buffer)
+{
+
+	string $SelVerts[] = `ls -sl -fl`;
+	//float $buffer = `floatField -q -v vertexMaxBuffer`; //editline tolerance
+	string $AdjustedVertArray[] = {};
+
+	//progressBar -edit -pr 0 MatchVert_progress;
+	//progressBar -edit -maxValue ( (`size $SelVerts`) )MatchVert_progress;
+
+	for ($a = 0; $a < `size $SelVerts`; $a++)
+	{
+
+		if (stringArrayContains($SelVerts[$a], $AdjustedVertArray) == 0)
+		{
+		string $VertA = $SelVerts[$a];
+		float $vertexApos[] = `xform -q -t -ws $SelVerts[$a]`;
+		for ($b = 0 ; $b < (`size $SelVerts`)  ; $b++)
+			{
+				string $VertB = $SelVerts[$b];
+				if ($VertA != $VertB  && (stringArrayContains($SelVerts[$b], $AdjustedVertArray) == 0) )
+				{
+					float $vertexBpos[] = `xform -q -t -ws $SelVerts[$b]`;
+					$Xdist = ($vertexApos[0] - $vertexBpos[0]);
+					$Ydist = ($vertexApos[1] - $vertexBpos[1]);
+					$Zdist = ($vertexApos[2] - $vertexBpos[2]);
+
+					$Distance = `sqrt (($Xdist*$Xdist) + ($Ydist*$Ydist) + ($Zdist*$Zdist))`;
+
+					if ( $Distance < $buffer && $Distance != 0)
+
+							{
+								xform -ws -t $vertexApos[0] $vertexApos[1] $vertexApos[2] $SelVerts[$b];
+								stringArrayInsertAtIndex(0, $AdjustedVertArray, $SelVerts[$b]);
+							}//end if
+
+                }//end if
+
+            }//end for b
+
+        }//end if
+		//progressBar -edit -step 1 MatchVert_progress;
+	}//end for a
+
+	select $AdjustedVertArray;
+
+}
+
+global proc NinjaMesh_FixSeams(float $buffer)
+{
+
+	string $SelObject[] = `ls -sl -fl`;
+	for ($o = 0; $o < `size $SelObject`; $o++)
+	{
+		ConvertSelectionToEdges;
+		doMenuComponentSelection($SelObject[$o], "edge");
+		polySelectConstraint -m 2 -t 0x8000 -bo true -sh false -cr false;
+		string $BorderEdges[] = `ls -sl -fl`;
+		select -add $BorderEdges;
+		PolySelectConvert 3;//convert to vertices
+		resetPolySelectConstraint;
+	}
+
+	NinjaMesh_MatchVertex($buffer);
+
+}
