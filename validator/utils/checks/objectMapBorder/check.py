@@ -22,9 +22,9 @@ def removeDupplicateList(currentList):
 def loadPlugin():
 
 	try:
-		cmds.loadPlugin('techartAPI2018')
+		cmds.loadPlugin('techartAPI')
 	except:
-		print("Can`t load techartAPI2018 plugin")
+		print("Can`t load techartAPI plugin")
 
 
 def main():

@@ -245,6 +245,7 @@ class WGWidgetAction(QWidgetAction):
         self.mainWidget.makeBGOld()
 
         path = Utils.getCurrentDir() + "\\actions\\" + self.actionName + ".py"
+        print('action! ', path)
 
         scriptFile = open(path, 'r')
         scriptIn = scriptFile.read()

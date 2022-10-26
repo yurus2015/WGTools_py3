@@ -1,15 +1,17 @@
 import maya.cmds as cmds
 
+
 def load_plugin():
-	if not cmds.pluginInfo( 'techartAPI2018', query=True, l=True ):
+	if not cmds.pluginInfo('techartAPI', query=True, l=True ):
 		try:
-			cmds.loadPlugin('techartAPI2018')
+			cmds.loadPlugin('techartAPI')
 			return True
 		except:
 			return False
 			#raise MissingPluginError('Unable to load techartAPI2018.mll!')
 	else:
 		return True
+
 
 def main():
 	return_list = []

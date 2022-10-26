@@ -1,4 +1,3 @@
-from PySide2 import QtGui, QtCore, QtWidgets
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
@@ -6,7 +5,6 @@ import weakref
 from maya.mel import eval as meval
 import maya.cmds as cmds
 from .constants import *
-# VERSION, PRESETOPTION, ISOLATEOPTION, PRESETS, LABEL
 from .buttonPresetWidget import PresetButton, MenuBar, CheckButton, ProgressBar
 from validator.utils.jsonPreset import PresetsJson
 from .checkItemWidget import CheckWidget
@@ -14,14 +12,13 @@ from collections import OrderedDict
 
 
 class ValidatorMainWindow(QDialog):
-    """docstring for TankExportMainWindow"""
     instances = list()
     CONTROL_NAME = VERSION
     DOCK_LABEL_NAME = LABEL
 
     def __init__(self, parent=None):
         super(ValidatorMainWindow, self).__init__(parent)
-        self.__class__.instances.append(weakref.proxy(self))
+        # self.__class__.instances.append(weakref.proxy(self))
         self.window_name = self.CONTROL_NAME
         self.setSizeGripEnabled(False)
 
@@ -34,20 +31,19 @@ class ValidatorMainWindow(QDialog):
 
         self.menuBar = MenuBar()
 
-        self.checkTab = QWidget()
+        self.check_tab_widget = QWidget()
+        self.check_tab_layout = QVBoxLayout()
+        self.check_tab_layout.setAlignment(Qt.AlignTop)
+        self.check_tab_layout.setContentsMargins(0, 0, 0, 0)
+        self.check_tab_layout.setSpacing(0)
+        self.check_tab_widget.setLayout(self.check_tab_layout)
 
-        self.checkTabLayot = QVBoxLayout()
-        self.checkTabLayot.setAlignment(Qt.AlignTop)
-        self.checkTabLayot.setContentsMargins(0, 0, 0, 0)
-        self.checkTabLayot.setSpacing(0)
-        self.checkTab.setLayout(self.checkTabLayot)
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setStyleSheet("QScrollArea {border: 0px; border-top : 1px solid; border-color: rgb(60,60,60);}")
         self.scrollArea.setAlignment(Qt.AlignTop)
 
         self.scrollAreaWidget = QWidget()
-
         # very important value - align to top
         self.scrollAreaWidget.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed))
 
@@ -59,30 +55,25 @@ class ValidatorMainWindow(QDialog):
 
         # CHECK BUTTON
         self.checkButton = CheckButton()
-        self.checkButton.setFixedHeight(30)
-        self.checkButton.setText("Check")
         self.checkButton.clicked.connect(lambda: self.check_all())
 
-        self.presetButton = PresetButton(self.scrollAreaLayout, parent=self)
-        self.menu, self.action_group = self.presetButton._create_action()
-        self.presetButton.setMenu(self.menu)
-        self.action_group.triggered.connect(lambda: self.append_preset_check())
+        self.presetButton = PresetButton(parent=self)
+        self.action_group = self.presetButton.create_action()
+        self.action_group.triggered.connect(self.append_preset_check)
 
         # PROGRESS BAR (hidden)
-        self.pb = ProgressBar()
-        self.pb.setObjectName('progressBarObj')
-        self.pb.setVisible(False)
+        self.progress_bar = ProgressBar()
 
         self.scrollArea.setWidget(self.scrollAreaWidget)
 
         self.centralWidget.addLayout(self.centralLayout)
         self.centralLayout.addWidget(self.menuBar)
         self.centralLayout.addWidget(self.presetButton)
-        self.centralLayout.addWidget(self.checkTab)
+        self.centralLayout.addWidget(self.check_tab_widget)
 
-        self.checkTabLayot.addWidget(self.checkButton)
-        self.checkTabLayot.addWidget(self.pb)  # progress bar
-        self.checkTabLayot.addWidget(self.scrollArea)
+        self.check_tab_layout.addWidget(self.checkButton)
+        self.check_tab_layout.addWidget(self.progress_bar)  # progress bar
+        self.check_tab_layout.addWidget(self.scrollArea)
 
         self.append_preset_check()
 
@@ -100,7 +91,7 @@ class ValidatorMainWindow(QDialog):
             cmds.optionVar(iv=(AUTOLOADOPTION, 0))
 
         preset = cmds.optionVar(q=PRESETOPTION)
-        self.presetButton.setPreset(preset)
+        self.presetButton.set_preset(preset)
         self.menuBar.set_isolate(cmds.optionVar(q=ISOLATEOPTION))
         self.menuBar.set_autoload(cmds.optionVar(q=AUTOLOADOPTION))
 
@@ -140,9 +131,9 @@ class ValidatorMainWindow(QDialog):
             check_for_run = self.visible_check()
             if check_for_run:
 
-                self.pb.setVisible(True)
-                qApp.processEvents()
-                self.pb.setMaximum(len(check_for_run))
+                self.progress_bar.setVisible(True)
+                QApplication.processEvents()
+                self.progress_bar.setMaximum(len(check_for_run))
                 for item in range(len(check_for_run)):
                     try:
                         if check_for_run[item].runCheck():
@@ -151,10 +142,10 @@ class ValidatorMainWindow(QDialog):
                             check_for_run[item].setVisible(False)
                     except:
                         pass
-                    self.pb.update_bar()
-                    qApp.processEvents()
-                self.pb.setVisible(False)
-                self.pb.reset()
+                    self.progress_bar.update_bar()
+                    QApplication.processEvents()
+                self.progress_bar.setVisible(False)
+                self.progress_bar.reset()
             # chahge check button
             check_for_run = self.visible_check()
             if not check_for_run:

@@ -124,9 +124,9 @@ class ToolOptions(QWidget):
 
 
 	def loadPlugin(self):
-		if not cmds.pluginInfo( 'techartAPI2018', query=True, loaded=True):
+		if not cmds.pluginInfo( 'techartAPI', query=True, loaded=True):
 			try:
-				cmds.loadPlugin('techartAPI2018')
+				cmds.loadPlugin('techartAPI')
 			except:
 				print 'Don`t load plugin'
 
