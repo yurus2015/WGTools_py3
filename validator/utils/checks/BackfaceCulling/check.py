@@ -1,31 +1,23 @@
 import maya.cmds as cmds
 
 
-# from validator.utils.validator_API import *
-
-# checkId = 2
-# checkLabel = "3.6 Check Objects with backface culling"
-
-
 def main():
     #
 
     # objList = vl_listAllTransforms()
-    returnList = []
+    return_list = []
 
-    shapeArray = cmds.ls(type='mesh', dag=1, l=True)
-    if shapeArray:
-        polyArray = list(set(cmds.listRelatives(shapeArray, p=1, type="transform", f=True)))
+    shape_array = cmds.ls(type='mesh', dag=1, l=True)
+    if shape_array:
+        poly_array = list(set(cmds.listRelatives(shape_array, p=1, type="transform", f=True)))
 
-        for obj in polyArray:
+        for obj in poly_array:
             try:
-                BCStatus = cmds.getAttr(obj + ".backfaceCulling")
-                if BCStatus != 0:
-                    tmp = []
-                    tmp.append(obj + " has the .backfaceCulling argument turned on")
-                    tmp.append(obj)
-                    returnList.append(tmp)
-            except:
+                bc_status = cmds.getAttr(obj + ".backfaceCulling")
+                if bc_status != 0:
+                    tmp = [obj + " has the .backfaceCulling argument turned on", obj]
+                    return_list.append(tmp)
+            except ValueError:
                 pass
 
-    return returnList
+    return return_list

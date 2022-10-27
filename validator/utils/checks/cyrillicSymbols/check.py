@@ -4,26 +4,22 @@ checkId = 100
 checkLabel = "Check for cyrillic symbols in names"
 
 
-def is_cyryllic(name):
-    for symb in name:
-        if '\u0400' <= symb <= '\u04FF' or '\u0500' <= symb <= '\u052F':
+def is_cyrillic(name):
+    for symbol in name:
+        if '\u0400' <= symbol <= '\u04FF' or '\u0500' <= symbol <= '\u052F':
             return True
 
 
 def main():
-    #
-
-    returnList = []
+    return_list = []
     all_list = []
-    errorMessage = " - The name contains cyrillic symbol"
+    error_message = " - The name contains cyrillic symbol"
     # scene name
     scene_name = cmds.file(q=1, sn=1, shn=1)
     if scene_name:
-        if is_cyryllic(scene_name):
-            tmp = []
-            tmp.append("The scene name contains cyrillic symbol")
-            tmp.append("")
-            returnList.append(tmp)
+        if is_cyrillic(scene_name):
+            tmp = ["The scene name contains cyrillic symbol", ""]
+            return_list.append(tmp)
 
     # dag objects name
     dag_objects = cmds.ls(dag=1, ap=1)
@@ -54,10 +50,8 @@ def main():
     if all_list:
         for obj in all_list:
             # print 'OBJ', obj,
-            if is_cyryllic(obj):
-                tmp = []
-                tmp.append(obj + errorMessage)
-                tmp.append(obj)
-                returnList.append(tmp)
+            if is_cyrillic(obj):
+                tmp = [obj + error_message, obj]
+                return_list.append(tmp)
 
-    return returnList
+    return return_list

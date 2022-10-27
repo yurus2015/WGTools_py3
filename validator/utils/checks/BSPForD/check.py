@@ -2,9 +2,6 @@ import maya.cmds as cmds
 import re
 from validator.utils.validator_API import *
 
-checkId = 4
-checkLabel = "5.0 Check BSP"
-
 
 def removeDupplicateList(currentList):
     resultList = list(set(currentList))

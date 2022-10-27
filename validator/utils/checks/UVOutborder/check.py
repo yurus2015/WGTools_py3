@@ -2,9 +2,6 @@ import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 from validator.utils.validator_API import *
 
-checkId = 53
-checkLabel = "8.13 Check UVs out of range"
-
 
 def main():
     obj_list = vl_listAllTransforms()

@@ -1,23 +1,9 @@
 import maya.cmds as cmds
-
 from validator.utils.validator_API import *
-
-checkId = 1
-
-checkLabel = "5.7 Correct texture size"
 
 
 def main():
-    # print('<< ' + checkLabel.upper() + ' >>')
-    # objMatData = vl_objMaterialsData()
     returnList = []
-
-    # chassisList = cmds.ls("*chassis*", type="mesh", l=1)
-    # gunList = cmds.ls("*gun*", type="mesh", l=1)
-    # hullList = cmds.ls("*hull*", type="mesh", l=1)
-    # turretList = cmds.ls("*turret*", type="mesh", l=1)
-    # trackList = cmds.ls("*track*", type = "mesh", l=1)
-
     chassisList = []
     gunList = []
     hullList = []

@@ -1,46 +1,41 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
-checkId = 109
-checkLabel = "Check shape count of each object"
-
 
 def main_2():
-    returnList = []
+    return_list = []
 
-    itDag = OpenMaya.MItDag(OpenMaya.MItDag.kDepthFirst, OpenMaya.MFn.kTransform)
-    while not itDag.isDone():
+    it_dag = OpenMaya.MItDag(OpenMaya.MItDag.kDepthFirst, OpenMaya.MFn.kTransform)
+    while not it_dag.isDone():
 
-        DP = OpenMaya.MDagPath()
-        itDag.getPath(DP)
-        DagNode = OpenMaya.MFnDagNode(DP)
-        childTypes = []
-        if DP.childCount() > 1:
-            for idx in range(DP.childCount()):
-                child = DagNode.child(idx)
+        dp = OpenMaya.MDagPath()
+        it_dag.getPath(dp)
+        dag_node = OpenMaya.MFnDagNode(dp)
+        child_types = []
+        if dp.childCount() > 1:
+            for idx in range(dp.childCount()):
+                child = dag_node.child(idx)
                 if child.apiTypeStr() == "kMesh":
-                    childTypes.append(child.apiType)
+                    child_types.append(child.apiType)
 
-        if len(childTypes) > 1:
-            tmp = []
-            tmp.append(str(DagNode.fullPathName()) + " has " + str(len(childTypes)) + " shape nodes.")
-            tmp.append(DagNode.fullPathName())
-            returnList.append(tmp)
+        if len(child_types) > 1:
+            tmp = [str(dag_node.fullPathName()) + " has " + str(len(child_types)) + " shape nodes.",
+                   dag_node.fullPathName()]
+            return_list.append(tmp)
 
-        next(itDag)
+        next(it_dag)
 
-    return returnList
+    return return_list
 
 
 def main():
-    returnList = []
+    return_list = []
     mesh_list = cmds.filterExpand(cmds.ls(tr=1), sm=12)
-    for i in mesh_list:
-        shapes = cmds.listRelatives(i, s=1, f=1)
-        if len(shapes) > 1:
-            tmp = []
-            tmp.append(i + ' has ' + str(len(shapes)) + ' shape nodes')
-            tmp.append(i)
-            returnList.append(tmp)
+    if mesh_list:
+        for i in mesh_list:
+            shapes = cmds.listRelatives(i, s=1, f=1)
+            if len(shapes) > 1:
+                tmp = [i + ' has ' + str(len(shapes)) + ' shape nodes', i]
+                return_list.append(tmp)
 
-    return returnList
+    return return_list
