@@ -3,6 +3,7 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 import importlib
 import objects_tools.ui.console as Console
+
 importlib.reload(Console)
 
 style = """

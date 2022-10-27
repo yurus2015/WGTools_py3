@@ -1,13 +1,13 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 
 import json
 import os
+
 dir = os.path.dirname(__file__)
 
 checkId = 714
 checkLabel = "5.2 Check bsp position"
-
 
 
 def check_out_of_bbox(obj):
@@ -25,7 +25,8 @@ def check_out_of_bbox(obj):
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
+    #
+
     json_file = open(("%s//%s") % (dir, "BSPPositionSettings.json"))
     json_string = json_file.read()
     settings = json.loads(json_string)
@@ -67,5 +68,3 @@ def main():
             return_list.append([("bsp of %s has wrong position") % (i), pairs[i]])
 
     return return_list
-
-

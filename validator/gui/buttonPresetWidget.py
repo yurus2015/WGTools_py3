@@ -1,14 +1,9 @@
-from PySide2 import QtGui, QtCore, QtWidgets
-from PySide2.QtGui import *
-from PySide2.QtCore import *
+# from PySide2.QtGui import *
+# from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 from functools import partial
 import maya.cmds as cmds
 from .constants import *
-
-
-
-# PRESETS, MIN, MAX, MENU, SUBMENU, ISOLATEOPTION, PRESETOPTION
 
 
 class MenuBar(QMenuBar):
@@ -85,7 +80,6 @@ class PresetButton(QPushButton):
         except:
             pass
         self.setText('Preset: ' + name)
-        print('test commit')
         cmds.optionVar(sv=(PRESETOPTION, name))
 
     def set_width_menu(self):

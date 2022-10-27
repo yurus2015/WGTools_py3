@@ -4,8 +4,8 @@ import maya.OpenMaya as OpenMaya
 checkId = 108
 checkLabel = "Check UV Shells out of UV border"
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
 
     # meshList = cmds.ls(type="mesh", l=1)

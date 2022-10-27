@@ -11,23 +11,21 @@ description = "Select vertices at the ends first. Then select other vertices. \n
 
 
 class ToolOptions(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(ToolOptions, self).__init__(parent)
         self.setLayout(self.createUI())
-
 
     def createUI(self):
 
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(5,5,5,5)
-        self.mainLayout.setSpacing(5) #layout
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(5)  # layout
         self.mainLayout.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.label  = QLabel(description)
+        self.label = QLabel(description)
         self.mainLayout.addWidget(self.label)
 
         return self.mainLayout
-
 
     # @classmethod
     def main(self):
@@ -36,16 +34,18 @@ class ToolOptions(QWidget):
 
         if not selection:
             print('Please select vertices that should be aligned')
-            cmds.inViewMessage(amg= '<hl>Please select vertices that should be alighted</hl>' , pos = 'topLeft', fade = True, fot = 1000)
+            cmds.inViewMessage(amg='<hl>Please select vertices that should be alighted</hl>', pos='topLeft', fade=True,
+                               fot=1000)
             return
 
         if ".vtx[" not in selection[0]:
-            cmds.inViewMessage(amg= '<hl>Please select vertices that should be alighted</hl>' , pos = 'topLeft', fade = True, fot = 1000)
+            cmds.inViewMessage(amg='<hl>Please select vertices that should be alighted</hl>', pos='topLeft', fade=True,
+                               fot=1000)
             return
 
         dir = str(os.path.dirname(__file__))
         cmds.undoInfo(ock=1)
-        scriptFile = open(dir+"/verticesInLine.mel", 'r')
-        scriptIn =  scriptFile.read()
+        scriptFile = open(dir + "/verticesInLine.mel", 'r')
+        scriptIn = scriptFile.read()
         mel.eval(scriptIn)
         cmds.undoInfo(cck=1)

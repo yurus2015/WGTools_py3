@@ -4,12 +4,15 @@ from PySide2.QtWidgets import *
 import importlib
 import os
 import modelingToolset.lib.uvChecker.utils.util as Util
+
 importlib.reload(Util)
 import modelingToolset.lib.uvChecker.gui.buttons
+
 importlib.reload(modelingToolset.lib.uvChecker.gui.buttons)
 from modelingToolset.lib.uvChecker.gui.buttons import ButtonAdd, ButtonCamouflage
 
 import modelingToolset.lib.uvChecker.gui.radio
+
 importlib.reload(modelingToolset.lib.uvChecker.gui.radio)
 from modelingToolset.lib.uvChecker.gui.radio import RadioDimensionLayout
 

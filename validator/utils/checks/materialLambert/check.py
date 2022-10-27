@@ -1,19 +1,15 @@
-
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 26
 checkLabel = "3.3 Check Objects with material type different from Lambert"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     objList = vl_listAllTransforms()
     returnList = []
 
-
-
     objMatList = vl_objMaterialsData()
-
 
     if len(objMatList) != 0:
         for i in objMatList:
@@ -33,7 +29,4 @@ def main():
                         returnList.append(tmp)
                         break
 
-
-
-
-    return  returnList
+    return returnList

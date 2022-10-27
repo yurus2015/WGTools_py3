@@ -1,74 +1,64 @@
 import maya.cmds as cmds
 import maya.mel as mel
-import  math, operator
+import math, operator
 
 from PySide2 import QtGui, QtCore, QtWidgets
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 
-
 description = "Display real vertex count"
 buttonType = "opt"
 beautyName = "HUD GameVerts"
 iconName = "HUD GameVerts"
 
+
 class ToolOptions(QWidget):
 
-	def __init__(self, parent = None):
+    def __init__(self, parent=None):
 
-		super(ToolOptions, self).__init__(parent)
+        super(ToolOptions, self).__init__(parent)
 
+        self.setLayout(self.createUI())
 
-		self.setLayout(self.createUI())
+    def createUI(self):
 
-	def createUI(self):
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(5)  # layout
+        self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
 
-		self.mainLayout = QVBoxLayout()
-		self.mainLayout.setContentsMargins(5,5,5,5)
-		self.mainLayout.setSpacing(5) #layout
-		self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
+        self.label = QLabel(
+            "<b>Description:</b><p>Display HUD real vertex count. <br>Press the button again to off HUD</p>")
 
-		self.label  = QLabel("<b>Description:</b><p>Display HUD real vertex count. <br>Press the button again to off HUD</p>")
+        self.mainLayout.addWidget(self.label)
 
-		self.mainLayout.addWidget(self.label)
+        return self.mainLayout
 
-		return self.mainLayout
+    def loadPlugin(self):
+        if not cmds.pluginInfo('techartAPI2018', query=True, loaded=True):
+            try:
+                cmds.loadPlugin('techartAPI2018')
+            except:
+                print('Don`t load plugin')
 
+    def compute(self):
+        self.loadPlugin()
+        # hardEdgeCount = 0
+        # meshes = cmds.listRelatives(cmds.ls(sl=1), ad=1, f=1, typ = "mesh")
+        # if meshes:
+        hardEdgeCount = cmds.hardEdgesCustom()
+        return hardEdgeCount
 
-	def loadPlugin(self):
-		if not cmds.pluginInfo( 'techartAPI2018', query=True, loaded=True):
-			try:
-				cmds.loadPlugin('techartAPI2018')
-			except:
-				print('Don`t load plugin')
-
-	def compute(self):
-		self.loadPlugin()
-		#hardEdgeCount = 0
-		#meshes = cmds.listRelatives(cmds.ls(sl=1), ad=1, f=1, typ = "mesh")
-		#if meshes:
-		hardEdgeCount = cmds.hardEdgesCustom()
-		return hardEdgeCount
-
-
-
-	def main(self):
-		if cmds.headsUpDisplay('HUDGameVertex', q=1, ex=1):
-			cmds.headsUpDisplay( 'HUDGameVertex', rem=True )
-		else:
-			nfb = cmds.headsUpDisplay(nfb =0);
-			cmds.headsUpDisplay( 'HUDGameVertex', section=0,
-								block = nfb,
-								blockSize='medium',
-								label='Game verts',
-								labelFontSize='small',
-								command= self.compute,
-								event='SelectionChanged')
-
-
-
-
-
-
-
+    def main(self):
+        if cmds.headsUpDisplay('HUDGameVertex', q=1, ex=1):
+            cmds.headsUpDisplay('HUDGameVertex', rem=True)
+        else:
+            nfb = cmds.headsUpDisplay(nfb=0);
+            cmds.headsUpDisplay('HUDGameVertex', section=0,
+                                block=nfb,
+                                blockSize='medium',
+                                label='Game verts',
+                                labelFontSize='small',
+                                command=self.compute,
+                                event='SelectionChanged')

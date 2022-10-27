@@ -1,104 +1,90 @@
 import maya.cmds as cmds
 from maya.mel import eval as meval
 
-
-checkId = 189
 checkLabel = "Check correct smooth group for map borders"
 
-def removeList(fromList, thisList):
-	resultList =  [n for n in fromList if n not in thisList]
-	resultList = list(resultList)
-	return resultList
 
-def intersectionList(oneList, secondList):
-	intersect = set(oneList).intersection( set(secondList) )
-	intersect = list(intersect)
-	return intersect
+def remove_list(from_list, this_list):
+    result_list = [n for n in from_list if n not in this_list]
+    result_list = list(result_list)
+    return result_list
 
-def removeDupplicateList(currentList):
-	resultList = list(set(currentList))
-	return resultList
 
-def loadPlugin():
+def intersection_list(one_list, second_list):
+    intersect = set(one_list).intersection(set(second_list))
+    intersect = list(intersect)
+    return intersect
 
-	try:
-		cmds.loadPlugin('techartAPI')
-	except:
-		print("Can`t load techartAPI plugin")
+
+def remove_duplicate_list(current_list):
+    result_list = list(set(current_list))
+    return result_list
+
+
+def load_plugin():
+    try:
+        cmds.loadPlugin('techartAPI')
+    except OSError:
+        print("Can`t load techartAPI plugin")
 
 
 def main():
-	print('<< ' + checkLabel.upper() + ' >>')
-	loadPlugin()
-	meshList = cmds.ls(type="mesh", l=1)
-	polyObjList = []
-	if meshList:
-		polyObjList = cmds.listRelatives(meshList, p=1, f=1)
-		polyObjList = removeDupplicateList(polyObjList)
+    load_plugin()
+    mesh_list = cmds.ls(type="mesh", l=1)
+    poly_obj_list = []
+    if mesh_list:
+        poly_obj_list = cmds.listRelatives(mesh_list, p=1, f=1)
+        poly_obj_list = remove_duplicate_list(poly_obj_list)
 
-	returnList = []
-	if polyObjList:
+    return_list = []
+    if poly_obj_list:
 
-		for obj in polyObjList:
-			cmds.select(obj)
+        for obj in poly_obj_list:
+            cmds.select(obj)
 
-			#fix two uv-sets bag
-			uvSets = cmds.polyUVSet (obj, query = True, allUVSets=True) #get all uvSets
-			if uvSets:
-				if len(uvSets) > 1:
-					cmds.polyUVSet(obj,  currentUVSet=True,  uvSet='map1')
+            # fix two uv-sets bag
+            uv_sets = cmds.polyUVSet(obj, query=True, allUVSets=True)  # get all uvSets
+            if uv_sets:
+                if len(uv_sets) > 1:
+                    cmds.polyUVSet(obj, currentUVSet=True, uvSet='map1')
 
-			#fix none polygons in current uv-set
-			uvs = cmds.ls(obj +'.map[*]', fl = True)
-			uvset_faces = cmds.polyListComponentConversion(uvs, fuv=True, tf=True )
-			uvset_faces = cmds.ls(uvset_faces, fl =1)
-			real_faces = cmds.ls(obj +'.f[*]', fl = True)
+            # fix none polygons in current uv-set
+            uvs = cmds.ls(obj + '.map[*]', fl=True)
+            uv_set_faces = cmds.polyListComponentConversion(uvs, fuv=True, tf=True)
+            uv_set_faces = cmds.ls(uv_set_faces, fl=1)
+            real_faces = cmds.ls(obj + '.f[*]', fl=True)
 
-			if len(uvset_faces) != len(real_faces):
-				continue
+            if len(uv_set_faces) != len(real_faces):
+                continue
 
-			#border edges
-			borderEdges = []
-			#borderEdges = meval('selectUVBorderEdge -uve')
+            # border edges
+            border_edges = []
+            # borderEdges = meval('selectUVBorderEdge -uve')
 
-			#'''
-			#print 'BEFORE PLUGIN'
-			try:
-				borderEdges = meval('selectUVBorderEdge -uve')
-			except:
-				return returnList
-			#'''
-			#print 'AFTER PLUGIN'
+            try:
+                border_edges = meval('selectUVBorderEdge -uve')
+            except ValueError:
+                return return_list
 
-			cmds.polySelectConstraint( m=3, t=0x8000, sm=2 ) # to get soft edges
-			softEdges = cmds.ls(sl=True, fl =1)
-			cmds.polySelectConstraint(sm =0)
-			cmds.polySelectConstraint(m =0)
-			#cmds.polySelectConstraint(disable =1)
+            cmds.polySelectConstraint(m=3, t=0x8000, sm=2)  # to get soft edges
+            soft_edges = cmds.ls(sl=True, fl=1)
+            cmds.polySelectConstraint(sm=0)
+            cmds.polySelectConstraint(m=0)
+            # cmds.polySelectConstraint(disable =1)
 
-			cmds.polySelectConstraint(m=3, t=0x8000, sm=1, w=2 ) # to get hard edges
-			hardEdges = cmds.ls(sl=True, fl =1)
+            cmds.polySelectConstraint(m=3, t=0x8000, sm=1, w=2)  # to get hard edges
+            hard_edges = cmds.ls(sl=True, fl=1)
 
-			cmds.polySelectConstraint(sm =0, w=0)
-			cmds.polySelectConstraint(m =0)
-			#cmds.polySelectConstraint(disable =1)
-			if borderEdges:
-				mustHard = intersectionList(softEdges, borderEdges)
-				# if mustHard:
-				# 	tmp = []
-				# 	tmp.append(obj + " - map border edges should be hard (not always)")
-				# 	tmp.append(mustHard)
-				# 	returnList.append(tmp)
+            cmds.polySelectConstraint(sm=0, w=0)
+            cmds.polySelectConstraint(m=0)
+            # cmds.polySelectConstraint(disable =1)
+            if border_edges:
+                must_hard = intersection_list(soft_edges, border_edges)
 
-			if hardEdges:
-				mustSplit = removeList(hardEdges, borderEdges)
-				if mustSplit:
-					tmp = []
-					tmp.append(obj + " - hard edges should be split in UV (not always)")
-					tmp.append(mustSplit)
-					returnList.append(tmp)
-	cmds.select(d=1)
-	return returnList
-
-
-
+            if hard_edges:
+                must_split = remove_list(hard_edges, border_edges)
+                if must_split:
+                    tmp = [obj + " - hard edges should be split in UV (not always)", must_split]
+                    return_list.append(tmp)
+    cmds.select(d=1)
+    return return_list

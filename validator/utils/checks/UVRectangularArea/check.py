@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 54
 checkLabel = "1.6 Check non-stretched UV sets"
 
@@ -18,30 +19,31 @@ def main():
         size = cmds.getAttr(i + ".outSize")[0]
 
         if not size[0] == 0:
-            proportion = size[0]/size[1]
+            proportion = size[0] / size[1]
             if proportion > 1:
                 # outAlpha = []
                 # outColor = []
                 # outTransparency = []
-                outAlpha = cmds.listConnections(i+".outAlpha", d=1,p=0)
-                outColor = cmds.listConnections(i+".outColor", d=1, p=0)
-                outTransparency = cmds.listConnections(i+".outTransparency", d=1, p=0)
-                #print outAlpha, outColor, outTransparency
+                outAlpha = cmds.listConnections(i + ".outAlpha", d=1, p=0)
+                outColor = cmds.listConnections(i + ".outColor", d=1, p=0)
+                outTransparency = cmds.listConnections(i + ".outTransparency", d=1, p=0)
+                # print outAlpha, outColor, outTransparency
 
                 if outColor or outAlpha or outTransparency:
-                    fileNodeConnections =  cmds.listConnections(i)
+                    fileNodeConnections = cmds.listConnections(i)
                     for j in fileNodeConnections:
-                        if cmds.nodeType(j) == "lambert" or cmds.nodeType(j) == "blinn" or cmds.nodeType(j) == "phong": # or other material types
+                        if cmds.nodeType(j) == "lambert" or cmds.nodeType(j) == "blinn" or cmds.nodeType(
+                                j) == "phong":  # or other material types
 
-                            #cmds.hyperShade(o = j)
-                            #objByMaterial = cmds.ls(sl=1, l=1)
+                            # cmds.hyperShade(o = j)
+                            # objByMaterial = cmds.ls(sl=1, l=1)
 
-                            #----------------------------------
+                            # ----------------------------------
                             objByMaterial = []
                             for x in objMatList:
                                 if j in x:
                                     objByMaterial.append(x[1])
-                            #----------------------------------
+                            # ----------------------------------
 
                             if len(objByMaterial) > 0:
                                 for obj in objByMaterial:
@@ -85,8 +87,8 @@ def main():
                                             if uArray[i] > maxU:
                                                 maxU = uArray[i]
 
-                                        diffV =  1 - (maxV-minV)
-                                        diffU =  1 - (maxU-minU)
+                                        diffV = 1 - (maxV - minV)
+                                        diffU = 1 - (maxU - minU)
 
                                         if diffV > emptySpacePercentage:
                                             tmp = []
@@ -94,11 +96,6 @@ def main():
                                             tmp.append(objName)
                                             returnList.append(tmp)
 
-
-
     OpenMaya.MGlobal.clearSelectionList()
 
-
-    return  returnList
-
-
+    return returnList

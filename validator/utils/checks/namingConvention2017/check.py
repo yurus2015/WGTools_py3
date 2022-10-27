@@ -1,11 +1,12 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 10001
 
 checkLabel = "Project/File/SceneObjects names 2017"
 
 
-def matchPattern(pattern = None, a = None):
+def matchPattern(pattern=None, a=None):
     if a in pattern:
         return True
     else:
@@ -19,17 +20,17 @@ def main():
     path = cmds.file(q=1, sn=1)
     pathSegments = path.split("/")[:-1]
 
-
     '''1st stage - folder name'''
 
     # hd_bld_SU _001 _ RichHouse
 
-    #patterns
+    # patterns
     objPrefix = ["hd"]
     objType = ["bld", "dec", "env", "gaf", "mle", "rw", "out"]
-    objNation = ["SU","EU","EUGB","EUNW","EUIT","AS","ASKR","ASCN","ASJP","SU","AM","AF","UNI"]
-    digits = ["0","1","2","3","4","5","6","7","8","9"]
-    alphabet = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
+    objNation = ["SU", "EU", "EUGB", "EUNW", "EUIT", "AS", "ASKR", "ASCN", "ASJP", "SU", "AM", "AF", "UNI"]
+    digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u",
+                "v", "w", "x", "y", "z"]
 
     valid = True
     message = None
@@ -51,12 +52,12 @@ def main():
         pass
 
     if len(partial_name) < 5:
-        #error
+        # error
         valid = False
         message = "The name of the project folder name is not valid (not enough words separated by '_')"
 
     elif len(partial_name) == 5:
-        #object
+        # object
         if valid:
             valid = matchPattern(objPrefix, partial_name[0])
             message = "Project folder name is not started with 'hd'"
@@ -87,7 +88,7 @@ def main():
                                         message = "Good Job"
 
     elif len(partial_name) == 4:
-        #hangar
+        # hangar
         if valid:
             valid = matchPattern(objPrefix, partial_name[0])
             message = "Project folder name is not started with 'hd'"
@@ -113,10 +114,9 @@ def main():
                         if valid:
                             message = "Good Job"
 
-
     '''2nd stage - scene name'''
 
-    fileName = cmds.file( q=True, sn=1, shn=1).split(".")[0]
+    fileName = cmds.file(q=True, sn=1, shn=1).split(".")[0]
 
     valid2 = True
     message2 = ""
@@ -125,22 +125,17 @@ def main():
         valid2 = False
         message2 = "This scene file name is not valid. The project folder name and the file name are different."
 
-
-
     '''3d stage - groups name'''
 
     topLevelDAG = cmds.ls(assemblies=1)
     cameras = cmds.listRelatives(cmds.ls(cameras=1), f=1, p=1)
-
 
     objects = []
     for i in topLevelDAG:
         if "|" + i not in cameras:
             objects.append(i)
 
-
     wrongObjects = []
-
 
     fileNameLength = len(fileName.split("_"))
 
@@ -149,10 +144,10 @@ def main():
 
             ii_len = len(ii.split("_"))
             ii_parts = ii.split("_")
-            #print 'TTT', ii_parts
+            # print 'TTT', ii_parts
 
             if ii_len == fileNameLength and ii != fileName:
-                    wrongObjects.append(["Object name and file name are different: " + str(ii), ii])
+                wrongObjects.append(["Object name and file name are different: " + str(ii), ii])
 
             elif ii_len > fileNameLength:
 
@@ -161,14 +156,13 @@ def main():
 
                 elif ii_len == 7:
                     if ii_parts[-1][0] not in digits or ii_parts[-2][0].lower() not in alphabet:
-                        wrongObjects.append(["Wrong object name. In extra name digits should come last: " + str(ii), ii])
+                        wrongObjects.append(
+                            ["Wrong object name. In extra name digits should come last: " + str(ii), ii])
 
                     if len(ii_parts[-1]) != 2:
                         wrongObjects.append(["Postfix number must have only two digits: " + str(ii), ii])
 
-
                     if ii_parts[-2][0].islower() and 'crash' not in ii_parts[-2]:
-
                         wrongObjects.append(["Postfix name should start with a capital character: " + str(ii), ii])
 
                 elif ii_len == 6:
@@ -187,20 +181,15 @@ def main():
 
                 wrongObjects.append(["Object name and the file name are different: " + str(ii), ii])
 
-
-
-
-
     ''' Compose '''
     if valid == False:
-        returnList.append([message,""])
+        returnList.append([message, ""])
 
     if valid2 == False:
-        returnList.append([message2,""])
+        returnList.append([message2, ""])
 
     if wrongObjects:
         for i in wrongObjects:
-
             returnList.append(i)
 
     return returnList

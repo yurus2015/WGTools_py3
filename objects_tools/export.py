@@ -1,18 +1,21 @@
 import importlib
 import objects_tools.utils as utl
+
 importlib.reload(utl)
 from objects_tools.utils import *
 import objects_tools.ui.gui as gui
+
 importlib.reload(gui)
 
 ARGUMENTS = 'noPrompt=1;bumpMapped=1;keep_material=1;copyExternalTextures=1;copyTexturesTo'
 EXPORT_MODE = 'exportMode=2;'
 VISUAL_SETTINGS = 'exportMode=static_with_nodes', 'keepMaterials', 'fixNodeTreeLOD'
+
+
 # CONSOLE = None
 
 
 def main(export_path=None):
-
     exporter = ObjectsExporter(export_path)
     exporter.run_export()
 

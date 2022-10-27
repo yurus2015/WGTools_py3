@@ -1,6 +1,6 @@
 import maya.OpenMaya as OpenMaya
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 9
 
 checkLabel = "8.3 Check faces without of material"

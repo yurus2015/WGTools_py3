@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import math
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 18
 checkLabel = "6.16 Check transformations of HP objests"
 

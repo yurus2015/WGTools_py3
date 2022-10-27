@@ -14,6 +14,7 @@ import simplygon_tools.gui.main_window as wnd
 
 print('Simplygon_Tools')
 
+
 def main():
     if cmds.window('SimplygonTanksWindow', q=True, exists=True):
         cmds.deleteUI('SimplygonTanksWindow')
@@ -27,7 +28,7 @@ def reload_all_modules():
     for m in list(sys.modules):
         if 'simplygon_tools' in m:
             print(m)
-            del(sys.modules[m])
+            del (sys.modules[m])
 
 
 if __name__ == '__main__':

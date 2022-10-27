@@ -1,26 +1,25 @@
-
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 16
 checkLabel = "1.14 Check Objects with history"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     objList = vl_listAllTransforms()
     returnList = []
 
     inputStd = ["joint", "tweak", "skinCluster", "mesh", "displayLayer"]
 
-    shapeArray = cmds.ls(type='mesh', dag=1, l = True)
+    shapeArray = cmds.ls(type='mesh', dag=1, l=True)
     if shapeArray:
-        polyArray = list(set(cmds.listRelatives(shapeArray, p=1, type="transform", f = True)))
+        polyArray = list(set(cmds.listRelatives(shapeArray, p=1, type="transform", f=True)))
 
         for obj in polyArray:
-            tmpListOfinputs = cmds.listHistory(obj, lf = 1, il = 1) #List objects which have inputs
+            tmpListOfinputs = cmds.listHistory(obj, lf=1, il=1)  # List objects which have inputs
             for i in tmpListOfinputs:
                 type = cmds.nodeType(i)
-                #if type != "joint" and type != "tweak" and type != "skinCluster" and type != "mesh" and type != "displayLayer":
+                # if type != "joint" and type != "tweak" and type != "skinCluster" and type != "mesh" and type != "displayLayer":
                 if type not in inputStd:
                     tmp = []
                     tmp.append(obj + " has an input node of type: " + type)
@@ -28,9 +27,6 @@ def main():
                     returnList.append(tmp)
                     break
 
-
-
     errorMessage = "Next objects still have a construction history:"
 
-
-    return  returnList
+    return returnList

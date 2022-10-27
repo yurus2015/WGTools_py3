@@ -6,14 +6,13 @@ checkLabel = "4.19 Correct UV-mapping of in-game track belts"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
     Tolerance = 0.002
 
-    #if its not a crush scene
-    rawFilePath = cmds.file (q=True, exn=True)
+    # if its not a crush scene
+    rawFilePath = cmds.file(q=True, exn=True)
     fileName = cmds.file(q=True, sn=True, shn=True)
-    if not"crash" in fileName:
+    if not "crash" in fileName:
 
         track_list = []
         track_list = cmds.ls("*track*", l=1, type="transform")
@@ -52,7 +51,8 @@ def main():
 
             if actualUpper - decimal < actualUpper - Tolerance:
                 tmp = []
-                tmp.append(DP.fullPathName() + " UVs must have " + str(float(actual)) + " or " + str(float(actual + 1)) +  " of V scale")
+                tmp.append(DP.fullPathName() + " UVs must have " + str(float(actual)) + " or " + str(
+                    float(actual + 1)) + " of V scale")
                 tmp.append(DP.fullPathName())
                 returnList.append(tmp)
 

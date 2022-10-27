@@ -252,7 +252,7 @@ class AutoSimplygon(object):
                 cmds.hyperShade(assign="tank_guns")
 
     def transferCrashData(self):
-        print ("Transfering UV data")
+        print("Transfering UV data")
         lod0 = cmds.ls("lod0", tr=1)[0]
         lod0_relatives = cmds.listRelatives(lod0, c=1, f=1)
 
@@ -380,7 +380,7 @@ class AutoSimplygon(object):
                             chassis_R.append(j)
                     if chassis_L: self.simplygonData.append(chassis_L)
                     if chassis_R: self.simplygonData.append(chassis_R)
-                    print ('chassis ', chassis_L, chassis_R)
+                    print('chassis ', chassis_L, chassis_R)
                 else:
                     self.simplygonData.append(self.inititalSelection[0])
             else:
@@ -471,10 +471,10 @@ class AutoSimplygon(object):
                 if enable == 'off':
                     subprocess.call('taskkill /F /IM Simplygon.Cloud.Yoda.Backend.LocalAgentGUI.exe',
                                     creationflags=CREATE_NO_WINDOW)
-                    print ('Kill agent')
+                    print('Kill agent')
                     gui = True
                 if enable == 'on':
-                    print ('Agent executed')
+                    print('Agent executed')
                     gui = True
 
             if 'LocalAgentService.exe' in line:
@@ -482,10 +482,10 @@ class AutoSimplygon(object):
                 if enable == 'off':
                     subprocess.call('taskkill /F /IM Simplygon.Cloud.Yoda.Backend.LocalAgentService.exe',
                                     creationflags=CREATE_NO_WINDOW)
-                    print ('Kill service')
+                    print('Kill service')
                     service = True
                 if enable == 'on':
-                    print ('Service executed', line)
+                    print('Service executed', line)
                     service = True
 
         if not gui and enable == 'on':  # when False
@@ -501,7 +501,7 @@ class AutoSimplygon(object):
         for x in range(10):
             try:
                 resultList = meval(command)
-                print ('EXPORTED!')
+                print('EXPORTED!')
                 break
             except Exception:
                 traceback.print_exc()
@@ -519,12 +519,12 @@ class AutoSimplygon(object):
                 meshName = i.split("|")[-1]
                 meshPath = i[:-1 * (len(meshName) + 1)]
                 meshPathList = meshPath.split("|")[1:]
-                print ('OBJECT COEFF MESH', i)
+                print('OBJECT COEFF MESH', i)
 
                 evalCommand = self.melCmdProxy()
                 resultList = self._send_to_simplygon(evalCommand)
 
-                print ('RESULT PRESET LIST ', resultList)
+                print('RESULT PRESET LIST ', resultList)
 
                 if resultList:
                     for j in resultList:
@@ -544,12 +544,12 @@ class AutoSimplygon(object):
                 groupPath = i
                 groupPathList = groupPath.split("|")[1:]
 
-                print ('OBJECT COEFF group', i)
+                print('OBJECT COEFF group', i)
 
                 evalCommand = self.melCmdProxy()
                 resultList = self._send_to_simplygon(evalCommand)
 
-                print ('RESULT PRESET LIST ', resultList)
+                print('RESULT PRESET LIST ', resultList)
 
                 if resultList:
                     for j in resultList:
@@ -568,12 +568,12 @@ class AutoSimplygon(object):
             elif Utils.checkType(i) == "list":
                 cmds.select(i)
 
-                print ('OBJECT COEFF list', i)
+                print('OBJECT COEFF list', i)
 
                 evalCommand = self.melCmdProxy()
                 resultList = self._send_to_simplygon(evalCommand)
 
-                print ('RESULT PRESET LIST ', resultList)
+                print('RESULT PRESET LIST ', resultList)
 
                 if resultList:
                     for j in resultList:
@@ -596,12 +596,12 @@ class AutoSimplygon(object):
                             elif "_R" in i[0]:
                                 cmds.rename(newDAGPath, "chassis_R")
 
-        print ('RECONNECT TEXTURES')
+        print('RECONNECT TEXTURES')
         Utils.reAssignTextures(sceneTextures)
 
     def runSimplygon(self):
-        print ('DATA TO SIMPLYGON ', self.simplygonData)
-        print ('DETACH TEXTURES')  # BUG WOTA-111852
+        print('DATA TO SIMPLYGON ', self.simplygonData)
+        print('DETACH TEXTURES')  # BUG WOTA-111852
         count1, count2, count3, lod_c1, lod_c2, lod_c3 = self.coeff_count[0], self.coeff_count[1], self.coeff_count[2], \
                                                          self.coeff_count[3], self.coeff_count[4], self.coeff_count[5]
         sceneTextures = Utils.clearTextures()
@@ -615,13 +615,13 @@ class AutoSimplygon(object):
                 meshPathList = meshPath.split("|")[1:]
 
                 coeff = self.typeCoeffReduce(i)
-                print ('OBJECT COEFF', i, coeff)
+                print('OBJECT COEFF', i, coeff)
 
                 lods_coff = [lod_c1 * coeff, lod_c2, lod_c3]
                 evalCommand = self.melCmdReduce(lods_coff)
                 resultList = self._send_to_simplygon(evalCommand)
 
-                print ('RESULT PRESET LIST ', resultList)
+                print('RESULT PRESET LIST ', resultList)
 
                 if resultList:
                     for j in resultList:
@@ -641,13 +641,13 @@ class AutoSimplygon(object):
                 groupPathList = groupPath.split("|")[1:]
 
                 coeff = self.typeCoeffReduce(i)
-                print ('OBJECT COEFF 2', i, coeff)
+                print('OBJECT COEFF 2', i, coeff)
 
                 lods_coff = [lod_c1 * coeff, lod_c2, lod_c3]
                 evalCommand = self.melCmdReduce(lods_coff)
                 resultList = self._send_to_simplygon(evalCommand)
 
-                print ('RESULT PRESET LIST ', resultList)
+                print('RESULT PRESET LIST ', resultList)
 
                 if resultList:
                     for j in resultList:
@@ -669,18 +669,18 @@ class AutoSimplygon(object):
 
             elif Utils.checkType(i) == "list":
                 cmds.select(i)
-                print ('LIST ', i)
+                print('LIST ', i)
                 tracks = cmds.ls('track_*')
                 cmds.select(tracks, d=1)
 
                 coeff = self.typeCoeffReduce(i)
-                print ('OBJECT COEFF', i, coeff)
+                print('OBJECT COEFF', i, coeff)
 
                 lods_coff = [lod_c1 * coeff, lod_c2, lod_c3]
                 evalCommand = self.melCmdReduce(lods_coff)
                 resultList = self._send_to_simplygon(evalCommand)
 
-                print ('RESULT PRESET LIST ', resultList)
+                print('RESULT PRESET LIST ', resultList)
 
                 if resultList:
                     for j in resultList:
@@ -712,7 +712,7 @@ class AutoSimplygon(object):
                             else:
                                 cmds.rename(newDAGPath, newName)
 
-        print ('RECONNECT TEXTURES')
+        print('RECONNECT TEXTURES')
         Utils.reAssignTextures(sceneTextures)
 
     def autoMapLayout(self):

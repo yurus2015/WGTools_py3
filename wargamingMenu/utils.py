@@ -3,7 +3,6 @@ import maya.OpenMaya as OpenMaya
 import maya.OpenMayaUI as OpenMayaUI
 import maya.OpenMayaRender as OpenMayaRender
 
-
 from PySide2 import QtGui, QtCore, QtWidgets
 from PySide2.QtGui import *
 from PySide2.QtCore import *
@@ -13,7 +12,9 @@ from shiboken2 import wrapInstance
 
 import os
 import json
-#import main as Main
+
+
+# import main as Main
 
 
 class Utils(object):
@@ -36,14 +37,13 @@ class Utils(object):
     def moveMenuPosition(cls, menu):
         main_window = cls.getWindowPointer().objectName()
         array_menu = cmds.window(main_window, q=1, menuArray=1)
-        cmds.window(main_window, e=1, menuIndex=[menu.objectName(), len(array_menu)-2])
+        cmds.window(main_window, e=1, menuIndex=[menu.objectName(), len(array_menu) - 2])
 
     @classmethod
     def uiRec(cls, p_parent, menuPtr):
         # Recursively look for the Maya's main QMenuBar
         for child in p_parent.children():
             if child.objectName() == "mainFileMenu":
-
                 menuPtr = child.parent()
                 return menuPtr
 
@@ -126,7 +126,7 @@ class Utils(object):
     def cleanUpJSON(cls):
         # clear json file
         currentFolder = cls.getCurrentDir().replace("\\", "\\\\")
-        jsonFile = open(currentFolder + '\\menu.json', 'w')   # Trying to create a new file
+        jsonFile = open(currentFolder + '\\menu.json', 'w')  # Trying to create a new file
         jsonFile.write("[\n]")
         jsonFile.close()
 

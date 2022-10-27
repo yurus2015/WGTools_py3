@@ -1,7 +1,7 @@
 
 import maya.cmds as cmds
 import maya.mel as mel
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 35
 checkLabel = "3.2 Check objects/faces without materials"
 

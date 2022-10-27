@@ -1,21 +1,20 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 28
 checkLabel = "3.1 Check names of materials"
 
-def main():
-    print('<< ' + checkLabel.upper() + ' >>')
 
+def main():
     validNamesList = vl_tanksMatValidNames()
 
     matData = listAllMat()
     returnList = []
 
-    #dom didom dom dom - KOSTIL'
-    rawFilePath = cmds.file (q=True, exn=True)
+    # dom didom dom dom - KOSTIL'
+    rawFilePath = cmds.file(q=True, exn=True)
     if "G_Tiger" in rawFilePath or "G45_G_Tiger" in rawFilePath:
         return returnList
-
 
     for x in range(len(matData)):
         valid = 0
@@ -29,21 +28,18 @@ def main():
             tmp.append(matData[x])
             returnList.append(tmp)
 
-
-
-
     for x in validNamesList:
-        pattern =  x.pattern
+        pattern = x.pattern
         try:
-            pattern = pattern.replace('\d','#')
+            pattern = pattern.replace('\d', '#')
         except:
             pass
         try:
-            pattern = pattern.replace('\Z','')
+            pattern = pattern.replace('\Z', '')
         except:
             pass
         try:
-            pattern = pattern.replace('^','')
+            pattern = pattern.replace('^', '')
         except:
             pass
         # helpStringList.append(pattern)
@@ -52,7 +48,7 @@ def main():
     for i in matData:
         if i.find("track_mat") != -1:
             track_mat.append(i)
-    if  track_mat:
+    if track_mat:
         if not len(track_mat) == 2:
             tmp = []
             tmp.append("The scene has more or less then 2 track_mat materials")
@@ -79,4 +75,4 @@ def main():
         tmp.append("")
         returnList.append(tmp)
 
-    return  returnList
+    return returnList

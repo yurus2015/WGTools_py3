@@ -4,6 +4,7 @@ import maya.OpenMaya as OpenMaya
 import maya.OpenMayaUI as OpenMayaUI
 import modelingToolset2019.utils.std as std_u
 
+
 def cleanup():
     selection = cmds.ls(sl=1, l=1, fl=1)
     mesh = None
@@ -14,10 +15,12 @@ def cleanup():
     cmds.selectMode(o=1, co=0)
     cmds.select(mesh)
 
-    mel.eval('polyCleanupArgList 4 { "0","1","0","0","0","0","0","0","0","1e-005","0","1e-005","0","1e-005","0","1","0","0" };')
+    mel.eval(
+        'polyCleanupArgList 4 { "0","1","0","0","0","0","0","0","0","1e-005","0","1e-005","0","1e-005","0","1","0","0" };')
 
     cmds.selectMode(co=1, o=0)
     cmds.select(selection)
+
 
 def getActiveCamera():
     try:
@@ -28,11 +31,12 @@ def getActiveCamera():
     except:
         return None, None
 
+
 def degreeToRad(degree):
-	return degree * 0.0175
+    return degree * 0.0175
+
 
 def getUVShells(uvList):
-
     shellData = []
 
     while uvList:
@@ -43,7 +47,6 @@ def getUVShells(uvList):
             shellData.append(shell)
 
         uvList = std_u.removeList(uvList, shell)
-
 
     return shellData
 
@@ -66,14 +69,14 @@ def get_shader(obj):
 
     return shader
 
-def get_texture_File(obj, channel = "color"):
 
+def get_texture_File(obj, channel="color"):
     file_node = None
 
     shader = get_shader(obj)
 
     if shader:
-        #get color connections
+        # get color connections
         incommingConnections = cmds.listConnections(shader + "." + channel)
 
         if not incommingConnections:
@@ -81,9 +84,9 @@ def get_texture_File(obj, channel = "color"):
 
         file_node = incommingConnections[0]
 
-    #bump specific feature
+    # bump specific feature
     if cmds.nodeType(file_node) == "bump2d":
-        incommingConnections = cmds.listConnections(file_node  + ".bumpValue")
+        incommingConnections = cmds.listConnections(file_node + ".bumpValue")
         if not incommingConnections:
             return None
         file_node = incommingConnections[0]
@@ -92,10 +95,9 @@ def get_texture_File(obj, channel = "color"):
 
 
 def get_color_Place2dTexture(obj):
-
     place2DTexture_node = None
 
-    file_node = get_texture_File(obj, channel = "color")
+    file_node = get_texture_File(obj, channel="color")
 
     if not file_node:
         return None
@@ -103,16 +105,15 @@ def get_color_Place2dTexture(obj):
     connections = list(set(cmds.listConnections(file_node, d=0, s=1)))
 
     if connections:
-        place2DTexture_node =  [i for i in connections if cmds.nodeType(i) == "place2dTexture"][0]
+        place2DTexture_node = [i for i in connections if cmds.nodeType(i) == "place2dTexture"][0]
 
     return place2DTexture_node
 
 
 def get_bump_Place2dTexture(obj):
-
     place2DTexture_node = None
 
-    file_node = get_texture_File(obj, channel = "normalCamera")
+    file_node = get_texture_File(obj, channel="normalCamera")
 
     if not file_node:
         return None
@@ -120,6 +121,6 @@ def get_bump_Place2dTexture(obj):
     connections = list(set(cmds.listConnections(file_node, d=0, s=1)))
 
     if connections:
-        place2DTexture_node =  [i for i in connections if cmds.nodeType(i) == "place2dTexture"][0]
+        place2DTexture_node = [i for i in connections if cmds.nodeType(i) == "place2dTexture"][0]
 
     return place2DTexture_node

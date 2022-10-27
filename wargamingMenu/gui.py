@@ -37,7 +37,7 @@ class WGAction(QAction):
         path = Utils.getCurrentDir() + "\\actions\\" + self.actionName + ".py"
         scriptFile = open(path, 'r')
         scriptIn = scriptFile.read()
-        exec (scriptIn)
+        exec(scriptIn)
 
 
 class WGWidgetAction_NULL(QWidgetAction):
@@ -199,7 +199,7 @@ class OptionButton(QPushButton):
 
     def buttonClick(self):
         OPTION_PATH = 'wargamingMenu.options.'
-        exec ('import ' + OPTION_PATH + self.action + '.main')
+        exec('import ' + OPTION_PATH + self.action + '.main')
         print('Action', OPTION_PATH + self.action + '.main.main()')
 
         self.returnUI = eval(OPTION_PATH + self.action + '.main.main()')

@@ -10,40 +10,38 @@ description = "Select object faces and click the tool"
 
 class ToolOptions(QWidget):
 
-	def __init__(self, parent = None):
+    def __init__(self, parent=None):
 
-		super(ToolOptions, self).__init__(parent)
+        super(ToolOptions, self).__init__(parent)
 
+        self.setLayout(self.createUI())
 
-		self.setLayout(self.createUI())
+    def createUI(self):
 
-	def createUI(self):
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(10)  # layout
+        self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
 
-		self.mainLayout = QVBoxLayout()
-		self.mainLayout.setContentsMargins(5,5,5,5)
-		self.mainLayout.setSpacing(10) #layout
-		self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
-
-		html = '''
+        html = '''
 		<b>Description:</b>
 		<p style="color: #aaa;">Detaches object`s faces without separates .</p>
 		'''
-		self.label  = QLabel(html)
+        self.label = QLabel(html)
 
+        self.mainLayout.addWidget(self.label)
 
-		self.mainLayout.addWidget(self.label)
+        return self.mainLayout
 
-		return self.mainLayout
+    def polyDetach(self):
+        bsp_face = cmds.filterExpand(ex=False, sm=34)
+        if bsp_face:
+            meval('DetachComponent')
+        else:
+            cmds.inViewMessage(amg='<hl>Please select faces that should be detached</hl>', pos='midCenter', fade=True,
+                               fot=1000)
+            return
 
-	def polyDetach(self):
-		bsp_face = cmds.filterExpand( ex=False, sm=34 )
-		if bsp_face:
-			meval('DetachComponent')
-		else:
-			cmds.inViewMessage(amg= '<hl>Please select faces that should be detached</hl>' , pos = 'midCenter', fade = True, fot = 1000)
-			return
-
-	# @classmethod
-	def main(self):
-		self.polyDetach()
-
+    # @classmethod
+    def main(self):
+        self.polyDetach()

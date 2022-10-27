@@ -12,6 +12,7 @@ from shiboken2 import wrapInstance
 import os
 import json
 
+
 class CtxMgr:
     """Safe way to manage group undo chunks using the 'with' command.
     It will close the chunk automatically on exit from the block
@@ -39,6 +40,7 @@ class CtxMgr:
             cmds.undoInfo(closeChunk=True)
             CtxMgr.openChunk = True
 
+
 def chunk(chunkName):
     """Undo decorator to name and group in a single chunk all commands
     inside the decorated callable."""
@@ -60,15 +62,16 @@ def chunk(chunkName):
         def wrapper(*args, **kwargs):
             with CtxMgr(chunkName):
                 return f(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
-
-def message(msg = None):
+def message(msg=None):
     if not msg:
         return
-    cmds.inViewMessage(amg= '<hl>' + msg + '</hl>' , pos = 'midCenter', fade = True, fot = 1000)
+    cmds.inViewMessage(amg='<hl>' + msg + '</hl>', pos='midCenter', fade=True, fot=1000)
 
 
 def log(text, *args):
@@ -78,12 +81,14 @@ def log(text, *args):
 
     print(message)
 
+
 def error(text, *args):
     message = "[MODELING TOOLSET ERROR] " + str(text) + " "
     for i in args:
         message += str(i) + " "
 
     print(message)
+
 
 def warning(text, *args):
     message = "[MODELING TOOLSET WARNING] " + str(text) + " "
@@ -92,25 +97,29 @@ def warning(text, *args):
 
     print(message)
 
+
 def getCurrentDir():
     # Get the place where this .py file is located
     path = str(os.path.dirname(__file__))
     return path
 
+
 def getRootDir():
-    #get root dir of the project
+    # get root dir of the project
     currentDir = getCurrentDir()
-    root = currentDir[ : len(currentDir) - len(currentDir.split("\\")[-1])  - 1]
+    root = currentDir[: len(currentDir) - len(currentDir.split("\\")[-1]) - 1]
     return root
 
+
 def getWindowPointer():
-    #Get and return Maya Main window pointer
+    # Get and return Maya Main window pointer
     main_window_ptr = OpenMayaUI.MQtUtil.mainWindow()
     qt_Maya_Window = wrapInstance(long(main_window_ptr), QMainWindow)
     return qt_Maya_Window
 
+
 def read_UI_JSON():
-    #read JSON data and return it
+    # read JSON data and return it
     currentFolder = getRootDir().replace("\\", "\\\\")
     jsonPath = currentFolder + '\\\\db.json'
 
@@ -122,13 +131,16 @@ def read_UI_JSON():
 
     return data
 
+
 def removeList(fromList, thisList):
-    resultList =  [n for n in fromList if n not in thisList]
+    resultList = [n for n in fromList if n not in thisList]
     resultList = list(resultList)
     return resultList
 
-def comprehensionList(A,B):
+
+def comprehensionList(A, B):
     return list(set(A) - set(B))
 
-def matchLists(A,B):
+
+def matchLists(A, B):
     return list(set(A) & set(B))

@@ -9,6 +9,7 @@ import maya.OpenMayaUI as omu
 import maya.mel as mel
 from PySide2.QtWidgets import *
 import style_catalog.utils.photoshop as phs
+
 reload(phs)
 
 LAYER = 'Detached'
@@ -64,7 +65,8 @@ def check_write_access(path):
 
 def list_directories(root):
     directories_list = [item for item in os.listdir(root) if os.path.isdir(os.path.join(root, item))]
-    print directories_list
+    print
+    directories_list
     return directories_list
 
 
@@ -162,7 +164,7 @@ def visible_layers(switch):
     for layer in layers:
         if layer != LAYER and layer != 'defaultLayer':
             print('LLL', layer)
-            cmds.setAttr(layer+'.visibility', switch)
+            cmds.setAttr(layer + '.visibility', switch)
 
 
 def default_layer_items():
@@ -434,7 +436,7 @@ def render_command():
     Settings.info_line.setText('TIPS: Render color image')
 
     # gray
-    cmds.setAttr(file_node+'.disableFileLoad', 1)
+    cmds.setAttr(file_node + '.disableFileLoad', 1)
     gray_image = render_image('gray.png')
     cmds.setAttr(file_node + '.disableFileLoad', 0)
     Settings.grey_render = gray_image
@@ -513,7 +515,7 @@ def create_normal_node(texture):
     cmds.defaultNavigation(connectToExisting=1, source=texture_file, destination=node)
     # alternative
     # connectAttr -f file1.outAlpha bump2d1.bumpValue;
-    cmds.setAttr(node+'.bumpInterp', 1)
+    cmds.setAttr(node + '.bumpInterp', 1)
     return node
 
 
@@ -525,10 +527,10 @@ def shading_mode():
         cmds.modelEditor(panel, edit=True, displayAppearance='smoothShaded', displayTextures=True)
         set_viewport(panel)
         camera = cmds.modelPanel(panel, q=True, cam=True)
-        show = cmds.getAttr(camera+'.displayResolution')
-        if not cmds.getAttr(camera+'.orthographic'):
-            cmds.setAttr(camera+'.displayResolution', not show)
-            cmds.setAttr(camera+'.displayFilmGate', not show)
+        show = cmds.getAttr(camera + '.displayResolution')
+        if not cmds.getAttr(camera + '.orthographic'):
+            cmds.setAttr(camera + '.displayResolution', not show)
+            cmds.setAttr(camera + '.displayFilmGate', not show)
             cmds.setAttr(camera + '.overscan', 1.3)
 
 
@@ -609,7 +611,6 @@ def export_command(root_path):
     items = cmds.ls(sl=True, tr=True, l=True)
     if items:
 
-
         cmds.select(items)
 
         try:
@@ -629,7 +630,7 @@ def export_command(root_path):
         capitalize_name = name.lower().capitalize()
         create_item_layer(capitalize_name)
         add_item_layer(capitalize_name, name)
-        rename_material(material, name.lower()+'_mat')
+        rename_material(material, name.lower() + '_mat')
         # cmds.rename(material, name.lower()+'_mat')
 
         # delete detached layer
@@ -669,7 +670,6 @@ def export_command(root_path):
 
 
 class Settings():
-
     """ Texture Maps """
     normal_map = None
     albedo_map = None

@@ -1,18 +1,20 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 33
 
 checkLabel = "1.9 Check layers of objects "
 
+
 def deleteCurrentLayers():
-    displayLayers = cmds.ls(type = "displayLayer", l=1)
+    displayLayers = cmds.ls(type="displayLayer", l=1)
     displayLayers.remove("defaultLayer")
     if displayLayers:
-    	cmds.delete(displayLayers)
+        cmds.delete(displayLayers)
+
 
 def main(*args):
-
-    fileName = cmds.file(q=1,sn=1)
+    fileName = cmds.file(q=1, sn=1)
 
     if not "collision" in fileName:
 
@@ -34,5 +36,3 @@ def main(*args):
                             displayLayers.append(layerName)
                             cmds.createDisplayLayer(n=layerName, empty=1)
                         cmds.editDisplayLayerMembers(layerName, rel)
-
-

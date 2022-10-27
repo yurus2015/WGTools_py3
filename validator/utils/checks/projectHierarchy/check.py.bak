@@ -3,7 +3,7 @@ import re
 import os
 import sys
 import os.path
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 39
 checkLabel = "1.4 Check SVN Structure"
 

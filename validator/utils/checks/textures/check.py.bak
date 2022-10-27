@@ -5,7 +5,7 @@ from os.path import isfile, join
 import maya.OpenMaya as OpenMaya
 from maya.mel import eval as meval
 import struct
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 44
 checkLabel = "Check texture propierties"
 

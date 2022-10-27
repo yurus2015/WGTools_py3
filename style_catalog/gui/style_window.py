@@ -7,10 +7,12 @@ from PySide2.QtWidgets import *
 from PySide2.QtGui import *
 from shiboken2 import wrapInstance
 import style_catalog.utils.utilites as utl
+
 reload(utl)
 import resource
 
 X_CATALOG = r'\\by1-wdstor-01.corp.wargaming.local\WOT_art_photogrammetry\Tanks_3DSt\Catalog'
+
 
 def get_window_pointer():
     # Get and return Maya Main window pointer
@@ -66,10 +68,11 @@ class CatalogWindow(QDialog):
         self.tools_help_button = CatalogButton(width=20, icon=':help.svg',
                                                cmd=lambda: self.clicked_help('Tools', utl.Settings.tools_help))
         self.material_help_button = CatalogButton(width=20, icon=':help.svg',
-                                               cmd=lambda: self.clicked_help('Textures and Material', utl.Settings.material_help))
+                                                  cmd=lambda: self.clicked_help('Textures and Material',
+                                                                                utl.Settings.material_help))
         self.render_help_button = CatalogButton(width=20, icon=':help.svg',
-                                                  cmd=lambda: self.clicked_help('Render',
-                                                                                utl.Settings.render_help))
+                                                cmd=lambda: self.clicked_help('Render',
+                                                                              utl.Settings.render_help))
 
         # material
         self.assign_button = CatalogButton('Create/Assign Material', utl.material_command)
@@ -87,7 +90,6 @@ class CatalogWindow(QDialog):
 
         self.texture_albedo.set_widget(self.texture_normal)
         self.texture_normal.set_widget(self.texture_albedo)
-
 
         # export
         self.export_broser_path = CatalogExportPath()
@@ -176,7 +178,7 @@ class CatalogExportWidget(QVBoxLayout):
         self.object_checkbox = QCheckBox('Create new object')  # todo separate class
         self.object_checkbox.toggled.connect(self.check_box_action)
         self.help_button = CatalogButton(width=20, icon=':help.svg',
-                                        cmd=lambda: self.clicked_help('Export', utl.Settings.export_help))
+                                         cmd=lambda: self.clicked_help('Export', utl.Settings.export_help))
         self.cb_layout.addWidget(self.object_checkbox)
         self.cb_layout.addWidget(self.help_button, alignment=Qt.AlignRight)
 
@@ -262,7 +264,8 @@ class CatalogGroupBox(QGroupBox):
     def __init__(self, parent=None, title=None):
         super(CatalogGroupBox, self).__init__(parent, title)
         self.setTitle(title)
-        self.setStyleSheet("QGroupBox {border: 1px solid #8C8C8C;margin-top: 0.5em;} QGroupBox::title {top: -8px;left: 18px;}")
+        self.setStyleSheet(
+            "QGroupBox {border: 1px solid #8C8C8C;margin-top: 0.5em;} QGroupBox::title {top: -8px;left: 18px;}")
 
 
 class CatalogVerticalLayout(QVBoxLayout):
@@ -347,7 +350,7 @@ class CatalogTextureBrowser(QHBoxLayout):
         self.height = 20
 
         self.line = QLineEdit()
-        self.line.setObjectName('Line_'+self.suffix)
+        self.line.setObjectName('Line_' + self.suffix)
         self.line.setMinimumWidth(200)
         self.line.setReadOnly(True)
         self.line.setEnabled(False)
@@ -365,7 +368,7 @@ class CatalogTextureBrowser(QHBoxLayout):
         maya_file = cmds.file(q=True, loc=True)
         file_path = os.path.dirname(maya_file)
         file_name = QFileDialog.getOpenFileName(None, 'Choose Texture', file_path, 'Image Files (*.tga)',
-                                               options=QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
+                                                options=QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
 
         if os.path.isfile(file_name[0]):
             texture_path = str(file_name[0])

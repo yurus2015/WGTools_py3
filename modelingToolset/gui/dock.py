@@ -1,15 +1,15 @@
-#import pymel.core as pm
+# import pymel.core as pm
 import maya.cmds as cmds
 import inspect
 import maya.OpenMayaUI as omui
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 from PySide2 import QtGui, QtCore, QtWidgets
 
-
 # Maya Bug introduced in 2018
 # Global holds all widgets restored from maya preferences so that qt doesnt garbage collect
 # them if they aren't currently visible (ex: in a docked tab that isn't the currently displayed tab).
 restored_widgets = []
+
 
 class DockManager(object):
     def __init__(self):
@@ -29,7 +29,7 @@ class DockManager(object):
         :param bool debug: Set to True to re-initialize an existing UI.
         '''
         # init dock manager
-        instance=cls()
+        instance = cls()
         # Test if tool is already open
         if cmds.workspaceControl(instance.window_name + 'WorkspaceControl', ex=True):
             # Used to bypass saved dock preferences in maya workspaces. Useful for testing without restarting maya
@@ -52,7 +52,8 @@ class DockManager(object):
             # Show widget and attach uiScript for restoring widget from maya close using class_name and module_name
             #  to define path to restore_from_close classmethod.
             # Import is in the uiScript to handle the case where it is not present in usersetup.py
-            workspace_widget.show(dockable=True, uiScript='import {0}\n{0}.{1}.restore_from_close()'.format(module_name, class_name))
+            workspace_widget.show(dockable=True,
+                                  uiScript='import {0}\n{0}.{1}.restore_from_close()'.format(module_name, class_name))
 
     @classmethod
     def restore_from_close(cls):

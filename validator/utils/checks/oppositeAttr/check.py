@@ -1,18 +1,17 @@
-
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 36
 checkLabel = "3.8 Check Objects with attribute 'Opposite' turned on"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     objList = vl_listAllTransforms()
     returnList = []
 
-    shapeArray = cmds.ls(type='mesh', dag=1, l = True)
+    shapeArray = cmds.ls(type='mesh', dag=1, l=True)
     if shapeArray:
-        polyArray = list(set(cmds.listRelatives(shapeArray, p=1, type="transform", f = True)))
+        polyArray = list(set(cmds.listRelatives(shapeArray, p=1, type="transform", f=True)))
 
         for obj in polyArray:
             try:
@@ -25,5 +24,4 @@ def main():
             except:
                 pass
 
-
-    return  returnList
+    return returnList

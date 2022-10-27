@@ -1,9 +1,9 @@
 icons:
-- checkerblue
-- checkergreen
-- checkerrainbow
-- checkerred
-- checkertricolor
-- checkertwocolor
-- crash_outside
-- ivozima
+  - checkerblue
+  - checkergreen
+  - checkerrainbow
+  - checkerred
+  - checkertricolor
+  - checkertwocolor
+  - crash_outside
+  - ivozima

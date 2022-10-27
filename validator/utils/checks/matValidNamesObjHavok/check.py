@@ -1,11 +1,11 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 1115
 checkLabel = "Check names of materials for 'havok' group"
 
 
 def main():
-
     print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
 
@@ -27,7 +27,5 @@ def main():
 
         if error:
             returnList.append([objShortName + " has materials which names doesn't start with 'n_'", objName])
-
-
 
     return returnList

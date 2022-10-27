@@ -1,12 +1,11 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 17
 checkLabel = "Check names of HP"
 
 
-
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     validNamesList = vl_tanksHPValidNames()
     objectData = vl_listHPModules()
     returnList = []
@@ -23,26 +22,20 @@ def main():
             tmp.append(objectData[x])
             returnList.append(tmp)
 
-
     for x in validNamesList:
-        pattern =  x.pattern
+        pattern = x.pattern
         try:
-            pattern = pattern.replace('\d','#')
+            pattern = pattern.replace('\d', '#')
         except:
             pass
         try:
-            pattern = pattern.replace('\Z','')
+            pattern = pattern.replace('\Z', '')
         except:
             pass
         try:
-            pattern = pattern.replace('^','')
+            pattern = pattern.replace('^', '')
         except:
             pass
         # helpStringList.append(pattern)
 
-
-
-
-    return  returnList
-
-
+    return returnList

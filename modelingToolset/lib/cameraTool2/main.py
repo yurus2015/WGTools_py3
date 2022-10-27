@@ -4,4 +4,5 @@ beautyName = "Camera Tool2"
 iconName = "Game Camera2"
 
 import TankViewer
+
 TankViewer.TankViewer.bridge()

@@ -23,15 +23,15 @@ class RadioDimensionLayout(QGridLayout):
         sets_group = QButtonGroup(self)
 
         for i in range(dimension_count):
-            button = RadioButton(str(dimension_start*128), not i)
+            button = RadioButton(str(dimension_start * 128), not i)
             button.toggled.connect(self.change_dimension)
             button.dim = dimension_start
-            dimension_start = dimension_start*2
+            dimension_start = dimension_start * 2
             dimension_group.addButton(button)
             self.addWidget(button, 0, i)
 
         for i in range(uv_sets_count):
-            button = RadioButton('map' + str(i+1), not i)
+            button = RadioButton('map' + str(i + 1), not i)
             button.toggled.connect(self.change_uvset)
             button.uv = str(i)
             sets_group.addButton(button)

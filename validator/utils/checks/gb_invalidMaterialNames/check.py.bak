@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 204
 checkLabel = "GB Check invalid material names"
 

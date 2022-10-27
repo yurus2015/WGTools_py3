@@ -4,8 +4,8 @@ import maya.OpenMaya as OpenMaya
 checkId = 106
 checkLabel = "Check polygons with zero Area"
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
 
     meshList = cmds.ls(type="mesh", l=1)
@@ -20,18 +20,18 @@ def main():
         selectionList.clear()
         selectionList.add(i)
 
-        #get dag and mobject
+        # get dag and mobject
         DagPath = OpenMaya.MDagPath()
         mObj = OpenMaya.MObject()
         selectionList.getDagPath(0, DagPath, mObj)
 
-        #iterator component
+        # iterator component
         component = OpenMaya.MObject()
 
-        #iterate
+        # iterate
         geomIter = OpenMaya.MItMeshPolygon(DagPath, component)
 
-        #create double pointer
+        # create double pointer
         number = OpenMaya.MScriptUtil()
         number.createFromDouble(0.0)
         numPointer = number.asDoublePtr()
@@ -42,7 +42,7 @@ def main():
 
             resultArea = OpenMaya.MScriptUtil(numPointer).asDouble()
             if resultArea <= areaTolerance:
-                #get face id
+                # get face id
                 faceId = geomIter.index()
                 tmp = []
                 tmp.append(i + ".f[" + str(faceId) + "]")
@@ -51,4 +51,4 @@ def main():
 
             next(geomIter)
 
-    return  returnList
+    return returnList

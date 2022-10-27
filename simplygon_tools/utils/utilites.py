@@ -109,7 +109,7 @@ def restore_normals(meshes):
     objects = cmds.filterExpand(sm=12)
     if objects:
         cmds.delete(objects, ch=1)
-        cmds.selectUVBorderEdge(he=1) # techart plugin command
+        cmds.selectUVBorderEdge(he=1)  # techart plugin command
         cmds.select(objects)
 
 

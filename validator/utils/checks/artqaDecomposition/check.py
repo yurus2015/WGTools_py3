@@ -5,14 +5,15 @@ NODE = 'hkdConvexDecompositionAction'
 
 
 def main():
-	print('<< ' + checkLabel.upper() + ' >>')
-	return_list = []
+    #
 
-	decomps = cmds.ls(type = NODE)
-	for node in decomps:
-		tmp = []
-		tmp.append("Scene contains Decomposition Node")
-		tmp.append(node)
-		return_list.append(tmp)
+    return_list = []
 
-	return return_list
+    decomps = cmds.ls(type=NODE)
+    for node in decomps:
+        tmp = []
+        tmp.append("Scene contains Decomposition Node")
+        tmp.append(node)
+        return_list.append(tmp)
+
+    return return_list

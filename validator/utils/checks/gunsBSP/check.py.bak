@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 import re
 
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 14
 
 checkLabel = "Check BSP of guns"

@@ -13,7 +13,6 @@ import math
 import modelingToolset2019.utils.scene as scene_u
 import modelingToolset2019.utils.std as std_u
 
-
 description = "Select uv / uv shell / a couple of uvs that share the same edge"
 buttonType = "opt"
 beautyName = "UV Shell alignment"
@@ -22,18 +21,17 @@ iconName = "Align UV Shell"
 
 class ToolOptions(QWidget):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
 
         super(ToolOptions, self).__init__(parent)
-
 
         self.setLayout(self.createUI())
 
     def createUI(self):
 
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(5,5,5,5)
-        self.mainLayout.setSpacing(10) #layout
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(10)  # layout
         self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
 
         html = '''
@@ -51,26 +49,23 @@ class ToolOptions(QWidget):
         <br>
 
         '''
-        self.label  = QLabel(html)
+        self.label = QLabel(html)
 
         self.mainLayout.addWidget(self.label)
 
-
         return self.mainLayout
 
-
     def applyAutoRotate(self):
-        selection = cmds.ls(sl=1,l=1,fl=1)
+        selection = cmds.ls(sl=1, l=1, fl=1)
         if not selection: return
 
         denisevichPath = str(os.path.dirname(__file__)) + "\\autoRotate.mel"
-        fix =  denisevichPath.replace("\\", "/")
-        mel.eval('source "'+fix+'"')
+        fix = denisevichPath.replace("\\", "/")
+        mel.eval('source "' + fix + '"')
         mel.eval('rotateUvShells()')
 
-
     def findLongestEdgeUVsInShell(self, uvShell):
-        #conver it to edges
+        # conver it to edges
         selectedEdgeList = cmds.ls(cmds.polyListComponentConversion(uvShell, fuv=1, te=1), l=1, fl=1)
         cmds.select(selectedEdgeList)
 
@@ -84,13 +79,13 @@ class ToolOptions(QWidget):
 
             if len(ourTwoUVs) == 2:
                 uvA = cmds.polyEditUV(ourTwoUVs[0], q=1, u=1, v=1)
-                uvA[0] = float(round(uvA[0],3))
-                uvA[1] = float(round(uvA[1],3))
+                uvA[0] = float(round(uvA[0], 3))
+                uvA[1] = float(round(uvA[1], 3))
                 uvB = cmds.polyEditUV(ourTwoUVs[1], q=1, u=1, v=1)
-                uvB[0] = float(round(uvB[0],3))
-                uvB[1] = float(round(uvB[1],3))
+                uvB[0] = float(round(uvB[0], 3))
+                uvB[1] = float(round(uvB[1], 3))
 
-                length = math.sqrt((uvB[0] - uvA[0])*(uvB[0] - uvA[0]) + (uvB[1] - uvA[1])*(uvB[1] - uvA[1]))
+                length = math.sqrt((uvB[0] - uvA[0]) * (uvB[0] - uvA[0]) + (uvB[1] - uvA[1]) * (uvB[1] - uvA[1]))
                 if length > highestLength:
                     highestLength = length
                     uvCouple = ourTwoUVs
@@ -101,23 +96,23 @@ class ToolOptions(QWidget):
             return [uvShell[0], uvShell[1]]
 
     def twoUVNotConnected(self):
-        selection = cmds.ls(sl=1,l=1,fl=1)
+        selection = cmds.ls(sl=1, l=1, fl=1)
         if not len(selection) == 2: return
 
-        #vectorA  = (1,0,0)
+        # vectorA  = (1,0,0)
         vectorA = OpenMaya.MVector(OpenMaya.MVector.xAxis)
 
-        #first uv from list
-        uv1 = cmds.polyEditUV(selection[0], q=1, u=1, v = 1)
+        # first uv from list
+        uv1 = cmds.polyEditUV(selection[0], q=1, u=1, v=1)
         uv1[0] = round(uv1[0], 3)
         uv1[1] = round(uv1[1], 3)
 
-        #second uv from list
-        uv2 = cmds.polyEditUV(selection[1], q=1, u=1, v = 1)
+        # second uv from list
+        uv2 = cmds.polyEditUV(selection[1], q=1, u=1, v=1)
         uv2[0] = round(uv2[0], 3)
         uv2[1] = round(uv2[1], 3)
 
-        #calculate vectorB.  PointA.y > PointB.y
+        # calculate vectorB.  PointA.y > PointB.y
         pointA, pointB = None, None
         if uv1[1] > uv2[1]:
             pointA = OpenMaya.MPoint(uv1[0], uv1[1], 0)
@@ -126,11 +121,11 @@ class ToolOptions(QWidget):
             pointA = OpenMaya.MPoint(uv2[0], uv2[1], 0)
             pointB = OpenMaya.MPoint(uv1[0], uv1[1], 0)
 
-        #VectorB = B->A (A always higher)
+        # VectorB = B->A (A always higher)
         vectorB = OpenMaya.MVector(pointA.x - pointB.x, pointA.y - pointB.y, pointA.z - pointB.z)
         vectorB.normalize()
         angleBetweenRad = vectorA.angle(vectorB)
-        angleBetweenEul =  (vectorA.angle(vectorB) * 180)/3.14159265359
+        angleBetweenEul = (vectorA.angle(vectorB) * 180) / 3.14159265359
 
         selectedUVs = cmds.ls(cmds.polyListComponentConversion(selection, tuv=1), l=1, fl=1)
         uvShells = scene_u.getUVShells(selectedUVs)
@@ -153,22 +148,20 @@ class ToolOptions(QWidget):
             if angleBetweenEul > 135:
                 rotate = 180 - angleBetweenEul
 
-        cmds.polyEditUVShell(rot = 1, angle = rotate, pu = pointB.x, pv = pointB.y)
+        cmds.polyEditUVShell(rot=1, angle=rotate, pu=pointB.x, pv=pointB.y)
         cmds.select(selection)
-
 
     def main(self):
 
         scene_u.cleanup()
 
-        #get the selection
-        selection = cmds.ls(sl=1,l=1,fl=1)
+        # get the selection
+        selection = cmds.ls(sl=1, l=1, fl=1)
 
-        #nothing is selected - cancel operation
+        # nothing is selected - cancel operation
         if not selection: return
 
-
-        #check if user selected two adjacent UVs or an edge
+        # check if user selected two adjacent UVs or an edge
         if len(selection) == 2 and ".map[" in selection[0] and ".map[" in selection[1]:
             edgelistA = cmds.ls(cmds.polyListComponentConversion(selection[0], te=1), l=1, fl=1)
             edgelistB = cmds.ls(cmds.polyListComponentConversion(selection[1], te=1), l=1, fl=1)
@@ -217,21 +210,20 @@ class ToolOptions(QWidget):
             # cmds.select(selection)
             return
 
-
-        #if user selected object - show confirm dialog
-        if ".vtx[" not in selection[0] and ".f[" not in selection[0] and ".e[" not in selection[0] and ".map[" not in selection[0]:
+        # if user selected object - show confirm dialog
+        if ".vtx[" not in selection[0] and ".f[" not in selection[0] and ".e[" not in selection[0] and ".map[" not in \
+                selection[0]:
             # cmds.inViewMessage(amg= '<hl>You have selected a whole mesh</hl>' , pos = 'midCenter', fade = True, fot = 1000)
             result = cmds.confirmDialog(
-                        title='Warning',\
-                        button=['Continue','Cancel'],\
-                        message='You have selected a polygonal mesh. <b style="color: #fff">It can take time to align all UV shells</b>. <br><br>Do you want to continue?',\
-                        cancelButton='Cancel',\
-                        dismissString='Cancel')
+                title='Warning', \
+                button=['Continue', 'Cancel'], \
+                message='You have selected a polygonal mesh. <b style="color: #fff">It can take time to align all UV shells</b>. <br><br>Do you want to continue?', \
+                cancelButton='Cancel', \
+                dismissString='Cancel')
             if result == 'Cancel':
                 return
 
-
-        #whatever is selected convert selection to UV Shells and work on each shell separately
+        # whatever is selected convert selection to UV Shells and work on each shell separately
         selectedUVs = cmds.ls(cmds.polyListComponentConversion(selection, tuv=1), l=1, fl=1)
         uvShells = scene_u.getUVShells(selectedUVs)
 

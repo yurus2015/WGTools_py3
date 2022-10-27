@@ -13,23 +13,25 @@ algorithm
 import maya.cmds as cmds
 from maya.mel import eval as meval
 
+
 def checkSelection():
-	if cmds.filterExpand( sm=(34,35) ):
-		return True
-	else:
-		return False
+    if cmds.filterExpand(sm=(34, 35)):
+        return True
+    else:
+        return False
+
 
 def convert2shell():
-	meval('polySelectBorderShell 0;')
+    meval('polySelectBorderShell 0;')
+
 
 def boundingBox():
-	coord = cmds.polyEvaluate( bc2=True )
-	return coord
+    coord = cmds.polyEvaluate(bc2=True)
+    return coord
+
 
 def gridUV():
-	gridDiv = cmds.optionVar( q='textureWindowGridDivisions' )
-	gridSps = cmds.optionVar( q='textureWindowGridSpacing' )
+    gridDiv = cmds.optionVar(q='textureWindowGridDivisions')
+    gridSps = cmds.optionVar(q='textureWindowGridSpacing')
 
-	return gridDiv/gridSps
-
-
+    return gridDiv / gridSps

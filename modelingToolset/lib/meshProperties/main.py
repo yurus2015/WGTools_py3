@@ -10,7 +10,6 @@ from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 import os
 
-
 description = "Setups a mesh with correct attributes"
 buttonType = "opt"
 beautyName = "Mesh Properties"
@@ -18,21 +17,20 @@ beautyName = "Mesh Properties"
 
 class ToolOptions(QWidget):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
 
         super(ToolOptions, self).__init__(parent)
-
 
         self.setLayout(self.createUI())
 
     def createUI(self):
 
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(5,5,5,5)
-        self.mainLayout.setSpacing(5) #layout
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(5)  # layout
         self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
 
-        self.label  = QLabel("""
+        self.label = QLabel("""
                                     <b>Description:</b>
                                     <p>Prepares scene options</p>
                                     <p>
@@ -65,15 +63,12 @@ class ToolOptions(QWidget):
 
         return self.mainLayout
 
-
     # @classmethod
     def main(self):
 
-
         '''fix meshes'''
-        meshList = cmds.ls(type="mesh",l=1)
+        meshList = cmds.ls(type="mesh", l=1)
         transformList = cmds.ls(type="transform", l=1)
-
 
         if meshList:
             for i in meshList:
@@ -82,18 +77,16 @@ class ToolOptions(QWidget):
                 # if not shapeNode:
                 #     continue
                 # cmds.setAttr(i + ".displayHandle",0)
-                cmds.setAttr(i + ".doubleSided",1)
-                cmds.setAttr(i + ".backfaceCulling",0)
-                cmds.setAttr(i + ".displayBorders",1)
-                cmds.setAttr(i + ".vertexNormalMethod",3)
+                cmds.setAttr(i + ".doubleSided", 1)
+                cmds.setAttr(i + ".backfaceCulling", 0)
+                cmds.setAttr(i + ".displayBorders", 1)
+                cmds.setAttr(i + ".vertexNormalMethod", 3)
 
-                cmds.setAttr(i + ".displayCenter",0)
-                cmds.setAttr(i + ".displayNormal",0)
+                cmds.setAttr(i + ".displayCenter", 0)
+                cmds.setAttr(i + ".displayNormal", 0)
 
         if transformList:
             for i in transformList:
-                cmds.setAttr(i + ".displayHandle",0)
-                cmds.setAttr(i + ".displayRotatePivot",0)
-                cmds.setAttr(i + ".displayScalePivot",0)
-
-
+                cmds.setAttr(i + ".displayHandle", 0)
+                cmds.setAttr(i + ".displayRotatePivot", 0)
+                cmds.setAttr(i + ".displayScalePivot", 0)

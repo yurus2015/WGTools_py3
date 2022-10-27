@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 415
 
 checkLabel = "6.5 Check layers of BSP "
@@ -10,14 +11,16 @@ def removeDupplicateList(currentList):
     resultList = list(set(currentList))
     return resultList
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
+    #
+
     all_additional = []
     returnList = []
 
-    bsp = cmds.ls('*_bsp', tr =1, l=1)
-    ramp = cmds.ls('*_ramp', tr =1, l=1)
-    wall = cmds.ls('s_wall0*', tr =1, l=1)
+    bsp = cmds.ls('*_bsp', tr=1, l=1)
+    ramp = cmds.ls('*_ramp', tr=1, l=1)
+    wall = cmds.ls('s_wall0*', tr=1, l=1)
 
     if bsp:
         all_additional.extend(bsp)
@@ -30,7 +33,7 @@ def main():
         all_additional = removeDupplicateList(all_additional)
 
         for obj in all_additional:
-            layer = cmds.listConnections(obj, type =  'displayLayer')
+            layer = cmds.listConnections(obj, type='displayLayer')
             if layer == None:
                 tmp = []
                 tmp.append(obj + " - attached to a wrong layer")
@@ -43,11 +46,4 @@ def main():
                 tmp.append(obj)
                 returnList.append(tmp)
 
-
     return returnList
-
-
-
-
-
-

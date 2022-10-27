@@ -10,41 +10,39 @@ from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 import os
 
-
 description = "Set all meshes uv_sets to map1"
 buttonType = "opt"
-#beautyName = "Hard/Soft Edges Fix"
-#iconName = "Hard/Soft Edges Fix"
+
+
+# beautyName = "Hard/Soft Edges Fix"
+# iconName = "Hard/Soft Edges Fix"
 
 class ToolOptions(QWidget):
 
-	def __init__(self, parent = None):
+    def __init__(self, parent=None):
 
-		super(ToolOptions, self).__init__(parent)
+        super(ToolOptions, self).__init__(parent)
 
+        self.setLayout(self.createUI())
 
-		self.setLayout(self.createUI())
+    def createUI(self):
 
-	def createUI(self):
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(5)  # layout
+        self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
 
-		self.mainLayout = QVBoxLayout()
-		self.mainLayout.setContentsMargins(5,5,5,5)
-		self.mainLayout.setSpacing(5) #layout
-		self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
+        self.label = QLabel("<b>Set all meshes uv_sets to map1</p>")
 
-		self.label  = QLabel("<b>Set all meshes uv_sets to map1</p>")
+        self.mainLayout.addWidget(self.label)
 
-		self.mainLayout.addWidget(self.label)
+        return self.mainLayout
 
-		return self.mainLayout
+    def main(self):
 
-
-	def main(self):
-
-		meshes = cmds.ls(type = 'mesh')
-		for i in meshes:
-			try:
-				cmds.polyUVSet(i, currentUVSet=True,  uvSet='map1')
-			except:
-				print((i + ' doesn`t have map1'))
-
+        meshes = cmds.ls(type='mesh')
+        for i in meshes:
+            try:
+                cmds.polyUVSet(i, currentUVSet=True, uvSet='map1')
+            except:
+                print((i + ' doesn`t have map1'))

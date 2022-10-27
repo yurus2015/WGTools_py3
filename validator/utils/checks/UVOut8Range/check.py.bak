@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 532
 checkLabel = "Check UVs out of 8 textures range"
 

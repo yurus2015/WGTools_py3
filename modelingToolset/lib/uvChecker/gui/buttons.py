@@ -4,6 +4,7 @@ from PySide2.QtWidgets import *
 import os
 import importlib
 import modelingToolset.lib.uvChecker.utils.util as Util
+
 importlib.reload(Util)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 

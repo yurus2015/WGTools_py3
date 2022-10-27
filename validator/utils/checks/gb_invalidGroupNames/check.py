@@ -1,5 +1,6 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 203
 checkLabel = "GB Check invalid group names"
 
@@ -14,11 +15,11 @@ def getGroups():
 
     return groups
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
 
-    availableGroups = ["|collision",  "|collision|chassis"]
+    availableGroups = ["|collision", "|collision|chassis"]
     groups = getGroups()
 
     for i in groups:
@@ -29,4 +30,3 @@ def main():
             returnList.append(tmp)
 
     return returnList
-

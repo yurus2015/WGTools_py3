@@ -1,5 +1,5 @@
 {
-    "names": [
-        "^(n_|d_)(wood|stone|metal)\\Z"
-        ]
+  "names": [
+    "^(n_|d_)(wood|stone|metal)\\Z"
+  ]
 }

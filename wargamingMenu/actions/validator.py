@@ -9,4 +9,5 @@ for i in sys.modules.keys():
             del sys.modules[i]
 
 import validator.main as vld
+
 vld.main(autoload=False)

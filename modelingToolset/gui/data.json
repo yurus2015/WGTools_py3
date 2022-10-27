@@ -1,269 +1,146 @@
 {
-
-	"01.Modeling Tools":
-		{
-			"01.combineObjects":
-			[
-			"Combine Objects",
-			"combineObjects"
-
-			],
-
-			"02.detachSeparate":
-			[
-
-			"Detach Separate",
-			"detachSeparate"
-
-			],
-
-			"03.duplicateSeparate":
-			[
-
-			"Duplicate Separate",
-			"duplicateSeparate"
-
-			],
-
-			"04.o_mukina":
-			[
-
-			"Detach",
-			"detach"
-
-			],
-
-
-			"04.vertexAlign":
-			[
-
-			"Vertex Align",
-			"vertexAlign"
-
-			]
-
-
-		},
-	"03.Check Tools":
-		{
-
-			"02.texel":
-			[
-
-			"Calculate Texel",
-			"texel"
-			],
-
-			"021.texelHUD":
-			[
-
-			"Texel Colorizer",
-			"texelHUD"
-			],
-
-			"022.distortion":
-			[
-
-			"Real Distortion UV",
-			"distortion"
-			],
-
-			"03.uvChecker":
-			[
-
-			"UV Checker",
-			"uvChecker"
-			],
-
-			"031.normalChecker":
-			[
-
-			"UV Normal Checker",
-			"normalChecker"
-			],
-
-			"032.paddingChecker":
-			[
-
-			"Padding Checker",
-			"padding"
-			],
-
-			"04.xray":
-			[
-
-			"Xray",
-			"xray"
-			],
-
-			"05.exposeGeo":
-			[
-
-			"Expose Geometry",
-			"exposeGeo"
-			],
-
-			"06.wheelAnimation":
-			[
-
-			"Wheel Animation",
-			"wheelAnimation"
-			],
-
-			"07.trackAnimation":
-			[
-
-			"Track Animation",
-			"trackAnimation"
-			],
-
-			"08.validator":
-			[
-
-			"Validator",
-			"validator"
-			],
-
-			"09.vertexCount":
-			[
-
-			"Vertex Count",
-			"vertexCount"
-			],
-
-			"10.camera Tool2":
-			[
-
-			"CameraTool2",
-			"cameraTool2"
-			],
-
-			"11.diameter":
-			[
-
-			"Diameter",
-			"diameter"
-			],
-
-			"12.vertexDistance":
-			[
-
-			"Two Vertex Distance",
-			"vertexDistHUD"
-			],
-
-			"13.edgeDistance":
-			[
-
-			"Two Edge Distance",
-			"edgeDistHUD"
-			]
-
-
-		},
-
-	"02.UV Mapping Tools":
-		{
-			"01.textureEditor":
-			[
-
-			"Texture Editor",
-			"textureEditor"
-
-			],
-
-			"02.hardSoftEdges":
-			[
-
-			"Hard/Soft Mapping",
-			"automap"
-
-			],
-
-			"03.automapNinja":
-			[
-
-			"Polygon Mapping",
-			"automapNinja"
-
-			],
-
-			"04.fixUnfold":
-			[
-
-			"Fix UV",
-			"fixUnfold"
-
-			],
-			"05.texelScale":
-			[
-
-			"Texel Scale",
-			"texelScale"
-
-			],
-			"06.alignShellVH":
-			[
-
-			"Align UV Shell",
-			"alignShellVH"
-
-			],
-			"07.straighten":
-			[
-
-			"Straighten",
-			"straighten"
-
-			],
-			"08.fixUV":
-			[
-
-			"UV Utils",
-			"fixUV"
-
-			],
-			"09.mapAlign":
-			[
-
-			"Map Align",
-			"mapAlign"
-
-			],
-			"10.shellScale":
-			[
-
-			"Shell Scale",
-			"shellScale"
-
-			]
-		},
-
-	"04.Utilities":
-		{
-			"01.scenePrepare":
-			[
-
-			"Scene Prepare",
-			"scenePrepare"
-
-			],
-
-			"02.hardSoftEdges":
-			[
-
-			"Hard/Soft Edges",
-			"hardSoftEdges"
-
-			],
-
-			"03.setToMap1":
-			[
-
-			"Set all uv-sets map1",
-			"setToMap1"
-
-			]
-
-		}
+  "01.Modeling Tools": {
+    "01.combineObjects": [
+      "Combine Objects",
+      "combineObjects"
+    ],
+    "02.detachSeparate": [
+      "Detach Separate",
+      "detachSeparate"
+    ],
+    "03.duplicateSeparate": [
+      "Duplicate Separate",
+      "duplicateSeparate"
+    ],
+    "04.o_mukina": [
+      "Detach",
+      "detach"
+    ],
+    "04.vertexAlign": [
+      "Vertex Align",
+      "vertexAlign"
+    ]
+  },
+  "03.Check Tools": {
+    "02.texel": [
+      "Calculate Texel",
+      "texel"
+    ],
+    "021.texelHUD": [
+      "Texel Colorizer",
+      "texelHUD"
+    ],
+    "022.distortion": [
+      "Real Distortion UV",
+      "distortion"
+    ],
+    "03.uvChecker": [
+      "UV Checker",
+      "uvChecker"
+    ],
+    "031.normalChecker": [
+      "UV Normal Checker",
+      "normalChecker"
+    ],
+    "032.paddingChecker": [
+      "Padding Checker",
+      "padding"
+    ],
+    "04.xray": [
+      "Xray",
+      "xray"
+    ],
+    "05.exposeGeo": [
+      "Expose Geometry",
+      "exposeGeo"
+    ],
+    "06.wheelAnimation": [
+      "Wheel Animation",
+      "wheelAnimation"
+    ],
+    "07.trackAnimation": [
+      "Track Animation",
+      "trackAnimation"
+    ],
+    "08.validator": [
+      "Validator",
+      "validator"
+    ],
+    "09.vertexCount": [
+      "Vertex Count",
+      "vertexCount"
+    ],
+    "10.camera Tool2": [
+      "CameraTool2",
+      "cameraTool2"
+    ],
+    "11.diameter": [
+      "Diameter",
+      "diameter"
+    ],
+    "12.vertexDistance": [
+      "Two Vertex Distance",
+      "vertexDistHUD"
+    ],
+    "13.edgeDistance": [
+      "Two Edge Distance",
+      "edgeDistHUD"
+    ]
+  },
+  "02.UV Mapping Tools": {
+    "01.textureEditor": [
+      "Texture Editor",
+      "textureEditor"
+    ],
+    "02.hardSoftEdges": [
+      "Hard/Soft Mapping",
+      "automap"
+    ],
+    "03.automapNinja": [
+      "Polygon Mapping",
+      "automapNinja"
+    ],
+    "04.fixUnfold": [
+      "Fix UV",
+      "fixUnfold"
+    ],
+    "05.texelScale": [
+      "Texel Scale",
+      "texelScale"
+    ],
+    "06.alignShellVH": [
+      "Align UV Shell",
+      "alignShellVH"
+    ],
+    "07.straighten": [
+      "Straighten",
+      "straighten"
+    ],
+    "08.fixUV": [
+      "UV Utils",
+      "fixUV"
+    ],
+    "09.mapAlign": [
+      "Map Align",
+      "mapAlign"
+    ],
+    "10.shellScale": [
+      "Shell Scale",
+      "shellScale"
+    ]
+  },
+  "04.Utilities": {
+    "01.scenePrepare": [
+      "Scene Prepare",
+      "scenePrepare"
+    ],
+    "02.hardSoftEdges": [
+      "Hard/Soft Edges",
+      "hardSoftEdges"
+    ],
+    "03.setToMap1": [
+      "Set all uv-sets map1",
+      "setToMap1"
+    ]
+  }
 }

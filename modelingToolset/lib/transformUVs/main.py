@@ -18,22 +18,19 @@ beautyName = "Transform UVs"
 iconName = "Transform UVs"
 
 
-
-
 class ToolOptions(QWidget):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
 
         super(ToolOptions, self).__init__(parent)
-
 
         self.setLayout(self.createUI())
 
     def createUI(self):
 
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(5,5,5,5)
-        self.mainLayout.setSpacing(10) #layout
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(10)  # layout
         self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
 
         html = '''
@@ -41,20 +38,19 @@ class ToolOptions(QWidget):
         <p style="color: #aaa;">Transforms and deforms UV shells</p>
         '''
 
-        self.label  = QLabel(html)
+        self.label = QLabel(html)
 
         self.btn_moveLeft = QPushButton("<-- Move Left")
-        self.btn_moveLeft.clicked.connect(lambda x = "mleft": self.transformUVs(x))
+        self.btn_moveLeft.clicked.connect(lambda x="mleft": self.transformUVs(x))
 
         self.btn_moveRight = QPushButton("--> Move Right")
-        self.btn_moveRight.clicked.connect(lambda x = "mright": self.transformUVs(x))
+        self.btn_moveRight.clicked.connect(lambda x="mright": self.transformUVs(x))
 
         self.btn_squeeze = QPushButton("x.5 Squeeze")
-        self.btn_squeeze.clicked.connect(lambda x = "squeeze": self.transformUVs(x))
+        self.btn_squeeze.clicked.connect(lambda x="squeeze": self.transformUVs(x))
 
         self.btn_stretch = QPushButton("x2 Stretch")
-        self.btn_stretch.clicked.connect(lambda x = "stretch": self.transformUVs(x))
-
+        self.btn_stretch.clicked.connect(lambda x="stretch": self.transformUVs(x))
 
         self.move_layout = QHBoxLayout()
         self.move_layout.addWidget(self.btn_moveLeft)
@@ -68,11 +64,9 @@ class ToolOptions(QWidget):
         self.mainLayout.addLayout(self.move_layout)
         self.mainLayout.addLayout(self.deform_layout)
 
-
         return self.mainLayout
 
-
-    def transformUVs(self, action = None):
+    def transformUVs(self, action=None):
         scene_u.cleanup()
 
         if not action: return
@@ -86,7 +80,6 @@ class ToolOptions(QWidget):
         elif action == "squeeze":
             cmds.polyEditUV(pu=1, pv=1, su=1, sv=0.5)
 
-
     def main(self):
 
-        cmds.inViewMessage(amg= '<hl>Please open options to continue</hl>' , pos = 'midCenter', fade = True, fot = 1000)
+        cmds.inViewMessage(amg='<hl>Please open options to continue</hl>', pos='midCenter', fade=True, fot=1000)

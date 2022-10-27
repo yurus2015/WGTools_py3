@@ -1,10 +1,10 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 
 import json
 import os
-dir = os.path.dirname(__file__)
 
+dir = os.path.dirname(__file__)
 
 checkId = 712
 checkLabel = "5.12 Check objects height"
@@ -21,9 +21,7 @@ def get_bbox_height(obj):
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
-
-#read json file
+    # read json file
     json_file = open(("%s//%s") % (dir, "objectHeightSettings.json"))
     json_string = json_file.read()
     settings = json.loads(json_string)
@@ -34,17 +32,16 @@ def main():
     wall = []
 
     for x in vl_listAllTransforms():
-        if (x.find("ramp") !=-1 and x.find("bsp") !=-1) or ("ramp" in x):
+        if (x.find("ramp") != -1 and x.find("bsp") != -1) or ("ramp" in x):
             ramp.append(x)
 
-        if x.find("wall") !=-1:
+        if x.find("wall") != -1:
             wall.append(x)
 
     # original
     # for x in ramp:
     #     if get_height(x) > settings["ramp"]:
     #         return_list.append(["%s ramp height is %s > %s" % (x, get_height(x), settings["ramp"]), x])
-
 
     for x in ramp:
         if get_height(x) < settings["ramp_min"]:
@@ -58,4 +55,3 @@ def main():
             return_list.append(["%s wall height is %s < %s" % (x, get_height(x), settings["wall"]), x])
 
     return return_list
-

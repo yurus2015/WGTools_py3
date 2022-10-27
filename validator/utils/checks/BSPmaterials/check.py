@@ -1,27 +1,27 @@
 #########################################################################################################
-#"""                                      matDataList[]                                              """#
-#"""   splited list format [materials_count, full_path, obj_name, material, material, ... ]          """#
-#"""                                                                                                 """#
-#"""   example:    [2, |env039_EngineerBridge_unique|lod0|n_0,   n_0,   n_wood_0,  n_metal_0, ...]   """#
-#"""                |                     |                       |        |           |             """#
-#"""        materials count         obj full path              obj name   mat         mat            """#
-#"""               [0]                   [1]                     [2]      [3]         [4]            """#
+# """                                      matDataList[]                                              """#
+# """   splited list format [materials_count, full_path, obj_name, material, material, ... ]          """#
+# """                                                                                                 """#
+# """   example:    [2, |env039_EngineerBridge_unique|lod0|n_0,   n_0,   n_wood_0,  n_metal_0, ...]   """#
+# """                |                     |                       |        |           |             """#
+# """        materials count         obj full path              obj name   mat         mat            """#
+# """               [0]                   [1]                     [2]      [3]         [4]            """#
 #########################################################################################################
 
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 import re
+
 checkId = 6
 checkLabel = "6.14 Check BSP correct materials"
+
 
 def checkLambert(obj):
     result = None
     msg = None
     shortName = obj[1].split("|")[-1]
 
-
-
-    #check if it has lambert material
+    # check if it has lambert material
     if shortName.find("bsp") != -1:
         for x in range(2, len(obj)):
             # if obj[x].find('lambert') != -1:
@@ -30,8 +30,7 @@ def checkLambert(obj):
                 msg = obj[1] + " - has a material named " + obj[x]
                 return result, msg
 
-
-    #check if s_wall has s_wall material
+    # check if s_wall has s_wall material
     if shortName.find("s_wall") != -1:
         status = 0
         for x in range(3, len(obj)):
@@ -41,9 +40,7 @@ def checkLambert(obj):
             result = obj[1]
             msg = obj[1] + " - has a material(s) with a wrong name "
 
-
-
-    #check s_0 n_0 d_0 for s_nd, s/n/d_wood/stone/metal
+    # check s_0 n_0 d_0 for s_nd, s/n/d_wood/stone/metal
     searchList = []
     searchList.append(re.compile("^s_\d"))
     searchList.append(re.compile("^d_\d"))
@@ -54,7 +51,8 @@ def checkLambert(obj):
 
     def check_snd(obj, type):
         for x in range(3, len(obj)):
-            if obj[x].find(type + "_nd") != -1 or obj[x].find(type + "_wood") != -1 or obj[x].find(type + "_stone") != -1 or obj[x].find(type + "_metal") != -1:
+            if obj[x].find(type + "_nd") != -1 or obj[x].find(type + "_wood") != -1 or obj[x].find(
+                    type + "_stone") != -1 or obj[x].find(type + "_metal") != -1:
                 return 0
             else:
                 return 1
@@ -80,6 +78,7 @@ def checkLambert(obj):
 
     return result, msg
 
+
 def check_bsp_mat(obj):
     result = None
     msg = None
@@ -89,8 +88,7 @@ def check_bsp_mat(obj):
     numOfMat = len(obj) - 3
     obj_materials = obj[3:]
 
-
-    #find all objects by type (d|n) in the same lod with the same index (first digit)
+    # find all objects by type (d|n) in the same lod with the same index (first digit)
     tmpPath = obj[1].split("lod")[0][:-1]
     lodPath = tmpPath + "|lod0|" if tmpPath else "|lod0|"
 
@@ -102,9 +100,9 @@ def check_bsp_mat(obj):
 
             if relShort[0] == bspType and relShort.find("bsp") == -1 and relShort == shortName[:-4]:
                 materials = []
-                #get Materials
+                # get Materials
                 rel_shapeNod = cmds.listRelatives(rel, c=1, type="mesh", f=1)[0]
-                #get history
+                # get history
                 tmp = cmds.listHistory(rel_shapeNod, f=1, ag=1)
                 temp = []
                 for hstr in tmp:
@@ -114,7 +112,7 @@ def check_bsp_mat(obj):
                     SG = temp
                     SG = list(set(SG))
                     for i in range(len(SG)):
-                        temp1 = cmds.listConnections (SG[i] + ".surfaceShader")
+                        temp1 = cmds.listConnections(SG[i] + ".surfaceShader")
                         if temp1 != None:
                             for y in temp1:
                                 if y != None:
@@ -127,33 +125,25 @@ def check_bsp_mat(obj):
                     pass
                 numOfMat_rel = len(materials)
 
-                #comparison
+                # comparison
                 if numOfMat_rel == numOfMat:
                     for i in range(numOfMat):
                         if materials[i] != obj_materials[i]:
                             obj_by_type = obj
                             break
 
-
-
         return obj_by_type
-
-
-
-
 
     result = get_obj_by_type_for_bsp(lodPath)
     if result:
         msg = obj[1] + " - has diffrent from original object material(s) "
 
-
     return result, msg
 
 
-
-
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
+    #
+
     returnList = []
 
     polyObj_matlist = []
@@ -176,7 +166,7 @@ def main():
         result = None
         if bsp_list:
             for i in bsp_list:
-                result, msg = check_bsp_mat(i) #send one object descriptor
+                result, msg = check_bsp_mat(i)  # send one object descriptor
                 if result:
                     tmp = []
                     tmp.append(msg)
@@ -184,4 +174,3 @@ def main():
                     returnList.append(tmp)
 
     return returnList
-

@@ -1,19 +1,19 @@
-
 import maya.cmds as cmds
 
 checkId = 6001
 checkLabel = "6.11 Check object history"
 
+
 def removeDupplicateList(currentList):
     resultList = list(set(currentList))
     return resultList
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
 
-    listAllMesh = cmds.ls(type = 'transform')
-    listAllMesh = cmds.filterExpand(listAllMesh, sm=12 )
+    listAllMesh = cmds.ls(type='transform')
+    listAllMesh = cmds.filterExpand(listAllMesh, sm=12)
     if not listAllMesh:
         return returnList
     listAllMesh = removeDupplicateList(listAllMesh)
@@ -23,7 +23,7 @@ def main():
     for mesh in listAllMesh:
         countNodes = 0
         noDAGNodes = cmds.listHistory(mesh, pdo=1)
-        #print 'NODES', noDAGNodes
+        # print 'NODES', noDAGNodes
 
         if noDAGNodes:
             countNodes = len(noDAGNodes)
@@ -40,6 +40,3 @@ def main():
             returnList.append(tmp)
 
     return returnList
-
-
-

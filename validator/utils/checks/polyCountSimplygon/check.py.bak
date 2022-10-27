@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import math
-import validator2019.utils.validator_API as vl
+import validator.utils.validator_API as vl
 checkId = 100
 checkLabel = "1.2.1 Check simplygon polycount"
 

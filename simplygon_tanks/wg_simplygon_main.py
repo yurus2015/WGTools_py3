@@ -5,6 +5,7 @@ from PySide2.QtGui import *
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 from shiboken2 import wrapInstance
+
 # from PySide2.QtWebKitWidgets import QWebView, QWebFrame, QWebPage, QWebElement
 
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
@@ -19,6 +20,7 @@ import simplygon_tanks.widgets.line_edit
 import simplygon_tanks.utils.generic as gen
 import simplygon_tanks.widgets.lodSwitch
 import simplygon_tanks.widgets.distanceVar
+
 # import simplygon_tanks.widgets.helpWidget
 
 reload(simplygon_tanks.widgets.distanceVar)
@@ -30,6 +32,7 @@ reload(simplygon_tanks.widgets.line_edit)
 from simplygon_tanks.widgets.line_edit import SG_LineEdit, SG_ButtonLineEdit, SG_Browser
 from simplygon_tanks.widgets.lodSwitch import SG_lodSwitch
 from simplygon_tanks.widgets.distanceVar import SG_lodDistance
+
 # from simplygon_tanks.widgets.helpWidget import SG_helpImage
 # from widgets.headerWidget import HeaderWidget
 

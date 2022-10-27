@@ -4,6 +4,7 @@ import maya.OpenMaya as OpenMaya
 checkId = 107
 checkLabel = "4.23 Check polygons with zero UV Map Area"
 
+
 def zeroUVMapPolygonsCheck():
     print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
@@ -20,21 +21,21 @@ def zeroUVMapPolygonsCheck():
         selectionList.clear()
         selectionList.add(i)
 
-        #get dag and mobject
+        # get dag and mobject
         DagPath = OpenMaya.MDagPath()
         mObj = OpenMaya.MObject()
         selectionList.getDagPath(0, DagPath, mObj)
 
-        #iterator component
+        # iterator component
         component = OpenMaya.MObject()
 
-        #iterate
+        # iterate
         geomIter = OpenMaya.MItMeshPolygon(DagPath, component)
 
-        #create double pointer
+        # create double pointer
         number = OpenMaya.MScriptUtil()
         number.createFromDouble(0.0)
-        numPointer = number.asDoublePtr()  
+        numPointer = number.asDoublePtr()
 
         while not geomIter.isDone():
 
@@ -46,7 +47,7 @@ def zeroUVMapPolygonsCheck():
                 if "lod3" not in i and "lod4" not in i:
                     if resultArea <= areaTolerance:
                         # print resultArea, areaTolerance
-                        #get face id
+                        # get face id
                         faceId = geomIter.index()
                         tmp = []
                         tmp.append(i + ".f[" + str(faceId) + "]")
@@ -61,5 +62,5 @@ def zeroUVMapPolygonsCheck():
                 returnList.append(tmp)
 
             next(geomIter)
-            
-    return  returnList
+
+    return returnList

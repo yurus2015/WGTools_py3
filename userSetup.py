@@ -11,16 +11,17 @@ except:
 
 try:
     import wargamingMenu.main
+
     maya.utils.executeDeferred('wargamingMenu.main.run()')
 except:
     print('Open Wargaming Menu failed')
-    
+
 try:
     if not cmds.commandPort(":7001", query=True):
         cmds.commandPort(name=":7001")
     else:
         print('Command port opened')
-except: 
+except:
     print('Can`t open Blender port')
 
 '''

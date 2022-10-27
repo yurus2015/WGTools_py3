@@ -5,9 +5,9 @@ from PySide2.QtWidgets import *
 import maya.cmds as cmds
 import objects_tools.utils as utl
 import objects_tools.export as export
+
 importlib.reload(utl)
 importlib.reload(export)
-
 
 # todo refactory array icon
 style = """
@@ -157,7 +157,6 @@ class ObjectsFrame(QGroupBox):
 
     def toggle_visible_block(self):
         print('Toggle')
-
 
 
 class ObjectsHavokFrame(ObjectsFrame):

@@ -1,33 +1,29 @@
-
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 61
 checkLabel = "1.3 Check Working Units"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     objList = vl_listAllTransforms()
     returnList = []
-
 
     currentWorkingUnits = cmds.currentUnit(q=1, l=1)
     workingUnits = currentWorkingUnits
 
-    if(currentWorkingUnits == "cm"):
+    if (currentWorkingUnits == "cm"):
         workingUnits = "centimetres"
-    elif(currentWorkingUnits == "in"):
+    elif (currentWorkingUnits == "in"):
         workingUnits = "inches"
-    elif(currentWorkingUnits == "mm"):
+    elif (currentWorkingUnits == "mm"):
         workingUnits = "millimetres"
-    elif(currentWorkingUnits == "ft"):
+    elif (currentWorkingUnits == "ft"):
         workingUnits = "feets"
-    elif(currentWorkingUnits == "yd"):
+    elif (currentWorkingUnits == "yd"):
         workingUnits = "yards"
 
-
     errorMessage = "You are using " + workingUnits + " as working units. Change it to meters."
-
 
     if (currentWorkingUnits != "m"):
         tmp = []
@@ -35,5 +31,4 @@ def main():
         tmp.append(errorMessage)
         returnList.append(tmp)
 
-
-    return  returnList
+    return returnList

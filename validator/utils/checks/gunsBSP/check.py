@@ -1,14 +1,14 @@
 import maya.cmds as cmds
 import re
 
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 14
 
 checkLabel = "Check BSP of guns"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     listTransforms = vl_listAllTransforms()
     returnList = []
     listGuns = []
@@ -22,7 +22,7 @@ def main():
             listGuns_bsp.append(x)
 
     for x in listGuns:
-        gun_bsp = re.compile(x.replace('|', '-') +"_bsp")
+        gun_bsp = re.compile(x.replace('|', '-') + "_bsp")
         result = False
         for y in listGuns_bsp:
             if gun_bsp.search(y.replace('|', '-')) is not None:
@@ -33,5 +33,4 @@ def main():
             tmp.append(x)
             returnList.append(tmp)
 
-
-    return  returnList
+    return returnList

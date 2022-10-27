@@ -1,11 +1,11 @@
-#modificators
+# modificators
 
 action_category = "TechArt Tools"
 action_label = "Tank Exporter"
 
-#running procedure
+# running procedure
 
 import tank_export.main
-reload(tank_export.main)
-#uvTools.wg_uiInfo.main(100)
 
+reload(tank_export.main)
+# uvTools.wg_uiInfo.main(100)

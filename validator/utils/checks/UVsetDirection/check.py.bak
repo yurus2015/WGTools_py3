@@ -2,7 +2,7 @@ import maya.OpenMaya as OpenMaya
 import maya.OpenMayaMPx as OpenMayaMPx
 import maya.cmds as cmds
 import re
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 56
 checkLabel = "8.9 Check direction of map1(track) "
 

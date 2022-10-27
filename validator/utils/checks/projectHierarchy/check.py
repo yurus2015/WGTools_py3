@@ -3,7 +3,8 @@ import re
 import os
 import sys
 import os.path
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 39
 checkLabel = "1.4 Check SVN Structure"
 
@@ -14,11 +15,11 @@ def main():
     returnList = []
 
     try:
-        #get file info
-        rawFilePath = cmds.file (q=True, exn=True)
+        # get file info
+        rawFilePath = cmds.file(q=True, exn=True)
         fileName = cmds.file(q=True, sn=True, shn=True)
         filePath = rawFilePath[:len(rawFilePath) - len(fileName)]
-        search =  fileName.find("_crash")
+        search = fileName.find("_crash")
         Tankname = None
         if search != -1:
             Tankname = fileName[:search]
@@ -28,18 +29,18 @@ def main():
         checkStatus = 0
 
         folderLevel_1 = os.path.abspath(os.path.join(filePath, os.pardir))
-        folderLevel_1_fixed = str(folderLevel_1).replace("\\","/")
+        folderLevel_1_fixed = str(folderLevel_1).replace("\\", "/")
         folderLevel_2 = os.path.abspath(os.path.join(folderLevel_1, os.pardir))
-        folderLevel_2_fixed = str(folderLevel_2).replace("\\","/")
+        folderLevel_2_fixed = str(folderLevel_2).replace("\\", "/")
 
-        #Check for folders Fin Expor Work
-        folderL1 = os.listdir (folderLevel_1_fixed)
+        # Check for folders Fin Expor Work
+        folderL1 = os.listdir(folderLevel_1_fixed)
         for i in folderL1:
             if i != "Fin" and i != "Export" and i != "Work" and i != ".svn":
                 checkStatus = 1
 
-        #Check for the name of folder level2
-        folderL2 = os.listdir (folderLevel_2_fixed)
+        # Check for the name of folder level2
+        folderL2 = os.listdir(folderLevel_2_fixed)
         folderL2List = folderLevel_2_fixed.split('/')
         folderL2Name = folderL2List[-1]
         searchL2 = folderL2Name.find(Tankname)
@@ -48,7 +49,7 @@ def main():
         else:
             checkStatus = 2
 
-        #Check for Fin and Export Content
+        # Check for Fin and Export Content
         fldFinList = []
         fldExportList = []
 
@@ -78,8 +79,6 @@ def main():
                 if fName[1] != "mb" and fName[1] != "dds" and fName[1] != "DDS" and fName[1] != "mayaSwatches":
                     checkStatus = 4
 
-
-
         errorMessage1 = "Check the Model folder. There are some extra folders"
         errorMessage2 = "Main folder of your project doesn't contain your tank name"
         errorMessage3 = "There are some extra filetypes in the Fin folder"
@@ -108,7 +107,4 @@ def main():
     except:
         pass
 
-
-    return  returnList
-
-
+    return returnList

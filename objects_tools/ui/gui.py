@@ -7,8 +7,10 @@ from shiboken2 import wrapInstance
 
 import objects_tools.export as OE
 import objects_tools.ui.dockWidgets as docks
+
 importlib.reload(docks)
 import objects_tools.ui.centralWidget as central
+
 importlib.reload(central)
 
 from objects_tools.ui.dockWidgets import *
@@ -90,7 +92,6 @@ class BranchSelectionWnd(QDialog):
         # self.export_frame.setFrameShadow(QFrame.Shadow)
         self.main_vertical_layout.addWidget(self.export_frame)
         self.main_vertical_layout.addWidget(self.havok_frame)
-
 
         # self.init_ui()
 

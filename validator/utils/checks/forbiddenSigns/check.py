@@ -1,78 +1,61 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
-checkId = 11
+from validator.utils.validator_API import *
 
 checkLabel = "8.12 Check forbidden symbols in names"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
-    #find double __ in all transforms
-    objectList = vl_listAllTransforms()
-    returnList = []
+    # find double __ in all transforms
+    object_list = vl_listAllTransforms()
+    return_list = []
 
-    #find all shapes which dont have "_" before Shape
-    meshList = cmds.ls(type="mesh", l=1)
-    for i in meshList:
-        meshName = i.split("|")[-1]
-        if meshName.find("_Shape") == -1:
-            tmp = []
-            tmp.append(i)
-            tmp.append(i)
-            returnList.append(tmp)
+    # find all shapes which dont have "_" before Shape
+    mesh_list = cmds.ls(type="mesh", l=1)
+    for i in mesh_list:
+        mesh_name = i.split("|")[-1]
+        if mesh_name.find("_Shape") == -1:
+            tmp = [i, i]
+            return_list.append(tmp)
 
-    for x in objectList:
+    for x in object_list:
         check = x.find("__")
         if check != -1:
-            errorMessage = x
-            tmp = []
-            tmp.append(x)
-            tmp.append(x)
-            returnList.append(tmp)
+            tmp = [x, x]
+            return_list.append(tmp)
 
-    #find double __ in all meshes
-    listPolyMeshes = cmds.ls (type='mesh', l=True)
-    for x in listPolyMeshes:
+    # find double __ in all meshes
+    list_poly_meshes = cmds.ls(type='mesh', l=True)
+    for x in list_poly_meshes:
         check = x.find("__")
         if check != -1:
-            tmp = []
-            tmp.append(x)
-            tmp.append(x)
-            returnList.append(tmp)
+            tmp = [x, x]
+            return_list.append(tmp)
 
-
-    for x in objectList:
+    for x in object_list:
         shape = cmds.listRelatives(x)
-        fullShape = cmds.listRelatives(x, f=True)
+        full_shape = cmds.listRelatives(x, f=True)
         error = False
         for x in range(len(shape)):
             check = shape[x].count("_")
-            if check >2:
-                errorMessage = fullShape[x]
-                tmp = []
-                tmp.append(fullShape[x])
-                tmp.append(fullShape[x])
-                returnList.append(tmp)
+            if check > 2:
+                tmp = [full_shape[x], full_shape[x]]
+                return_list.append(tmp)
 
-    allNames = []
+    all_names = []
     for x in listAllMat():
-        allNames.append(x)
+        all_names.append(x)
 
     for x in vl_listAllTransforms():
-        allNames.append(x)
+        all_names.append(x)
 
     for x in vl_listAllGroups():
-        allNames.append(x)
+        all_names.append(x)
 
-    for x in allNames:
+    for x in all_names:
         for y in x:
             ord(y)
             if ord(y) < 48 or ord(y) > 124:
-                tmp = []
-                tmp.append(x)
-                tmp.append(x)
-                returnList.append(tmp)
+                tmp = [x, x]
+                return_list.append(tmp)
 
-
-
-    return  returnList
+    return return_list

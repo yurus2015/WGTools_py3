@@ -1,17 +1,17 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 33
 
-checkLabel = "1.9 Check layers of objects "
 
 def deleteCurrentLayers():
-    displayLayers = cmds.ls(type = "displayLayer", l=1)
+    displayLayers = cmds.ls(type="displayLayer", l=1)
     displayLayers.remove("defaultLayer")
     if displayLayers:
         cmds.delete(displayLayers)
 
-def main(*args):
 
+def main(*args):
     deleteCurrentLayers()
     displayLayers = []
 
@@ -25,16 +25,16 @@ def main(*args):
             for rel in relatives:
 
                 if rel.find("bsp") == -1:
-                    layerName = rel.split("|")[-1].title() #object name lower case
+                    layerName = rel.split("|")[-1].title()  # object name lower case
 
-                    if layerName not in displayLayers: #at the beginning its actually empty
+                    if layerName not in displayLayers:  # at the beginning its actually empty
 
                         displayLayers.append(layerName)
                         cmds.createDisplayLayer(n=layerName, empty=1)
 
                     cmds.editDisplayLayerMembers(layerName, rel)
 
-    #sorting
+    # sorting
     dLayers = cmds.ls(l=1, type="displayLayer")
     dLayers.remove("defaultLayer")
 
@@ -53,9 +53,9 @@ def main(*args):
         elif "Chassis" in layer:
             layer_chassis.append(layer)
 
-    layer_hull    = sorted(layer_hull, reverse=True)
-    layer_turret  = sorted(layer_turret, reverse=True)
-    layer_gun     = sorted(layer_gun, reverse=True)
+    layer_hull = sorted(layer_hull, reverse=True)
+    layer_turret = sorted(layer_turret, reverse=True)
+    layer_gun = sorted(layer_gun, reverse=True)
     layer_chassis = sorted(layer_chassis, reverse=True)
     resultLayer = layer_chassis + layer_gun + layer_turret + layer_hull
 
@@ -64,7 +64,4 @@ def main(*args):
         cmds.delete(i)
         cmds.createDisplayLayer(n=i, empty=1)
         cmds.editDisplayLayerMembers(i, objects)
-        cmds.setAttr(i +'.displayOrder', idx+1)
-
-
-
+        cmds.setAttr(i + '.displayOrder', idx + 1)

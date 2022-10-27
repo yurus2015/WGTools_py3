@@ -1,11 +1,11 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 206
 checkLabel = "GB Check invalid lambert name"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
 
     ISG = cmds.hyperShade(o="initialShadingGroup")

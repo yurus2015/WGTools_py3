@@ -5,11 +5,8 @@ checkId = 112
 checkLabel = "4.24 Check onefold track UV scale"
 
 
-
 def main(*args):
-
     searchThreshold = 0.05
-
 
     if args:
         for obj in args:
@@ -17,13 +14,11 @@ def main(*args):
             selectionList.clear()
             selectionList.add(obj)
 
-
-
             DagPath = OpenMaya.MDagPath()
             selectionList.getDagPath(0, DagPath)
 
             DagNode = OpenMaya.MObject()
-            DagNode =  DagPath.node()
+            DagNode = DagPath.node()
 
             fnMesh = OpenMaya.MFnMesh(DagPath)
 
@@ -67,8 +62,7 @@ def main(*args):
 
             scaleFactor = scaleApprox / (maxV - minV)
 
-            cmds.polyEditUV(obj + ".map[*]", pu = 0, pv = 0, su = 1, sv = scaleFactor)
-
+            cmds.polyEditUV(obj + ".map[*]", pu=0, pv=0, su=1, sv=scaleFactor)
 
             # for i in min_array:
             #     cmds.polyEditUV(obj + ".map[" + str(i) + "]", v = minBorder, r=0)

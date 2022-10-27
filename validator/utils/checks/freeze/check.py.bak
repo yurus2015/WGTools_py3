@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 12
 checkLabel = "1.13 Check objects with non-zero transformations"
 

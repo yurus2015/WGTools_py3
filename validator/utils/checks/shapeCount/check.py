@@ -4,8 +4,8 @@ import maya.OpenMaya as OpenMaya
 checkId = 109
 checkLabel = "Check shape count of each object"
 
+
 def main_2():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
 
     itDag = OpenMaya.MItDag(OpenMaya.MItDag.kDepthFirst, OpenMaya.MFn.kTransform)
@@ -29,12 +29,10 @@ def main_2():
 
         next(itDag)
 
-
-    return  returnList
+    return returnList
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
     mesh_list = cmds.filterExpand(cmds.ls(tr=1), sm=12)
     for i in mesh_list:

@@ -1,12 +1,13 @@
-#modificators
+# modificators
 
 action_category = "Objects"
 action_label = "Environment Simplygon"
 
-#running procedure
+# running procedure
 
 
 import simplygon.wg_EnvSimplygon
+
 global envSimplygon
 try:
     envSimplygon

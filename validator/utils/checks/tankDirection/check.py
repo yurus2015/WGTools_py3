@@ -1,12 +1,13 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import math
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 42
 checkLabel = "Check for Tank Direction"
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     listTransforms = vl_listAllTransforms()
     returnList = []
 
@@ -14,7 +15,7 @@ def main():
         gunList = cmds.ls("*gun*", type="transform", l=1)
         turretList = cmds.ls("*turret*", type="transform", l=1)
 
-        if len(gunList) >0:
+        if len(gunList) > 0:
             gunObj = gunList[0]
 
             zeroPoint = [0.0, 0.0, 0.0]
@@ -25,8 +26,7 @@ def main():
                 # print turretList[0]
                 # print turretPivotTmp
 
-
-            objList =  OpenMaya.MSelectionList()
+            objList = OpenMaya.MSelectionList()
             objList.add(gunObj)
 
             minZ_offset = 0
@@ -38,10 +38,10 @@ def main():
                 objIter.getDagPath(dagPath)
                 xNode = OpenMaya.MFnDagNode(dagPath)
                 bbox = xNode.boundingBox()
-                minZ_offset_abs = abs(bbox.min().z)/100
-                maxZ_offset_abs =  abs(bbox.max().z)/100
-                minZ_offset = bbox.min().z/100
-                maxZ_offset = bbox.max().z/100
+                minZ_offset_abs = abs(bbox.min().z) / 100
+                maxZ_offset_abs = abs(bbox.max().z) / 100
+                minZ_offset = bbox.min().z / 100
+                maxZ_offset = bbox.max().z / 100
                 # print "min ", minZ_offset
                 # print "max ", maxZ_offset
                 next(objIter)
@@ -61,5 +61,4 @@ def main():
                 tmp.append("")
                 returnList.append(tmp)
 
-
-    return  returnList
+    return returnList

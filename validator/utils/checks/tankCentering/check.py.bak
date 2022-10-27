@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import maya.OpenMayaUI as OpenMayaUI
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 41
 checkLabel = "3.4 Check centering of the tank"
 

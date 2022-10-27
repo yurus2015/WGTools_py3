@@ -1,54 +1,57 @@
-
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 58
 checkLabel = "4.12 Check UVs texel density (FIX as VERY long)"
 
+
 def removeList(fromList, thisList):
-    resultList =  [n for n in fromList if n not in thisList]
+    resultList = [n for n in fromList if n not in thisList]
     resultList = list(resultList)
     return resultList
 
+
 def universal2d_bbox(sel, type):
-    bbx = cmds.polyEvaluate( bc2=True)
+    bbx = cmds.polyEvaluate(bc2=True)
     xval = bbx[0]
     yval = bbx[1]
-    value = [0,0]
+    value = [0, 0]
     if (type == "pivot"):
-        value[0] = (xval[0] + xval[1])/2.0
-        value[1] = (yval[0] + yval[1])/2.0
+        value[0] = (xval[0] + xval[1]) / 2.0
+        value[1] = (yval[0] + yval[1]) / 2.0
     if (type == "size"):
-        value[0] = xval[1] - xval[0]    #width
-        value[1] = yval[1] - yval[0]    #hight
+        value[0] = xval[1] - xval[0]  # width
+        value[1] = yval[1] - yval[0]  # hight
     if (type == "u"):
-        value[0] = xval[0]   #left
-        value[1] = xval[1]   #right
+        value[0] = xval[0]  # left
+        value[1] = xval[1]  # right
     if (type == "v"):
-        value[0] = yval[0]   #bottom
-        value[1] = yval[1]   #top
+        value[0] = yval[0]  # bottom
+        value[1] = yval[1]  # top
     return value
+
 
 def uvSlellArray(selection):
     shellData = list()
-    #print 'SA begin'
+    # print 'SA begin'
     while selection:
         cmds.select(selection[0])
-        #print 'SA select point'
-        cmds.polySelectConstraint( m=2)
-        cmds.polySelectConstraint(bo = 0, sh=1, cr=0)
-        #print 'SA select shell'
-        shell = cmds.ls(sl =1, fl = 1)
+        # print 'SA select point'
+        cmds.polySelectConstraint(m=2)
+        cmds.polySelectConstraint(bo=0, sh=1, cr=0)
+        # print 'SA select shell'
+        shell = cmds.ls(sl=1, fl=1)
         if shell:
             shellData.append(shell)
-            #print 'SA add shell'
+            # print 'SA add shell'
         selection = removeList(selection, shell)
-        #print 'SA remove uv shell'
-        cmds.polySelectConstraint(bo = 0, sh=0, cr=0);
-        cmds.polySelectConstraint( m=0, t=0x0000)
+        # print 'SA remove uv shell'
+        cmds.polySelectConstraint(bo=0, sh=0, cr=0);
+        cmds.polySelectConstraint(m=0, t=0x0000)
     return shellData
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     objList = vl_listAllTransforms()
     returnList = []
 
@@ -145,4 +148,4 @@ def main():
             returnList.append(i[0])
     """
 
-    return  returnList
+    return returnList

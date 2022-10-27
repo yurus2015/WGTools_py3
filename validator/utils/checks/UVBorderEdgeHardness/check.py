@@ -1,8 +1,8 @@
-
 import maya.cmds as cmds
 import maya.OpenMaya as om
 import maya.mel as mel
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 50
 checkLabel = "4.4 Check UV border for edges (too long)"
 
@@ -94,11 +94,7 @@ def main():
     cmds.selectMode( object=True )
     cmds.select(cl=1)"""
 
+    # errorMessage = "Next objects still have a construction history:"
+    # returnList.append(errorMessage)
 
-
-
-    #errorMessage = "Next objects still have a construction history:"
-    #returnList.append(errorMessage)
-
-
-    return  returnList
+    return returnList

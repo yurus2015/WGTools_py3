@@ -1,11 +1,11 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 15
 checkLabel = "8.8 Check transformations of guns"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
     gunList = []
 
@@ -15,27 +15,23 @@ def main():
 
         if gunList:
             for x in gunList:
-                if cmds.getAttr((x +'.tx'), l=True) or\
-                    cmds.getAttr((x +'.ty'), l=True) or\
-                    cmds.getAttr((x +'.tz'), l=True) or\
-                    \
-                    cmds.getAttr((x +'.rx'), l=True) or\
-                    cmds.getAttr((x +'.ry'), l=True) or\
-                    cmds.getAttr((x +'.rz'), l=True) or\
-                    \
-                    cmds.getAttr((x +'.sx'), l=True) or\
-                    cmds.getAttr((x +'.sy'), l=True) or\
-                    cmds.getAttr((x +'.sz'), l=True):
-                        tmp = []
-                        tmp.append(x)
-                        tmp.append(x)
-                        returnList.append(tmp)
+                if cmds.getAttr((x + '.tx'), l=True) or \
+                        cmds.getAttr((x + '.ty'), l=True) or \
+                        cmds.getAttr((x + '.tz'), l=True) or \
+ \
+                        cmds.getAttr((x + '.rx'), l=True) or \
+                        cmds.getAttr((x + '.ry'), l=True) or \
+                        cmds.getAttr((x + '.rz'), l=True) or \
+ \
+                        cmds.getAttr((x + '.sx'), l=True) or \
+                        cmds.getAttr((x + '.sy'), l=True) or \
+                        cmds.getAttr((x + '.sz'), l=True):
+                    tmp = []
+                    tmp.append(x)
+                    tmp.append(x)
+                    returnList.append(tmp)
 
-
-    return  returnList
-
-
-
+    return returnList
 
     # returnList = []
     # listGuns = []
@@ -57,7 +53,6 @@ def main():
     #             if gun_bsp.search(x):
     #                 if cmds.listRelatives(x, s=True) != None:   #if transform have connections it's mean it's mesh
     #                     listGuns_bsp.append(x)
-
 
     # def checkLock(array):
     #     for x in array:

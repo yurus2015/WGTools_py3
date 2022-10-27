@@ -10,6 +10,7 @@ def convert_to(component, types, internal, convert):
     execute_type_command = 'selectType -' + types + ' 1'
     meval(execute_type_command)
 
+
 # component:: from 1 to 4: vertex, edges, faces, uvs
 # internal:: False or True: flag of command - select components inside selection
 # convert:: False or True: if True convert current component to target

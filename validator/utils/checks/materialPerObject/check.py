@@ -1,15 +1,16 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 28
 
 checkLabel = "3.30 One material per object"
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     objMatData = vl_objMaterialsData()
     returnList = []
 
-    #allObj = cmds.listRelatives(cmds.ls(type="mesh", l=1), p=1, f=1)
+    # allObj = cmds.listRelatives(cmds.ls(type="mesh", l=1), p=1, f=1)
     allMeshes = cmds.ls(type="mesh", l=1, fl=1)
 
     if allMeshes:
@@ -23,11 +24,9 @@ def main():
 
             if iSG:
                 if len(iSG) > 1:
-                    tmp =[]
+                    tmp = []
                     tmp.append(cmds.listRelatives(i, p=1, f=1)[0])
                     tmp.append(cmds.listRelatives(i, p=1, f=1)[0])
                     returnList.append(tmp)
 
-
-
-    return  returnList
+    return returnList

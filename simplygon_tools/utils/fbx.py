@@ -39,7 +39,6 @@ def load_import_preset():
 
 
 def export_selection(selection):
-
     print('export manual', Settings.lods_manual)
     print('export auto', Settings.lods_calculate)
     load_import_preset()
@@ -116,11 +115,12 @@ def send_to_simplygon(preset, type_reduce):
 
     cmd = SIMPLYGON + r' ' \
                       r'--Input ' + EXPORT_FILE + ' ' \
-                      r'--Output ' + OUTPUT_DIR + ' ' \
-                      r'--OutputFileFormat fbx ' \
-                      r'--Spl ' + PRESET_PATH + ' ' \
-                      r'--Server ' + HOST + ':' + str(PORT) + ' ' \
-                      r'--Verbose'
+                                                  r'--Output ' + OUTPUT_DIR + ' ' \
+                                                                              r'--OutputFileFormat fbx ' \
+                                                                              r'--Spl ' + PRESET_PATH + ' ' \
+                                                                                                        r'--Server ' + HOST + ':' + str(
+        PORT) + ' ' \
+                r'--Verbose'
 
     # todo
     if check_socket():

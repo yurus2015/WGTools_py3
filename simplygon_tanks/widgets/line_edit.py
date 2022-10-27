@@ -1,5 +1,5 @@
-#from PySide import QtCore, QtGui
-#maya2018 pyside2
+# from PySide import QtCore, QtGui
+# maya2018 pyside2
 try:
     from PySide import QtGui, QtCore
     from PySide.QtGui import *
@@ -12,9 +12,11 @@ except ImportError:
 
 import maya.cmds as cmds
 import os
-#import maya.utils as utils
 
-#import base
+
+# import maya.utils as utils
+
+# import base
 
 class SG_LineEdit(QLineEdit):
     def __init__(self, *args, **kwargs):
@@ -42,35 +44,30 @@ class SG_Browser(QHBoxLayout):
         self.addWidget(self.button)
 
         self.line = SG_LineEdit()
-        self.line.setObjectName(args[0].replace(' ',''))
+        self.line.setObjectName(args[0].replace(' ', ''))
         self.addWidget(self.line)
         self.line.setMinimumWidth(300)
-
 
     def choose_directory(self):
         """
         Opens a file dialog and sets the file text box to the chosen texture.
         """
-        mayaFileName=cmds.file( q=True, loc=True)
-        filePath=os.path.dirname(mayaFileName)
-        #dirname = self.get_default_directory()
-        dirname = QFileDialog.getExistingDirectory(None, 'Choose Directory', filePath, options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
-        if os.path.exists(dirname):    # avoids problems if <Cancel> was selected
+        mayaFileName = cmds.file(q=True, loc=True)
+        filePath = os.path.dirname(mayaFileName)
+        # dirname = self.get_default_directory()
+        dirname = QFileDialog.getExistingDirectory(None, 'Choose Directory', filePath,
+                                                   options=QFileDialog.ShowDirsOnly | QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
+        if os.path.exists(dirname):  # avoids problems if <Cancel> was selected
             self.line.setText(str(dirname))
 
     def choose_file(self):
         """
         Opens a file dialog and sets the file text box to the chosen track texture.
         """
-        mayaFileName=cmds.file( q=True, loc=True)
-        filePath=os.path.dirname(mayaFileName)
-        #dirname = self.get_default_directory()
-        filename = QFileDialog.getOpenFileName(None, 'Choose Track texture', filePath, "Image Files (*.tga)", options= QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
-        if os.path.isfile(filename[0]):    # avoids problems if <Cancel> was selected
+        mayaFileName = cmds.file(q=True, loc=True)
+        filePath = os.path.dirname(mayaFileName)
+        # dirname = self.get_default_directory()
+        filename = QFileDialog.getOpenFileName(None, 'Choose Track texture', filePath, "Image Files (*.tga)",
+                                               options=QFileDialog.DontResolveSymlinks | QFileDialog.ReadOnly)
+        if os.path.isfile(filename[0]):  # avoids problems if <Cancel> was selected
             self.line.setText(str(filename[0]))
-
-
-
-
-
-

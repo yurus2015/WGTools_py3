@@ -3,17 +3,19 @@ import re
 import os
 import sys
 
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 10
 checkLabel = "1.5 Check File Name"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
+    #
+
     objList = vl_listAllTransforms()
     returnList = []
 
-    rawFilePath = cmds.file (q=True, exn=True)
+    rawFilePath = cmds.file(q=True, exn=True)
 
     name = rawFilePath.split("/")
     name = name[-1]
@@ -27,7 +29,7 @@ def main():
     else:
         fileName = cmds.file(q=True, sn=True, shn=True)
         filePath = rawFilePath[:len(rawFilePath) - len(fileName)]
-        search =  fileName.find("_crash")
+        search = fileName.find("_crash")
         Tankname = None
         if search != -1:
             Tankname = fileName[:search]
@@ -36,10 +38,10 @@ def main():
             Tankname = fileName[:-3]
 
         checkStatus = 0
-        folderArray = filePath.split('/') [0:-1]
+        folderArray = filePath.split('/')[0:-1]
         for fld in folderArray:
             check = fld.find(Tankname)
-            if check != -1: #If file name was found in the name of directory
+            if check != -1:  # If file name was found in the name of directory
                 checkStatus = 1
                 break
 
@@ -50,5 +52,4 @@ def main():
             tmp.append("")
             returnList.append(tmp)
 
-
-    return  returnList
+    return returnList

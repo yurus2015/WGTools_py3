@@ -1,18 +1,16 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 
 checkId = 216
 checkLabel = "GB Check invalid normals"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
-
     returnList = []
 
-    allTransforms = cmds.ls(tr=1,l=1,fl=1)
+    allTransforms = cmds.ls(tr=1, l=1, fl=1)
     for i in allTransforms:
-        cmds.makeIdentity(i, apply=1,t=1,r=1,s=1,n=0,jointOrient=1)
+        cmds.makeIdentity(i, apply=1, t=1, r=1, s=1, n=0, jointOrient=1)
 
     allMeshes = cmds.ls(type="mesh", l=1, fl=1)
 

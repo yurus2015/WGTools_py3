@@ -11,13 +11,14 @@ from .constants import VERSION
 
 dir = os.path.dirname(__file__)
 
+
 def getMayaWindow():
     main_window_ptr = OpenMayaUI.MQtUtil.mainWindow()
     return wrapInstance(long(main_window_ptr), QWidget)
 
 
 class aboutWindow(QMainWindow):
-    def __init__(self, parent = getMayaWindow()):
+    def __init__(self, parent=getMayaWindow()):
         super(aboutWindow, self).__init__(parent)
 
         self.centralwidget = QWidget(self)
@@ -32,7 +33,7 @@ class aboutWindow(QMainWindow):
         self.versionInfo.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
 
         self.icon = QLabel()
-        self.icon.setPixmap(QPixmap(os.path.join(dir,'img', 'Wargaming.net_logo.png')))
+        self.icon.setPixmap(QPixmap(os.path.join(dir, 'img', 'Wargaming.net_logo.png')))
         self.icon.setObjectName("icon")
         self.icon.setAlignment(QtCore.Qt.AlignHCenter)
 
@@ -44,4 +45,3 @@ class aboutWindow(QMainWindow):
         self.layout.addWidget(self.versionInfo)
         self.layout.addWidget(self.contacts)
         self.centralwidget.setLayout(self.layout)
-

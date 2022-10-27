@@ -1,14 +1,14 @@
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
-#import maya.OpenMayaUI as omu
+# import maya.OpenMayaUI as omu
 from shiboken2 import wrapInstance
-#import weakref
+# import weakref
 from maya.mel import eval as meval
 import maya.cmds as cmds
 from .menu import MenuBar
 from .constants import VERSION, LABEL, SMIN, SMAX, SETTINGS
-#from buttonPresetWidget import PresetButton, MenuBar, CheckButton, ProgressBar
+# from buttonPresetWidget import PresetButton, MenuBar, CheckButton, ProgressBar
 from .jsonData import DataJson
 from .toolsWidget import ToolsWidget
 from .contentWidget import DataWidget
@@ -16,118 +16,118 @@ from collections import OrderedDict
 
 
 class ToolKitMainWindow(QDialog):
-	CONTROL_NAME = VERSION
-	DOCK_LABEL_NAME = LABEL
-	print('label', DOCK_LABEL_NAME)
-	SMIN = SMIN
-	SMAX = SMAX
+    CONTROL_NAME = VERSION
+    DOCK_LABEL_NAME = LABEL
+    print('label', DOCK_LABEL_NAME)
+    SMIN = SMIN
+    SMAX = SMAX
 
-	def __init__(self):
-		'''
-		Main widget
-		'''
-		super(ToolKitMainWindow, self).__init__()
-		self.centralLayout = QVBoxLayout()
-		self.centralLayout.setContentsMargins(0,0,0,0)  #0 margins
-		self.centralLayout.setSpacing(0)
-		self.centralLayout.setAlignment(Qt.AlignTop)
+    def __init__(self):
+        '''
+        Main widget
+        '''
+        super(ToolKitMainWindow, self).__init__()
+        self.centralLayout = QVBoxLayout()
+        self.centralLayout.setContentsMargins(0, 0, 0, 0)  # 0 margins
+        self.centralLayout.setSpacing(0)
+        self.centralLayout.setAlignment(Qt.AlignTop)
 
-		self.setLayout(self.centralLayout)
+        self.setLayout(self.centralLayout)
 
-		self.menuBar = MenuBar()
-		self.slider = QSlider(Qt.Horizontal)
-		self.slider.setRange(SMIN, SMAX)
-		self.slider.setValue(22)
-		self.slider.valueChanged.connect(lambda: self.changeSize(self.slider.value()))
-		self.scrollArea = QScrollArea()
-		self.scrollArea.setWidgetResizable(True)
-		self.scrollArea.setStyleSheet("QScrollArea {border: 0px; border-top : 1px solid; border-color: rgb(60,60,60);}")
-		self.scrollArea.setAlignment(Qt.AlignTop)
-		self.scrollAreaWidget = QWidget()
+        self.menuBar = MenuBar()
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setRange(SMIN, SMAX)
+        self.slider.setValue(22)
+        self.slider.valueChanged.connect(lambda: self.changeSize(self.slider.value()))
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setStyleSheet("QScrollArea {border: 0px; border-top : 1px solid; border-color: rgb(60,60,60);}")
+        self.scrollArea.setAlignment(Qt.AlignTop)
+        self.scrollAreaWidget = QWidget()
 
-		self.scrollAreaLayout = QVBoxLayout()
-		self.scrollAreaLayout.setAlignment(Qt.AlignTop)
-		self.scrollAreaLayout.setContentsMargins(1,1,0,0)
-		self.scrollAreaLayout.setSpacing(5)
-		self.scrollAreaWidget.setLayout(self.scrollAreaLayout)
+        self.scrollAreaLayout = QVBoxLayout()
+        self.scrollAreaLayout.setAlignment(Qt.AlignTop)
+        self.scrollAreaLayout.setContentsMargins(1, 1, 0, 0)
+        self.scrollAreaLayout.setSpacing(5)
+        self.scrollAreaWidget.setLayout(self.scrollAreaLayout)
 
-		self.scrollArea.setWidget(self.scrollAreaWidget)
+        self.scrollArea.setWidget(self.scrollAreaWidget)
 
-		#footer
-		self.footer = QWidget()
-		self.footerLayout = QVBoxLayout()
-		self.footerLayout.setContentsMargins(0,0,0,0)
-		self.footerLayout.setSpacing(0) #layout
-		self.footer.setLayout(self.footerLayout)
+        # footer
+        self.footer = QWidget()
+        self.footerLayout = QVBoxLayout()
+        self.footerLayout.setContentsMargins(0, 0, 0, 0)
+        self.footerLayout.setSpacing(0)  # layout
+        self.footer.setLayout(self.footerLayout)
 
-		self.footerTitleLabel = QLabel("Options")
+        self.footerTitleLabel = QLabel("Options")
 
-		#option widget
-		self.opt_widget = QFrame()
-		self.optLayout = QVBoxLayout()
-		self.optLayout.setAlignment(Qt.AlignTop)
-		self.optLayout.setContentsMargins(10,20,10,10)
-		self.optLayout.setSpacing(1) #layout
-		self.opt_widget.setLayout(self.optLayout)
-		self.opt_widget.setStyleSheet("background-color: #2a2a2a;")
+        # option widget
+        self.opt_widget = QFrame()
+        self.optLayout = QVBoxLayout()
+        self.optLayout.setAlignment(Qt.AlignTop)
+        self.optLayout.setContentsMargins(10, 20, 10, 10)
+        self.optLayout.setSpacing(1)  # layout
+        self.opt_widget.setLayout(self.optLayout)
+        self.opt_widget.setStyleSheet("background-color: #2a2a2a;")
 
-		self.footerLayout.addWidget(self.footerTitleLabel)
-		self.footerLayout.addWidget(self.opt_widget)
+        self.footerLayout.addWidget(self.footerTitleLabel)
+        self.footerLayout.addWidget(self.opt_widget)
 
-		self.centralLayout.addWidget(self.menuBar)
-		self.centralLayout.addWidget(self.slider)
-		self.centralLayout.addWidget(self.scrollArea)
-		self.centralLayout.addWidget(self.footer)
+        self.centralLayout.addWidget(self.menuBar)
+        self.centralLayout.addWidget(self.slider)
+        self.centralLayout.addWidget(self.scrollArea)
+        self.centralLayout.addWidget(self.footer)
 
-		self.append_widgets()
-		self.load_options()
+        self.append_widgets()
+        self.load_options()
 
-	def append_widgets(self):
-		self.buttons_list = []
-		data = DataJson.read_json()
-		data = OrderedDict(sorted(data.items()))
-		for x in data:
-			toolWidget = ToolsWidget(label = x.split('.')[1])
-			gridWidget =QWidget()
-			grid = QGridLayout()
-			gridWidget.setLayout(grid)
-			grid.setContentsMargins(5,1,5,1)
-			grid.setSpacing(2)
-			self.scrollAreaLayout.addWidget(toolWidget)
-			self.scrollAreaLayout.addWidget(gridWidget)
-			toolWidget.dataLayout(gridWidget)
+    def append_widgets(self):
+        self.buttons_list = []
+        data = DataJson.read_json()
+        data = OrderedDict(sorted(data.items()))
+        for x in data:
+            toolWidget = ToolsWidget(label=x.split('.')[1])
+            gridWidget = QWidget()
+            grid = QGridLayout()
+            gridWidget.setLayout(grid)
+            grid.setContentsMargins(5, 1, 5, 1)
+            grid.setSpacing(2)
+            self.scrollAreaLayout.addWidget(toolWidget)
+            self.scrollAreaLayout.addWidget(gridWidget)
+            toolWidget.dataLayout(gridWidget)
 
-			sorted_data = OrderedDict(sorted(data[x].items()))
-			raw = 0
-			column = 0
-			#for indx in range(len(sorted_data)):
-			for y in sorted_data:
+            sorted_data = OrderedDict(sorted(data[x].items()))
+            raw = 0
+            column = 0
+            # for indx in range(len(sorted_data)):
+            for y in sorted_data:
 
-				if column == 2:
-					column = 0
+                if column == 2:
+                    column = 0
 
-				label = sorted_data[y][0]
-				action = sorted_data[y][1]
+                label = sorted_data[y][0]
+                action = sorted_data[y][1]
 
-				#content = DataWidget(label = label, action = action, options_layout = self.optLayout)
-				content = DataWidget(label = label, action = action, options_layout = self.optLayout)
-				grid.addWidget(content, raw, column)
+                # content = DataWidget(label = label, action = action, options_layout = self.optLayout)
+                content = DataWidget(label=label, action=action, options_layout=self.optLayout)
+                grid.addWidget(content, raw, column)
 
-				self.buttons_list.append(content)
+                self.buttons_list.append(content)
 
-				column += 1
-				if column != 1:
-					raw += 1
+                column += 1
+                if column != 1:
+                    raw += 1
 
-	def load_options(self):
-		if not cmds.optionVar(ex = SETTINGS):
-			cmds.optionVar(sv=(SETTINGS, '22') )
+    def load_options(self):
+        if not cmds.optionVar(ex=SETTINGS):
+            cmds.optionVar(sv=(SETTINGS, '22'))
 
-		value = cmds.optionVar(q = SETTINGS)
-		self.slider.setValue(int(value))
-		self.changeSize(int(value))
+        value = cmds.optionVar(q=SETTINGS)
+        self.slider.setValue(int(value))
+        self.changeSize(int(value))
 
-	def changeSize(self, value):
-		for btn in self.buttons_list:
-			btn.setIconSize(value)
-		cmds.optionVar(sv=(SETTINGS, value) )
+    def changeSize(self, value):
+        for btn in self.buttons_list:
+            btn.setIconSize(value)
+        cmds.optionVar(sv=(SETTINGS, value))

@@ -18,17 +18,15 @@ iconName = "Texture Editor"
 
 class ToolOptions(QWidget):
 
-    def __init__(self, parent = None):
-
+    def __init__(self, parent=None):
         super(ToolOptions, self).__init__(parent)
 
         self.setLayout(self.createUI())
 
     def createUI(self):
-
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(5,5,5,5)
-        self.mainLayout.setSpacing(10) #layout
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(10)  # layout
         self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
 
         html = '''
@@ -36,19 +34,15 @@ class ToolOptions(QWidget):
         <p style="color: #aaa;">Opens Maya native Texture Editor</p>
         '''
 
-        self.label  = QLabel(html)
+        self.label = QLabel(html)
 
         self.mainLayout.addWidget(self.label)
 
         return self.mainLayout
 
-
-
-
     def main(self):
-
-        #path = str(os.path.dirname(__file__)) + "\\wg_textureEditor.mel"
-        #fix =  path.replace("\\", "/")
-        #mel.eval('source "'+fix+'"')
+        # path = str(os.path.dirname(__file__)) + "\\wg_textureEditor.mel"
+        # fix =  path.replace("\\", "/")
+        # mel.eval('source "'+fix+'"')
 
         mel.eval("TextureViewWindow;")

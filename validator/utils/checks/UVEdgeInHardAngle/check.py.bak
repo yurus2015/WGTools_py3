@@ -4,7 +4,7 @@ import maya.OpenMaya as OpenMaya
 import maya.mel as mel
 import math
 import re
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 51
 checkLabel = "4.4 Check hard UVs inside uv mesh (too long)"
 

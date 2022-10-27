@@ -3,7 +3,7 @@ import maya.cmds as cmds
 import os
 import re
 dir = os.path.dirname(__file__)
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 120
 checkLabel = "Check havok objects with non-zero transformations"
 

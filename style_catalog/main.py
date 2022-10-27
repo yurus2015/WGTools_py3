@@ -1,6 +1,7 @@
 # from style_catalog.gui.style_window import*
 import maya.cmds as cmds
 import style_catalog.gui.style_window as sw
+
 reload(sw)
 
 

@@ -166,8 +166,8 @@ class SG_lodSwitch(QWidget):
     def switchLodsColorLabel(self, value):
         # print 'Value', value
         allLabelsLod = (
-        self.textLaybel_01, self.textLaybel_02, self.textLaybel_03, self.textLaybel_04, self.textLaybel_05,
-        self.textLaybel_06, self.textLaybel_07)
+            self.textLaybel_01, self.textLaybel_02, self.textLaybel_03, self.textLaybel_04, self.textLaybel_05,
+            self.textLaybel_06, self.textLaybel_07)
         for index in range(len(allLabelsLod)):
             if index == value:
                 allLabelsLod[index].setStyleSheet("color: rgb(80, 200, 0)")

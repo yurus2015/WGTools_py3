@@ -8,6 +8,7 @@ import maya.cmds as cmds
 import sys
 import importlib
 import modelingToolset.lib.uvChecker.gui.widgets
+
 importlib.reload(modelingToolset.lib.uvChecker.gui.widgets)
 from modelingToolset.lib.uvChecker.gui.widgets import *
 

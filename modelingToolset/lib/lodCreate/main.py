@@ -17,40 +17,36 @@ beautyName = "Create lods"
 
 class ToolOptions(QWidget):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
 
         super(ToolOptions, self).__init__(parent)
-
 
         self.setLayout(self.createUI())
 
     def createUI(self):
 
         self.mainLayout = QVBoxLayout()
-        self.mainLayout.setContentsMargins(5,5,5,5)
-        self.mainLayout.setSpacing(5) #layout
+        self.mainLayout.setContentsMargins(5, 5, 5, 5)
+        self.mainLayout.setSpacing(5)  # layout
         self.mainLayout.setAlignment(QtCore.Qt.AlignTop)
 
-        self.label  = QLabel("<b>Description:</b><p>Create lod groups hierarchy</p>")
+        self.label = QLabel("<b>Description:</b><p>Create lod groups hierarchy</p>")
 
         self.mainLayout.addWidget(self.label)
 
         return self.mainLayout
 
-
     # @classmethod
     def main(self):
 
-        selection = cmds.ls(sl=1,l=1)
+        selection = cmds.ls(sl=1, l=1)
 
         if not cmds.objExists("lod0"):
-            cmds.inViewMessage(amg= '<hl>Lod0 does not exists</hl>' , pos = 'topLeft', fade = True, fot = 1000)
+            cmds.inViewMessage(amg='<hl>Lod0 does not exists</hl>', pos='topLeft', fade=True, fot=1000)
             return
-
 
         cmds.select("lod0")
         lodGroup = cmds.listRelatives(p=1, type="lodGroup")
-
 
         if lodGroup:
             cmds.select(lodGroup[0])
@@ -88,7 +84,6 @@ class ToolOptions(QWidget):
             if cmds.objExists("lod4"):
                 cmds.select("lod4", add=1)
 
-
             nameOfLodGroup = mel.eval('performSetupLod;')
             if cmds.objExists(nameOfLodGroup[0] + ".threshold[0]"):
                 cmds.setAttr(nameOfLodGroup[0] + ".threshold[0]", 13 * unitCoof)
@@ -99,8 +94,5 @@ class ToolOptions(QWidget):
             if cmds.objExists(nameOfLodGroup[0] + ".threshold[3]"):
                 cmds.setAttr(nameOfLodGroup[0] + ".threshold[3]", 77 * unitCoof)
 
-
-
-        cmds.inViewMessage(amg= '<hl style="color: #00FF00">Selected mesh properties has been set up successfully</hl>' , pos = 'topLeft', fade = True, fot = 1000)
-
-
+        cmds.inViewMessage(amg='<hl style="color: #00FF00">Selected mesh properties has been set up successfully</hl>',
+                           pos='topLeft', fade=True, fot=1000)

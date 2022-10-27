@@ -3,212 +3,195 @@ import maya.mel as mel
 
 import os, posixpath
 
-#import wg_modelingToolset.utils.scene as scene_u
-#import wg_modelingToolset.utils.std as std_u
+# import wg_modelingToolset.utils.scene as scene_u
+# import wg_modelingToolset.utils.std as std_u
 
 from PySide2 import QtGui, QtCore, QtWidgets
 from PySide2.QtGui import *
 from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 
-
 description = "Use this checker to make sure a model's uvs are created correctly"
 buttonType = "opt"
 beautyName = "UV Checker"
 iconName = "UV Checker"
 
+
 class Checker(object):
 
-	@classmethod
-	def takeMaterial(cls, selection = None):
-		if not selection: return 0
+    @classmethod
+    def takeMaterial(cls, selection=None):
+        if not selection: return 0
 
-		cmds.hyperShade(smn=1)
-		shader = cmds.ls(sl=1,l=1)
-		return shader
+        cmds.hyperShade(smn=1)
+        shader = cmds.ls(sl=1, l=1)
+        return shader
 
+    @classmethod
+    def deleteCheckerNode(cls):
 
-	@classmethod
-	def deleteCheckerNode(cls):
+        try:
+            cmds.select("Cheker_TFile*", r=1)
+            cmds.delete()
+            cmds.select("Checker_place2dTextures*")
+            cmds.delete()
+        except:
+            pass
 
+        return 1
 
+    @classmethod
+    def assignFileNodeToShader(cls, shader=None, texture=None):
+        if not shader or not texture: return
 
-		try:
-			cmds.select("Cheker_TFile*", r=1)
-			cmds.delete()
-			cmds.select("Checker_place2dTextures*")
-			cmds.delete()
-		except:
-			pass
+        fileName = mel.eval('shadingNode -asTexture file -name "Cheker_TFile"')
+        nodeName = mel.eval('shadingNode -asUtility place2dTexture -name "Checker_place2dTextures"')
+        cmds.setAttr(fileName + ".fileTextureName", texture, type="string")
+        cmds.defaultNavigation(connectToExisting=1, source=nodeName, destination=fileName)
+        cmds.connectAttr(fileName + ".outColor", shader + ".color", force=1)
+        cmds.addAttr(fileName, ln="Checker_main", at="bool")
+        cmds.setAttr(fileName + ".Checker_main", e=1, keyable=1)
+        cmds.setAttr(nodeName + ".repeatUV.repeatU", 16)
+        cmds.setAttr(nodeName + ".repeatUV.repeatV", 16)
 
+        return fileName
 
+    @classmethod
+    def checkTakeObjectMat(cls, shader=None):
 
-		return 1
+        checkColorNode = cmds.listConnections(shader + ".color", type="file")  # returns ["fileNodeName"]
+        defaultMapPath = str(os.path.dirname(__file__)).replace("\\", "/") + "/checkers/checkerblue_128.xpm"
 
-	@classmethod
-	def assignFileNodeToShader(cls, shader = None, texture = None):
-		if not shader or not texture: return
+        result = None
 
+        if not checkColorNode:
 
-		fileName = mel.eval('shadingNode -asTexture file -name "Cheker_TFile"')
-		nodeName = mel.eval('shadingNode -asUtility place2dTexture -name "Checker_place2dTextures"')
-		cmds.setAttr(fileName + ".fileTextureName", texture, type="string")
-		cmds.defaultNavigation(connectToExisting=1, source = nodeName, destination = fileName)
-		cmds.connectAttr(fileName + ".outColor", shader + ".color", force = 1)
-		cmds.addAttr(fileName, ln="Checker_main", at="bool")
-		cmds.setAttr(fileName + ".Checker_main", e=1, keyable=1)
-		cmds.setAttr(nodeName + ".repeatUV.repeatU", 16)
-		cmds.setAttr(nodeName + ".repeatUV.repeatV", 16)
+            result = cls.assignFileNodeToShader(shader=shader, texture=defaultMapPath)  # returns fileNodeName
 
+        else:
 
-		return fileName
+            if not cmds.objExists(checkColorNode[0] + ".Checker_main"):
 
+                cmds.delete(cmds.listConnections(shader + ".color"))
 
-	@classmethod
-	def checkTakeObjectMat(cls, shader = None):
+                result = cls.assignFileNodeToShader(shader=shader, texture=defaultMapPath)
 
-		checkColorNode = cmds.listConnections(shader + ".color", type="file") #returns ["fileNodeName"]
-		defaultMapPath = str(os.path.dirname(__file__)).replace("\\","/") + "/checkers/checkerblue_128.xpm"
+            else:  # file name with attr Checker_main exists
+                result = checkColorNode[0]
 
-		result = None
+        return result  # fileName
 
-		if not checkColorNode:
+    @classmethod
+    def checkChangeSizeOrTextures(cls, checkTextureSize, checkTexturePath):
 
-			result = cls.assignFileNodeToShader(shader = shader, texture = defaultMapPath) #returns fileNodeName
+        cmds.undoInfo(ock=1)
 
-		else:
+        checkerSelection = cmds.ls(sl=1, l=1)
 
-			if not cmds.objExists(checkColorNode[0] + ".Checker_main"):
+        if not checkerSelection: return
 
-				cmds.delete(cmds.listConnections(shader + ".color"))
+        assignedShaders = cls.takeMaterial(cmds.ls(sl=1, l=1, fl=1))  ###
 
-				result = cls.assignFileNodeToShader(shader = shader, texture = defaultMapPath)
+        # format checkTexturePath
+        fullTexturePath = str(os.path.dirname(__file__)).replace("\\", "/") + "/checkers/" + str(checkTexturePath)
 
-			else: #file name with attr Checker_main exists
-				result = checkColorNode[0]
+        for i in assignedShaders:
 
-		return result #fileName
+            checkFileNode = cls.checkTakeObjectMat(i)
 
+            if checkTextureSize == 0:
 
+                cmds.setAttr(checkFileNode + ".fileTextureName", fullTexturePath, type="string")
 
-	@classmethod
-	def checkChangeSizeOrTextures(cls, checkTextureSize, checkTexturePath):
+            else:
+                if checkFileNode:
+                    check2Node = cmds.listConnections(checkFileNode + ".repeatUV", type="place2dTexture")
 
-		cmds.undoInfo(ock=1)
+                    if check2Node:
+                        cmds.setAttr(check2Node[0] + ".repeatUV.repeatU", checkTextureSize)
+                        cmds.setAttr(check2Node[0] + ".repeatUV.repeatV", checkTextureSize)
 
-
-		checkerSelection = cmds.ls(sl=1, l=1)
-
-		if not checkerSelection: return
-
-		assignedShaders = cls.takeMaterial(cmds.ls(sl=1,l=1,fl=1)) ###
-
-		#format checkTexturePath
-		fullTexturePath = str(os.path.dirname(__file__)).replace("\\","/") + "/checkers/" + str(checkTexturePath)
-
-		for i in assignedShaders:
-
-			checkFileNode = cls.checkTakeObjectMat(i)
-
-
-			if checkTextureSize == 0:
-
-				cmds.setAttr(checkFileNode + ".fileTextureName", fullTexturePath, type = "string")
-
-			else:
-				if checkFileNode:
-					check2Node = cmds.listConnections(checkFileNode + ".repeatUV", type="place2dTexture")
-
-					if check2Node:
-						cmds.setAttr(check2Node[0] + ".repeatUV.repeatU", checkTextureSize)
-						cmds.setAttr(check2Node[0] + ".repeatUV.repeatV", checkTextureSize)
-
-		cmds.select(checkerSelection, r=1)
-		cmds.undoInfo(cck=1)
-		return 1
+        cmds.select(checkerSelection, r=1)
+        cmds.undoInfo(cck=1)
+        return 1
 
 
 class TextureButton(QWidget):
 
-	def __init__(self, parent = None, icon = None, textureSize = 0, texturePath = 0):
+    def __init__(self, parent=None, icon=None, textureSize=0, texturePath=0):
+        super(TextureButton, self).__init__(parent)
 
-		super(TextureButton, self).__init__(parent)
+        '''data'''
+        self.icon = icon
+        self.bgcolor = 90
+        self.setFixedSize(30, 30)
+        self.setLayout(self.UI())
 
-		'''data'''
-		self.icon = icon
-		self.bgcolor = 90
-		self.setFixedSize(30,30)
-		self.setLayout(self.UI())
+        self.textureSize = textureSize
+        self.texturePath = texturePath
 
-		self.textureSize = textureSize
-		self.texturePath = texturePath
+    def UI(self):
+        self.setStyleSheet("background-color: rgb(90,90,90)")
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setAlignment(QtCore.Qt.AlignCenter)
+        self.mainLayout.setSpacing(0)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
+        self.label = QLabel("None")
+        self.label.setFixedSize(50, 50)
 
-	def UI(self):
+        if self.icon and os.path.isfile(self.icon):
+            self.label.setGeometry(0, 0, 50, 50)
+            self.label.setPixmap(
+                QPixmap(self.icon).scaled(50, 50, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
 
-		self.setStyleSheet("background-color: rgb(90,90,90)")
-		self.mainLayout = QVBoxLayout()
-		self.mainLayout.setAlignment(QtCore.Qt.AlignCenter)
-		self.mainLayout.setSpacing(0)
-		self.mainLayout.setContentsMargins(0,0,0,0)
+        self.mainLayout.addWidget(self.label)
 
-		self.label = QLabel("None")
-		self.label.setFixedSize(50,50)
+        return self.mainLayout
 
-		if self.icon and os.path.isfile(self.icon):
-			self.label.setGeometry(0, 0, 50, 50)
-			self.label.setPixmap(QPixmap(self.icon).scaled(50,50, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+    def mouseReleaseEvent(self, event):
+        self.setStyleSheet("background-color: rgb(110,110,110)")
+        Checker.checkChangeSizeOrTextures(self.textureSize, self.texturePath)
 
-		self.mainLayout.addWidget(self.label)
+    def enterEvent(self, event):
+        self.setCursor(QtCore.Qt.PointingHandCursor)
+        self.setStyleSheet("background-color: rgb(110,110,110)")
 
-		return self.mainLayout
+    def leaveEvent(self, event):
+        self.setCursor(QtCore.Qt.ArrowCursor)
+        self.setStyleSheet("background-color: rgb(90,90,90)")
 
-
-	def mouseReleaseEvent(self, event):
-		self.setStyleSheet("background-color: rgb(110,110,110)")
-		Checker.checkChangeSizeOrTextures(self.textureSize,self.texturePath)
-
-	def enterEvent(self, event):
-		self.setCursor(QtCore.Qt.PointingHandCursor)
-		self.setStyleSheet("background-color: rgb(110,110,110)")
-
-
-	def leaveEvent(self, event):
-		self.setCursor(QtCore.Qt.ArrowCursor)
-		self.setStyleSheet("background-color: rgb(90,90,90)")
-
-
-	def mousePressEvent(self, event):
-		self.setStyleSheet("background-color: rgb(120,120,120)")
+    def mousePressEvent(self, event):
+        self.setStyleSheet("background-color: rgb(120,120,120)")
 
 
 class Utils(object):
 
-	@classmethod
-	def get_texture(cls):
-		dir_checkers = os.path.dirname(__file__)
-		dir_checkers = os.path.join(dir_checkers, 'checkers').replace(os.sep, '/')
-		print('file', dir_checkers)
+    @classmethod
+    def get_texture(cls):
+        dir_checkers = os.path.dirname(__file__)
+        dir_checkers = os.path.join(dir_checkers, 'checkers').replace(os.sep, '/')
+        print('file', dir_checkers)
 
-		textures_list = []
-		for i in os.listdir(dir_checkers): #get all files in this folder
-			if i.lower().endswith(".tga"):
-				current_path = posixpath.join(dir_checkers, i)
-				textures_list.append(current_path)
-		print('textures ', textures_list)
-		return textures_list
+        textures_list = []
+        for i in os.listdir(dir_checkers):  # get all files in this folder
+            if i.lower().endswith(".tga"):
+                current_path = posixpath.join(dir_checkers, i)
+                textures_list.append(current_path)
+        print('textures ', textures_list)
+        return textures_list
 
 
 class BlendLabelSlider(QHBoxLayout):
-	def __init__(self, parent = None, title = None, min = None, max = None):
-		super(BlendLabelSlider, self).__init__()
-		self.name = title
-		self.min_range = min
-		self.max_range = max
-		self.label = QLabel(self.name)
-		self.addWidget(self.label)
-		self.slider = QSlider(Qt.Horizontal)
-		self.slider.setStyleSheet('''QSlider::groove:horizontal {
+    def __init__(self, parent=None, title=None, min=None, max=None):
+        super(BlendLabelSlider, self).__init__()
+        self.name = title
+        self.min_range = min
+        self.max_range = max
+        self.label = QLabel(self.name)
+        self.addWidget(self.label)
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setStyleSheet('''QSlider::groove:horizontal {
 										border: 0px solid;
 										height: 5px;
 										margin: 0px;
@@ -216,103 +199,97 @@ class BlendLabelSlider(QHBoxLayout):
 										QSlider::handle:horizontal {
 										background-color: white;
 										height: 50px;width: 12px;}''')
-		self.slider.setRange(self.min_range, self.max_range)
-		self.slider.setFixedSize(50, 10)
-		self.addWidget(self.slider)
-		self.setContentsMargins(5,0,0,0)
-		self.setSpacing(10)
+        self.slider.setRange(self.min_range, self.max_range)
+        self.slider.setFixedSize(50, 10)
+        self.addWidget(self.slider)
+        self.setContentsMargins(5, 0, 0, 0)
+        self.setSpacing(10)
 
 
 class BlendTextureWidget(QWidget):
-	def __init__(self, parent = None, icon = None, texture = None):
-		QWidget.__init__(self)
-		self.icon = icon
-		self.texture = texture
-		self.setLayout(self.ui())
+    def __init__(self, parent=None, icon=None, texture=None):
+        QWidget.__init__(self)
+        self.icon = icon
+        self.texture = texture
+        self.setLayout(self.ui())
+
+    def ui(self):
+        print('ui')
+        self.mainLayout = QHBoxLayout()
+        self.mainLayout.setContentsMargins(0, 3, 3, 0)
+        self.mainLayout.setSpacing(0)  # layout
+        self.mainLayout.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+
+        self.title_sliderLayout = QHBoxLayout()
+        self.title_sliderLayout.setContentsMargins(0, 3, 3, 0)
+        self.title_sliderLayout.setSpacing(0)  # layout
+        self.title_sliderLayout.setAlignment(Qt.AlignLeft)
+
+        self.sliderLayout = QVBoxLayout()
+        self.sliderLayout.setContentsMargins(5, 0, 5, 1)
+        self.sliderLayout.setSpacing(2)  # layout
+        self.sliderLayout.setAlignment(Qt.AlignLeft)
+
+        self.tileULabel = BlendLabelSlider(title='tileU', min=1, max=32)
+        self.tileVLabel = BlendLabelSlider(title='     tileV', min=1, max=32)
+        self.offcetULabel = BlendLabelSlider(title='offcetU', min=0, max=100)
+        self.offcetVLabel = BlendLabelSlider(title='offcetV', min=0, max=100)
+
+        self.icon_wdg = QPushButton()
+        self.icon_wdg.setFixedSize(60, 60)
+        self.icon_wdg.setIcon(QIcon(self.texture))
+        self.icon_wdg.setIconSize(QSize(60, 60))
+
+        self.sliderLayout.addLayout(self.tileULabel)
+        self.sliderLayout.addLayout(self.tileVLabel)
+        self.sliderLayout.addLayout(self.offcetULabel)
+        self.sliderLayout.addLayout(self.offcetVLabel)
+
+        self.mainLayout.addWidget(self.icon_wdg)
+        self.mainLayout.addLayout(self.title_sliderLayout)
+        # self.title_sliderLayout.addLayout(self.labelLayout)
+        self.title_sliderLayout.addLayout(self.sliderLayout)
+
+        return self.mainLayout
 
 
-	def ui(self):
-		print('ui')
-		self.mainLayout = QHBoxLayout()
-		self.mainLayout.setContentsMargins(0,3,3,0)
-		self.mainLayout.setSpacing(0) #layout
-		self.mainLayout.setAlignment(Qt.AlignLeft|Qt.AlignTop)
-
-		self.title_sliderLayout = QHBoxLayout()
-		self.title_sliderLayout.setContentsMargins(0,3,3,0)
-		self.title_sliderLayout.setSpacing(0) #layout
-		self.title_sliderLayout.setAlignment(Qt.AlignLeft)
-
-
-		self.sliderLayout = QVBoxLayout()
-		self.sliderLayout.setContentsMargins(5,0,5,1)
-		self.sliderLayout.setSpacing(2) #layout
-		self.sliderLayout.setAlignment(Qt.AlignLeft)
-
-		self.tileULabel = BlendLabelSlider(title = 'tileU', min = 1, max = 32)
-		self.tileVLabel = BlendLabelSlider(title = '     tileV', min = 1, max = 32)
-		self.offcetULabel = BlendLabelSlider(title = 'offcetU', min = 0, max = 100)
-		self.offcetVLabel = BlendLabelSlider(title = 'offcetV', min = 0, max = 100)
-
-		self.icon_wdg = QPushButton()
-		self.icon_wdg.setFixedSize(60, 60)
-		self.icon_wdg.setIcon(QIcon(self.texture))
-		self.icon_wdg.setIconSize(QSize(60,60))
-
-
-		self.sliderLayout.addLayout(self.tileULabel)
-		self.sliderLayout.addLayout(self.tileVLabel)
-		self.sliderLayout.addLayout(self.offcetULabel)
-		self.sliderLayout.addLayout(self.offcetVLabel)
-
-		self.mainLayout.addWidget(self.icon_wdg)
-		self.mainLayout.addLayout(self.title_sliderLayout)
-		#self.title_sliderLayout.addLayout(self.labelLayout)
-		self.title_sliderLayout.addLayout(self.sliderLayout)
-
-		return self.mainLayout
-		#self.setLayout(self.mainLayout)
-
+# self.setLayout(self.mainLayout)
 
 
 class ToolOptions(QWidget):
 
-	def __init__(self, parent = None):
-		super(ToolOptions, self).__init__(parent)
-		self.setLayout(self.ui())
+    def __init__(self, parent=None):
+        super(ToolOptions, self).__init__(parent)
+        self.setLayout(self.ui())
 
+    def ui(self):
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.setContentsMargins(2, 2, 2, 2)
+        self.mainLayout.setSpacing(0)  # layout
+        self.mainLayout.setAlignment(Qt.AlignTop)
 
-	def ui(self):
-		self.mainLayout = QVBoxLayout()
-		self.mainLayout.setContentsMargins(2,2,2,2)
-		self.mainLayout.setSpacing(0) #layout
-		self.mainLayout.setAlignment(Qt.AlignTop)
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setStyleSheet("QScrollArea {border: 0px; border-top : 1px solid; border-color: rgb(60,60,60);}")
+        self.scrollArea.setAlignment(Qt.AlignTop)
+        self.scrollAreaWidget = QWidget()
+        # self.scrollAreaWidget.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed))
 
-		self.scrollArea = QScrollArea()
-		self.scrollArea.setWidgetResizable(True)
-		self.scrollArea.setStyleSheet("QScrollArea {border: 0px; border-top : 1px solid; border-color: rgb(60,60,60);}")
-		self.scrollArea.setAlignment(Qt.AlignTop)
-		self.scrollAreaWidget = QWidget()
-		#self.scrollAreaWidget.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed))
+        self.itemLayout = QVBoxLayout()
+        self.itemLayout.setContentsMargins(2, 2, 2, 2)
+        self.itemLayout.setSpacing(0)  # layout
+        self.itemLayout.setAlignment(Qt.AlignTop)
 
-		self.itemLayout = QVBoxLayout()
-		self.itemLayout.setContentsMargins(2,2,2,2)
-		self.itemLayout.setSpacing(0) #layout
-		self.itemLayout.setAlignment(Qt.AlignTop)
+        self.scrollAreaWidget.setLayout(self.itemLayout)
+        self.scrollArea.setWidget(self.scrollAreaWidget)
 
-		self.scrollAreaWidget.setLayout(self.itemLayout)
-		self.scrollArea.setWidget(self.scrollAreaWidget)
+        textures = Utils.get_texture()
+        for texture in textures:
+            self.item = BlendTextureWidget(texture=texture)
+            self.itemLayout.addWidget(self.item)
 
-		textures = Utils.get_texture()
-		for texture in textures:
-			self.item = BlendTextureWidget(texture = texture)
-			self.itemLayout.addWidget(self.item)
+        self.mainLayout.addWidget(self.scrollArea)
+        return self.mainLayout
 
-		self.mainLayout.addWidget(self.scrollArea)
-		return self.mainLayout
-
-
-	def main(self):
-
-		cmds.inViewMessage(amg= '<hl>Please open options to apply checker</hl>' , pos = 'topLeft', fade = True, fot = 1000)
-
+    def main(self):
+        cmds.inViewMessage(amg='<hl>Please open options to apply checker</hl>', pos='topLeft', fade=True, fot=1000)

@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import time
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 60
 checkLabel = "3.24 Check pivots of wheels "
 

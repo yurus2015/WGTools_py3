@@ -1,7 +1,9 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 208
 checkLabel = "GB Check for absent surveying device"
+
 
 def checkForSurveyingDevice(mesh):
     result = None
@@ -12,7 +14,7 @@ def checkForSurveyingDevice(mesh):
 
     cmds.select(mesh)
     cmds.hyperShade(smn=1)
-    meshMaterials = cmds.ls(sl=1,l=1,fl=1)
+    meshMaterials = cmds.ls(sl=1, l=1, fl=1)
 
     if pattern in meshMaterials:
         result = pattern
@@ -61,6 +63,3 @@ def main():
                 returnList.append(tmp)
 
     return returnList
-
-
-

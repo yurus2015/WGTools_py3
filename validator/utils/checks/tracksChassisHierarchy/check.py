@@ -1,8 +1,10 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 46
 
 checkLabel = "Check hierarchy of tracks and chassis (Normal only)"
+
 
 def main():
     print('<< ' + checkLabel.upper() + ' >>')
@@ -17,7 +19,7 @@ def main():
                 chassis_R = True
             if y.find("chassis_L") != -1:
                 chassis_L = True
-        if  not chassis_R or not chassis_L:
+        if not chassis_R or not chassis_L:
             tmp = []
             tmp.append(x + " - doesn't have chassis")
             tmp.append(x)
@@ -31,7 +33,7 @@ def main():
                 track_R = True
             if y.find("track_L") != -1:
                 track_L = True
-        if 	not track_R or not track_L:
+        if not track_R or not track_L:
             tmp = []
             tmp.append(x + " - doesn't have tracks")
             tmp.append(x)
@@ -48,34 +50,27 @@ def main():
             if y.find("wd_L") != -1 or y.find("w_L") != -1:
                 w_Left += 1
 
-        if  w_Right != w_Left:
+        if w_Right != w_Left:
             tmp = []
             tmp.append(x + " - different wheels count or wrong name of wheels on the sides")
             tmp.append(x)
             returnList.append(tmp)
 
-
-
-
     if len(lodArray) > 0:
         for x in lodArray:
             if x == "lod0":
-                childArray = cmds.listRelatives(x, f=1, ad = True)
+                childArray = cmds.listRelatives(x, f=1, ad=True)
                 findChassis(childArray)
                 findTracks(childArray)
                 findWheels(childArray)
             elif x == "lod1":
-                childArray = cmds.listRelatives(x, f=1, ad = True)
+                childArray = cmds.listRelatives(x, f=1, ad=True)
                 findChassis(childArray)
                 findTracks(childArray)
                 findWheels(childArray)
 
             elif x == "lod4":
-                childArray = cmds.listRelatives(x, f=1, ad = True)
+                childArray = cmds.listRelatives(x, f=1, ad=True)
                 findChassis(childArray)
 
-
-    return  returnList
-
-
-
+    return returnList

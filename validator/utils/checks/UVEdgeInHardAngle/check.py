@@ -1,10 +1,10 @@
-
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import maya.mel as mel
 import math
 import re
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
+
 checkId = 51
 checkLabel = "4.4 Check hard UVs inside uv mesh (too long)"
 
@@ -111,12 +111,7 @@ def main():
             if cosAngle < 120:
                 returnList.append(edge)"""
 
+    # errorMessage = "Next objects still have a construction history:"
+    # returnList.append(errorMessage)
 
-
-
-    #errorMessage = "Next objects still have a construction history:"
-    #returnList.append(errorMessage)
-
-
-    return  returnList
-
+    return returnList

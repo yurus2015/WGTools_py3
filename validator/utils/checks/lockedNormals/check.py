@@ -1,17 +1,15 @@
 from maya.OpenMaya import *
 import maya.cmds as cmds
 
-
 checkId = 708
 checkLabel = "9. Check locked vertex normals"
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
-    all_meshes = cmds.ls(type="mesh", l = True)
+    all_meshes = cmds.ls(type="mesh", l=True)
     sel_list = MSelectionList()
     for x in all_meshes:
         sel_list.add(x)
-
 
     return_list = []
 
@@ -19,8 +17,8 @@ def main():
     for x in range(sel_list.length()):
         sel_list.getDagPath(x, dag_path)
 
-        #Horrible Dirty Shit for havok preset
-        if "havok" in cmds.file(q=1,sn = 1):
+        # Horrible Dirty Shit for havok preset
+        if "havok" in cmds.file(q=1, sn=1):
             if "havok" not in dag_path.fullPathName().split("|")[1]:
                 continue
 
@@ -35,7 +33,4 @@ def main():
                     return_list.append([dag_path.fullPathName(), dag_path.fullPathName()])
                 break
 
-
     return return_list
-
-

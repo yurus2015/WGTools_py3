@@ -2,7 +2,7 @@ import maya.cmds as cmds
 import re, posixpath
 import os
 import struct
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 43
 checkLabel = "8.7 Check names of textures"
 

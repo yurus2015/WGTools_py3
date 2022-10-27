@@ -17,6 +17,7 @@ SUFFIX = (('AM', True),
           ('BM', False),
           ('DM', False))
 
+
 def main_window_pointer():
     point = omu.MQtUtil.mainWindow()
     return wrapInstance(int(point), QWidget)
@@ -68,7 +69,8 @@ class TanksWindow(QDialog):
 
     def script_jons_start(self):
         self.sj_open_scene = cmds.scriptJob(e=["SceneOpened", self.calculate_polycount], p="SimplygonTanksWindow")
-        self.sj_change_selection = cmds.scriptJob(e=["SelectionChanged", self.calculate_polycount], p="SimplygonTanksWindow")
+        self.sj_change_selection = cmds.scriptJob(e=["SelectionChanged", self.calculate_polycount],
+                                                  p="SimplygonTanksWindow")
         self.sj_change_name = cmds.scriptJob(e=["NameChanged", self.calculate_polycount], p="SimplygonTanksWindow")
 
     def calculate_polycount(self):
@@ -117,6 +119,7 @@ class TanksReduceBlock(TanksGroupBox):
 
     def table(self):
         return self._table
+
 
 class TanksToolsBlock(TanksGroupBox):
     def __init__(self, *args):
@@ -282,8 +285,8 @@ class TanksTable(QTableWidget):
         # settings from 0 to 2
         item = self.item(2, column)
         if item.text().isdigit():
-            Settings.lods_manual[column-2] = item.text()
-            print('Item text', item.text(), ' in ', column-2)
+            Settings.lods_manual[column - 2] = item.text()
+            print('Item text', item.text(), ' in ', column - 2)
         else:
             print('ERROR: enter only digits')
             item.setText('Enter value')

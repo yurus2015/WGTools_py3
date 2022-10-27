@@ -2,28 +2,28 @@ import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import re
 import os
+
 checkId = 110
 checkLabel = "Check TGA textures"
 
+
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     returnList = []
 
-    rawFilePath = cmds.file (q=True, exn=True)
+    rawFilePath = cmds.file(q=True, exn=True)
     fileName = cmds.file(q=True, sn=True, shn=True)
     filePath = None
     if fileName:
         fileNameFrmt = fileName.split(".")[0]
         ext = fileName.split(".")[-1]
         filePath = rawFilePath[:len(rawFilePath) - len(fileName)]
-        search =  fileName.find("_crash")
+        search = fileName.find("_crash")
         Tankname = None
         if search != -1:
             Tankname = fileName[:search]
 
         else:
             Tankname = fileName[:-3]
-
 
     file_list = cmds.ls(type="file", l=1)
     for i in file_list:
@@ -59,4 +59,4 @@ def main():
                         tmp.append(txt)
                         returnList.append(tmp)
 
-    return  returnList
+    return returnList

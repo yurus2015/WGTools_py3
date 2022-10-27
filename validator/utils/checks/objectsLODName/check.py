@@ -1,12 +1,11 @@
 import maya.cmds as cmds
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 
 checkId = 704
 checkLabel = "3.14 Check objects group names and lods existance"
 
 
 def main():
-    print('<< ' + checkLabel.upper() + ' >>')
     return_list = []
 
     file_name = cmds.file(q=True, sn=True).split("/")[-1][:-3]

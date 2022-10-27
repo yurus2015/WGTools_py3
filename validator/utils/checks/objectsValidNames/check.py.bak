@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 34
 checkLabel = "8.6 Check names of objects"
 

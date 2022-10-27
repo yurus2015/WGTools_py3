@@ -1,12 +1,13 @@
-#modificators
+# modificators
 
 action_category = "TechArt Tools"
 action_label = "Collider Creation Toolset"
 
-#running procedure
+# running procedure
 
 
 import CCToolset.main
+
 global cctInstance
 
 try:
@@ -14,5 +15,3 @@ try:
     cctInstance.main()
 except:
     cctInstance = CCToolset.main.run()
-
-

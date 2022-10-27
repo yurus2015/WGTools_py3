@@ -3,7 +3,7 @@ import re
 import os
 import maya.OpenMaya as OpenMaya
 import struct
-from validator2019.utils.validator_API import *
+from validator.utils.validator_API import *
 checkId = 44
 checkLabel = "Check texture proportions"
 
