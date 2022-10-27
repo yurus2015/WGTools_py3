@@ -655,24 +655,26 @@ def listAllMat():
 
 
 def vl_listAllTransforms():
-    listPolyMeshes = cmds.ls(type='mesh', l=True)
+    list_poly_meshes = cmds.ls(type='mesh', l=True)
     # maya bag fix - transform has strange shape - no visible in outliner
-    real_meshes_list = cmds.filterExpand(listPolyMeshes, sm=12, fp=1)
+    real_meshes_list = cmds.filterExpand(list_poly_meshes, sm=12, fp=1)
     # maya bag fix end
+    if not real_meshes_list:
+        return []
 
-    listMeshesTransform = []
-    hpModules = []
+    list_meshes_transform = []
+    hp_modules = []
     for x in real_meshes_list:
-        trFullPath = cmds.listRelatives(x, p=True, f=True)
-        check = trFullPath[0].find("HP_")
+        tr_full_path = cmds.listRelatives(x, p=True, f=True)
+        check = tr_full_path[0].find("HP_")
         if check == -1:
-            listMeshesTransform.append(trFullPath[0])
+            list_meshes_transform.append(tr_full_path[0])
         else:
-            hpModules.append(trFullPath[0])
+            hp_modules.append(tr_full_path[0])
 
-    listMeshesTransform = list(set(listMeshesTransform))
+    list_meshes_transform = list(set(list_meshes_transform))
 
-    return listMeshesTransform
+    return list_meshes_transform
 
 
 def vl_listAllGroups():

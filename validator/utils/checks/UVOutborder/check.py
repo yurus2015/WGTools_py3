@@ -7,25 +7,25 @@ checkLabel = "8.13 Check UVs out of range"
 
 
 def main():
-    objList = vl_listAllTransforms()
-    objList = cmds.filterExpand(objList, sm=12, fp=1)
+    obj_list = vl_listAllTransforms()
+    obj_list = cmds.filterExpand(obj_list, sm=12, fp=1)
     # objList = cmds.ls(objList, l=1)
 
     track_L, track_R = vl_findTracksInLods()
-    trackList = track_L + track_R
-    trackList = cmds.filterExpand(trackList, sm=12, fp=1)
+    track_list = track_L + track_R
+    track_list = cmds.filterExpand(track_list, sm=12, fp=1)
     # trackList = cmds.ls(trackList, l=1)
 
-    returnList = []
+    return_list = []
 
-    if len(objList) > 0:
+    if obj_list:
         # remove track objects from the objList
-        if len(trackList) > 0:
-            for i in trackList:
-                objList.remove(i)
+        if len(track_list) > 0:
+            for i in track_list:
+                obj_list.remove(i)
 
         # for all objs in objList get its uv coordinates
-        for i in objList:
+        for i in obj_list:
             if i.find("lod0") != -1 or i.find("lod1") != -1:
                 print('Current object ', i)
                 util = OpenMaya.MScriptUtil()
@@ -52,13 +52,11 @@ def main():
                         status = True
                         break
                 if status == True:
-                    tmp = []
-                    tmp.append(DagPath.fullPathName())
-                    tmp.append(DagPath.fullPathName())
-                    returnList.append(tmp)
+                    tmp = [DagPath.fullPathName(), DagPath.fullPathName()]
+                    return_list.append(tmp)
 
-        if len(trackList) > 0:
-            for i in trackList:
+        if len(track_list) > 0:
+            for i in track_list:
                 if i.find("lod0") != -1:
                     util = OpenMaya.MScriptUtil()
                     selectionList = OpenMaya.MSelectionList()
@@ -84,11 +82,9 @@ def main():
                             status = True
                             break
                     if status == True:
-                        tmp = []
-                        tmp.append(DagPath.fullPathName())
-                        tmp.append(DagPath.fullPathName())
-                        returnList.append(tmp)
+                        tmp = [DagPath.fullPathName(), DagPath.fullPathName()]
+                        return_list.append(tmp)
 
         OpenMaya.MGlobal.clearSelectionList()
 
-    return returnList
+    return return_list

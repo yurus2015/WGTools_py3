@@ -136,7 +136,7 @@ class ValidatorMainWindow(QDialog):
                 self.progress_bar.setMaximum(len(check_for_run))
                 for item in range(len(check_for_run)):
                     try:
-                        if check_for_run[item].runCheck():
+                        if check_for_run[item].run_check():
                             pass
                         elif isolate:
                             check_for_run[item].setVisible(False)

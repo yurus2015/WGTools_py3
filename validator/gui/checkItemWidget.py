@@ -55,11 +55,16 @@ class CheckWidget(QWidget):
             self.dataWidget.setVisible(True)
             self.headerWidget.setArrow()
 
-    def runCheck(self, *args):
+    def run_check(self, *args):
         isolate = cmds.optionVar(q=ISOLATEOPTION)
         exec('import ' + CHECKS_PATH + self.action + '.check')
         print(self.label.upper())
-        self.returnList = eval(CHECKS_PATH + self.action + '.check.main()')
+        self.returnList = None
+        try:
+            self.returnList = eval(CHECKS_PATH + self.action + '.check.main()')
+        except ValueError:
+            self.headerWidget.setLabel('Error in script!: ' + self.label)
+            return self.error, self.fixed
         if self.returnList:
             self.dataWidget.addItem(self.returnList)
             self.headerWidget.set_color_error(self.error)
@@ -103,7 +108,7 @@ class CheckWidget(QWidget):
         else:
             self.dataWidget.addItem(self.returnList)
             self.headerWidget.set_color_error()
-            self.runCheck()
+            self.run_check()
 
 
 class HeaderWidget(QWidget):
@@ -126,13 +131,13 @@ class HeaderWidget(QWidget):
         self.resultButton = QPushButton(self)
         self.resultButton.setFixedSize(13, 25)
         self.resultButton.setStyleSheet("border:0px;background: rgb(150, 150, 150);")
-        #
+
         # arrow button
         self.arrowButton = QLabel("", self)
         self.arrowButton.setFixedSize(13, 25)
         self.arrowButton.setStyleSheet("background:transparent;")
         self.arrowButton.setEnabled(False)
-        #
+
         # label
         self.checkLabel = QLabel(self)
         #
@@ -185,7 +190,7 @@ class HeaderWidget(QWidget):
         self.checkLabel.setMaximumWidth(int(s.width() - 104))
 
     def runCheck(self, *args):
-        err, fix = self.parent().runCheck()
+        err, fix = self.parent().run_check()
 
     def set_color_error(self, err=None):
         if err == 'Warning':
