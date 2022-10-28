@@ -10,7 +10,7 @@ from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 import os
 
-import modelingToolset2019.utils.scene as scene_u
+import modelingToolset.utils.scene as scene_u
 
 description = "Select one or more polygonal to apply hard/soft-mapping"
 buttonType = "opt"

@@ -8,4 +8,4 @@ import sceneTools.mapHard as mh
 from importlib import reload
 
 reload(mh)
-mh.mapToHard()
+mh.map_border_hard()

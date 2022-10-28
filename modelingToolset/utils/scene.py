@@ -2,7 +2,7 @@ import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMaya as OpenMaya
 import maya.OpenMayaUI as OpenMayaUI
-import modelingToolset2019.utils.std as std_u
+import modelingToolset.utils.std as std_u
 
 
 def cleanup():

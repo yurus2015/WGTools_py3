@@ -11,8 +11,8 @@ from PySide2.QtWidgets import *
 import os
 import math
 
-import modelingToolset2019.utils.scene as scene_u
-import modelingToolset2019.utils.std as std_u
+import modelingToolset.utils.scene as scene_u
+import modelingToolset.utils.std as std_u
 
 description = "Select at least one polygonal object to apply Texel Scaling"
 buttonType = "opt"

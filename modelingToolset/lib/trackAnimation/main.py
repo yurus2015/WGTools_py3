@@ -10,7 +10,7 @@ from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 import os
 
-import modelingToolset2019.utils.scene as scene_u
+import modelingToolset.utils.scene as scene_u
 
 description = "Adds a rotation animation to all tracks found in the scene"
 buttonType = "opt"

@@ -10,8 +10,8 @@ import os
 import re
 import math
 
-import modelingToolset2019.utils.scene as scene_u
-import modelingToolset2019.utils.std as std_u
+import modelingToolset.utils.scene as scene_u
+import modelingToolset.utils.std as std_u
 
 description = "Select faces to map them into separated UV Shells"
 buttonType = "opt"

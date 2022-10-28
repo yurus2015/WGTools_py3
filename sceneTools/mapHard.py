@@ -1,20 +1,18 @@
 import maya.cmds as cmds
 
 
-def loadPlugin():
+def load_plugin():
     if not cmds.pluginInfo('techartAPI', query=True, loaded=True):
         try:
             cmds.loadPlugin('techartAPI')
-        except:
+        except IOError:
             print('Don`t load plugin')
 
 
-def mapToHard():
-    loadPlugin()
+def map_border_hard():
+    load_plugin()
     objects = cmds.filterExpand(sm=12)
     if objects:
-        # for obj in objects:
-        # cmds.polySoftEdge(obj, a = 180, ch = 0)
         cmds.delete(objects, ch=1)
         map_borders = cmds.selectUVBorderEdge(he=1)
         cmds.select(objects)

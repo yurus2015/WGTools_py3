@@ -1,10 +1,13 @@
+import sys
+
 packages = list(sys.modules.keys())
 for p in packages:
     if p.startswith('modelingToolset'):
         del sys.modules[p]
 
-from importlib import reload
-import modelingToolset.main as modelToolset
+import modelingToolset.main as modeling_toolset
 
-reload(modelToolset)
-modelToolset.main()
+# from importlib import reload
+#
+# reload(modeling_toolset)
+modeling_toolset.main()
