@@ -5,8 +5,10 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 import simplygon_tools.utils.fbx as fbx
+import simplygon_tools.utils.baker as baker
 import simplygon_tools.utils.utilites as utl
 from simplygon_tools.utils.utilites import Settings
+from simplygon_tools.utils.constants import *
 
 SUFFIX = (('AM', True),
           ('GM', True),
@@ -185,10 +187,10 @@ class TanksTable(QTableWidget):
                 self.setItem(row, col, item)
 
         reduce_button_auto = TanksReduceButton()
-        reduce_button_auto._reduce_button.clicked.connect(lambda: fbx.main_commands('Auto'))
+        reduce_button_auto._reduce_button.clicked.connect(lambda: fbx.main_commands())
         self.setCellWidget(1, 6, reduce_button_auto)
         reduce_button_manual = TanksReduceButton()
-        reduce_button_manual._reduce_button.clicked.connect(lambda: fbx.main_commands('Manual'))
+        reduce_button_manual._reduce_button.clicked.connect(lambda: fbx.main_commands(True))
         self.setCellWidget(2, 6, reduce_button_manual)
 
         self.colorize_background()
@@ -290,6 +292,7 @@ class TanksTable(QTableWidget):
         else:
             print('ERROR: enter only digits')
             item.setText('Enter value')
+            Settings.lods_manual[column - 2] = item.text()
 
 
 class TanksTableCell(QTableWidgetItem):
@@ -329,7 +332,7 @@ class TanksTextureBlock(TanksGroupBox):
 
         self._button = TanksButton(label='Texture dir')
         self._button.setMaximumHeight(20)
-        self._button.clicked.connect(fbx.export_selection)
+        self._button.clicked.connect(baker.test)
         self._line = QLineEdit()
         self._original_textures_layout.addWidget(self._button)
         self._original_textures_layout.addWidget(self._line)

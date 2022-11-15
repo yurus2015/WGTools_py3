@@ -37,7 +37,7 @@ class ToolOptions(QWidget):
 
         return self.mainLayout
 
-    def main2(self):
+    def main(self):
 
         selection = cmds.ls(sl=1, l=1)
 
@@ -103,5 +103,5 @@ class ToolOptions(QWidget):
         for m in all_meshes:
             self.soft_hard_display_restore(m)
 
-    def main(self):
+    def main2(self):
         self.restore_selected()

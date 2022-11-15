@@ -59,6 +59,8 @@ def exists_folder(path):
 
 
 def clear_folder(path):
+    if not os.path.isdir(path):
+        return
     for filename in os.listdir(path):
         file_path = os.path.join(path, filename)
         try:
@@ -191,6 +193,33 @@ def tracks_lod():
     return lods_track_count
 
 
+def validate_value(settings):
+    try:
+        m1 = int(settings[0])
+        m2 = int(settings[1])
+        m3 = int(settings[2])
+        print([m1, m2, m3])
+        return [m1, m2, m3]
+    except ValueError:
+        confirm_dialog('Not valid value in fields', 'err')
+
+
+def lods_count(type_reduce=None):
+    if type_reduce:
+        # check is int value
+        lod_counts = validate_value(Settings.lods_manual)
+        print('TYPE_MANUAL', lod_counts)
+    else:
+        lod_counts = validate_value(Settings.lods_calculate[1:])
+        print('TYPE_AUTO', lod_counts)
+
+    # calculate plycount for lods
+    calculate_polycount()
+
+    lod_counts = list(map(str, lod_counts))
+    return lod_counts
+
+
 def calculate_polycount(*args):
     if not is_empty_scene() or not is_tank_scene():
         return
@@ -298,6 +327,7 @@ def calculate_polycount(*args):
 
         lod2_auto_count = int(0.5 * lod1_without_tracks * coef2 + tracks_lods_polycount[2])
         lod2_without_tracks = lod2_auto_count - tracks_lods_polycount[2]
+
     except Exception:
         if tracks_lods_polycount[0]:
             lod2_auto_count = 'No tracks'
@@ -319,6 +349,7 @@ def calculate_polycount(*args):
 
         lod3_auto_count = int(0.5 * lod2_without_tracks * coef3 + tracks_lods_polycount[3])
         lod3_without_tracks = lod3_auto_count - tracks_lods_polycount[3]
+
     except Exception:
         if tracks_lods_polycount[0]:
             lod3_auto_count = 'No tracks'
@@ -331,7 +362,8 @@ def calculate_polycount(*args):
             lod3_auto_count = int(0.5 * lod2_auto_count * coef3)
         traceback.print_exc()
 
-    print('Final Count', lod0_auto_count, lod1_auto_count, lod2_auto_count, lod3_auto_count)
+    print('Final Count', lod0_auto_count, lod1_auto_count, lod2_auto_count, lod3_auto_count, coef1, 0.5 * coef2,
+          0.5 * coef3)
     # lod0_auto_count = int(lod0_auto_count)
     # lod1_auto_count = int(lod1_auto_count)
     # lod2_auto_count = int(lod2_auto_count)
