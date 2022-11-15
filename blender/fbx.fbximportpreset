@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Import UIH="0" UID="0" UIG="1" UIX="0" UIP="0" lbENU="Import">
+  <IncludeGrp UIH="0" UID="0" UIG="1" UIX="1" UIP="0" lbENU="Include">
+    <MergeMode UIH="0" UID="0" UIG="0" lbENU="File content" dt="Enum" enumSelected="Add" v="0" enumItem_0="Add" enumItem_1="Add and update animation" enumItem_2="Update animation" enumItem_3="Update animation (keyed transforms)"/>
+    <Geometry UIH="0" UID="0" UIG="1" UIX="1" UIP="0" lbENU="Geometry">
+      <UnlockNormals UIH="0" UID="0" UIG="0" UIBG="0" lbENU="Unlock Normals" dt="Bool" v="0"/>
+      <HardEdges UIH="0" UID="0" UIG="0" UIBG="0" lbENU="Combine per-vertex Normals" dt="Bool" v="0"/>
+      <BlindData UIH="1" UID="0" UIG="0" UIBG="0" lbENU="Blind Data" dt="Bool" v="1"/>
+    </Geometry>
+  </IncludeGrp>
+</Import>
