@@ -6,6 +6,7 @@ import posixpath
 from simplygon_tools.utils.utilites import Settings
 import simplygon_tools.utils.utilites as utl
 from simplygon_tools.utils.constants import *
+from simplygon_tools.utils.tank_lod_import import *
 import subprocess
 
 
@@ -36,7 +37,9 @@ def export_selection(selection):
     # load_import_preset()
 
     # todo validate
-    selection = cmds.ls(sl=True)
+    # selection = cmds.ls(sl=True)
+    # todo need export without selection
+    cmds.select(selection)
 
     # todo check
     # detach textures
@@ -74,6 +77,32 @@ def edit_lods_spl(preset_path, lod_counts):  # lods_count, example ['5000', '250
         file.writelines(data)
 
 
+def edit_preset_spl(preset_path, lod_coefficient):  # lods coeff, example [0.3, 0.5, 0.5]
+    with open(preset_path, 'r') as file:
+        # read a list of lines into data
+        data = file.readlines()
+
+    lods_line = []
+
+    # gather line with coefficients
+    for idx, x in enumerate(data):
+        if 'TriangleRatio' in data[idx]:
+            print('find', data[idx])
+            lods_line.append([data[idx], idx])
+
+    # change line to new value
+    for idx, x in enumerate(lod_coefficient):
+        # if lod_coefficient[idx].isfloat():
+        print('F', lod_coefficient[idx])
+        new_lod_count = lod_coefficient[idx]
+        lods_line[idx][0] = re.sub(r"0.\d+", str(new_lod_count), lods_line[idx][0])
+        print('Final_line', lods_line[idx][0])
+        data[lods_line[idx][1]] = lods_line[idx][0]
+
+    with open(preset_path, 'w') as file:
+        file.writelines(data)
+
+
 def batch_command():
     cmd = SIMPLYGON_EXE + ' --Input ' + INPUT_FILES + \
           ' --Output ' + OUTPUT_FILES + \
@@ -92,6 +121,7 @@ def execute_command(command):
                 break
 
 
+# legacy code
 def send_to_simplygon(preset, type_reduce):
     PRESET_PATH = posixpath.join(FILES_DIR, 'input', preset + '.spl')
 
@@ -105,15 +135,10 @@ def send_to_simplygon(preset, type_reduce):
 
     # edit_lods_spl(PRESET_PATH, lods_count)
 
-    cmd = SIMPLYGON + r' ' \
-                      r'--Input ' + EXPORT_FILE + ' ' \
-                                                  r'--Output ' + OUTPUT_DIR + ' ' \
-                                                                              r'--OutputFileFormat fbx ' \
-                                                                              r'--Spl ' + PRESET_PATH + ' ' \
-                                                                                                        r'--Server ' + HOST + ':' + str(
-        PORT) + ' ' \
-                r'--Verbose'
-
+    cmd = SIMPLYGON_EXE + r' --Input ' + INPUT_FILES
+    cmd += ' --Output ' + OUTPUT_FILES
+    cmd += ' --OutputFileFormat fbx --Spl ' + PRESET_PATH
+    cmd += ' --Server ' + HOST + ':' + str(PORT) + ' --Verbose'
     # todo
     if check_socket():
         os.system(cmd)
@@ -135,13 +160,45 @@ def import_lods():
 
 
 def main_commands(type_reduce=None):
-    print('\n\n\n\nTYPE BUTTON ', type_reduce)
-
-    # get polycount
-    lod_list = utl.lods_count(type_reduce)
-    return
+    # type reduce - auto or manual
+    # auto: by algorithm
+    # get polycount from ui
+    lod_list = utl.lods_coefficient(type_reduce)
+    print('\n\n\nLODS', lod_list)
+    coefficient_list = lod_list[4:]
+    print('\n\n\nCOEF', coefficient_list)
     # get selection
-    selection = cmds.ls(sl=True)
+    selection = cmds.ls(sl=True, l=True)
+    export_data = utl.export_data(selection)
+    print('DATA \n', export_data, '\n', len(export_data))
+    # return
+    # loop to every in export data
+    for i in export_data:
+        lod_1_coefficient = utl.coefficient_by_type(i)
+        print(lod_1_coefficient)
+        # get polycount exported
+        # start_count = cmds.polyEvaluate(i, t=True)
+        # children = cmds.listRelatives(i, ad=1, typ='transform', f=1)  # mesh??
+        # if children:
+        #     start_count = cmds.polyEvaluate(children, t=True)
+        # print('START COUNT', start_count)
+
+        lod1 = coefficient_list[0] * lod_1_coefficient
+        # coeff to list and rounded to 3 digit after point
+        spl_coefficient = [round(lod1, 3), round(coefficient_list[1], 3), round(coefficient_list[2], 3)]
+        print('LOD 1 COUNT', spl_coefficient)
+        edit_preset_spl(SPL_PRESET, spl_coefficient)
+
+        # export to fbx
+        export_selection(i)
+
+        # generate batch command
+        cmd = batch_command()
+        utl.clear_folder(OUTPUT_FILES)
+        execute_command(cmd)
+        import_all_lods(i)
+
+    return
     # export selection to fbx
     export_selection(selection)
     # todo

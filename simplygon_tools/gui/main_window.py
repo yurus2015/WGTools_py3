@@ -33,6 +33,7 @@ class TanksWindow(QDialog):
         self.setWindowFlags(Qt.Window)
         self.setObjectName('SimplygonTanksWindow')
         self.setWindowTitle('Simplygon Tools: Tanks')
+        self.setFixedHeight(300)
 
         self.init_ui()
         self.script_jons_start()

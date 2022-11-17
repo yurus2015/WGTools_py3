@@ -204,7 +204,26 @@ def validate_value(settings):
         confirm_dialog('Not valid value in fields', 'err')
 
 
-def lods_count(type_reduce=None):
+def type_exported(exported):  # type could be: mesh, group, or list(tuple)
+    if isinstance(exported, (list, tuple)):
+        return 'list'
+    if cmds.listRelatives(exported, c=1, f=1, type="transform"):
+        return 'group'
+    if cmds.listRelatives(exported, c=1, f=1, type="mesh"):
+        return 'mesh'
+
+
+def coefficient_by_type(exported):
+    if type_exported(exported) == 'list':
+        exported = exported[0]
+    print('L', exported)
+    if 'gun' in exported or 'chassis' in exported:
+        return 0.40
+    if 'hull' in exported or 'turret' in exported:
+        return 0.30
+
+
+def lods_coefficient(type_reduce=None):
     if type_reduce:
         # check is int value
         lod_counts = validate_value(Settings.lods_manual)
@@ -214,10 +233,11 @@ def lods_count(type_reduce=None):
         print('TYPE_AUTO', lod_counts)
 
     # calculate plycount for lods
-    calculate_polycount()
+    lods_coefficients = calculate_polycount()
+    print('LODS/COEFF\n', lods_coefficients)
 
     lod_counts = list(map(str, lod_counts))
-    return lod_counts
+    return lods_coefficients
 
 
 def calculate_polycount(*args):
@@ -231,7 +251,7 @@ def calculate_polycount(*args):
     if is_style():
         count1 = Settings.lod1_style_count
     print('args ', args)
-    if args:  # fof manual
+    if args:  # for manual
         count1 = args[0]
         count2 = args[1]
         count3 = args[2]
@@ -370,3 +390,35 @@ def calculate_polycount(*args):
     # lod3_auto_count = int(lod3_auto_count)
     Settings.lods_calculate = [lod0_auto_count, lod1_auto_count, lod2_auto_count, lod3_auto_count]
     return lod0_auto_count, lod1_auto_count, lod2_auto_count, lod3_auto_count, coef1, 0.5 * coef2, 0.5 * coef3
+
+
+def export_data(selection):  # prepare data in legacy script
+    simplygon_data = []
+    chassis_l = []
+    chassis_r = []
+
+    # nothing selected
+    if not selection:
+        # lod0 needs to exists
+        # get relatives children
+        selection = cmds.listRelatives("|lod0", c=1, type="transform", f=1)
+
+    for i in selection:
+        if cmds.listRelatives(i, c=1, type="transform"):
+            if 'chassis' in i:
+                chassis_parts = cmds.listRelatives(i, c=1, type="transform", f=1)
+                for j in chassis_parts:
+                    if '_L' in j:
+                        chassis_l.append(j)
+                    if '_R' in j:
+                        chassis_r.append(j)
+                if chassis_l:
+                    simplygon_data.append(chassis_l)
+                if chassis_r:
+                    simplygon_data.append(chassis_r)
+            else:
+                simplygon_data.append(i)  # i don't now
+        else:
+            simplygon_data.append(i)
+
+    return simplygon_data

@@ -43,6 +43,7 @@ def imported_objects():
     import_file()
     after = set(cmds.ls(assemblies=True))
     imported_head = after.difference(before)
+    imported_head = list(imported_head)
     if imported_head:
         # freeze transform locators/groups only scale
         cmds.makeIdentity(imported_head, apply=True, s=1, n=0)
