@@ -1,4 +1,5 @@
 from simplygon_tools.utils.constants import *
+import simplygon_tools.utils.utilites as utl
 from maya.mel import eval as meval
 import maya.cmds as cmds
 import re
@@ -35,6 +36,8 @@ def load_preset_fbx():
 # todo send exported objects as arguments
 def get_imported_objects(lod_path, lod_number, imported_list):
     imported = []
+    if not isinstance(imported_list, list):
+        imported_list = [imported_list]
     before = set(cmds.ls(assemblies=True))
     import_lod(lod_path)
     after = set(cmds.ls(assemblies=True))
@@ -44,38 +47,32 @@ def get_imported_objects(lod_path, lod_number, imported_list):
     print('EXPORTED \n', imported_list)
     print('LOD \n', lod_number)
 
-    # check type - list or group/mesh
-    # replace lod's name in imported to current in loop
-    new_name = re.sub(r'lod\d', 'lod' + str(lod_number), imported_list)
-    print('NEW NAME \n', new_name)
+    for element in imported_list:
+        # replace lod's name in imported to current in loop
+        new_name = re.sub(r'lod\d', 'lod' + str(lod_number), element)
+        print('NEW NAME \n', new_name)
+        current_name = re.sub(r'lod\d', imported_head[0], element)
+        print('CARRENT NAME: \n', current_name)
 
-    # check exists object, if yes, remove existing
-    if cmds.objExists(new_name):
-        print('Exists!')
-        cmds.delete(new_name)
+        # todo restore normal
 
-    # create group in hierarchy
-    parent_group = create_hierarchy(new_name)
+        # check exists object, if yes, remove existing
+        if cmds.objExists(new_name):
+            print('Exists!')
+            cmds.delete(new_name)
 
-    # parent imported to specify lod/group
-    # cmds.parent(imported_list, parent_group)
+        # create group in hierarchy
+        parent_group = create_hierarchy(new_name)
+        print('PARENT GRP \n', parent_group)
+
+        try:
+            # parent imported to specify lod/group
+            cmds.parent(current_name, parent_group)
+        except:
+            pass
 
     # delete source lod/group
-
-    # get children
-    return
-    if imported_head:
-        # freeze transform locators/groups only scale
-        cmds.makeIdentity(imported_head, apply=True, s=1, n=0)
-        imported.extend(imported_head)
-    # print('Imported:', imported)
-    for head in imported_head:
-        child = cmds.listRelatives(head, ad=True, type='transform')
-        print('Child', child)
-        if child:
-            imported.extend(child)
-    print('Imported:', imported)
-    return imported
+    cmds.delete(imported_head)
 
 
 def create_hierarchy(input_path):
@@ -92,7 +89,13 @@ def create_hierarchy(input_path):
 # loop through all lods
 # todo send exported objects as arguments
 def import_all_lods(imported_list):
+    # todo load specific preset: only lods, lods and proxy, only proxy
     load_preset_fbx()
+    output_dir = utl.generate_lod_path(OUTPUT_FILES)
+    print('EX_EX', output_dir)
     for i in range(1, 4):
-        lod_import_file = os.path.join(IMPORT_FILES, 'LOD' + str(i), 'export_lods_LOD' + str(i) + '.fbx')
-        get_imported_objects(lod_import_file, i, imported_list)
+        lod_dir = os.path.join(str(output_dir), 'LOD' + str(i))
+        fbx_file = utl.generate_lod_fbx_path(lod_dir)
+        # lod_import_file = os.path.join(IMPORT_FILES, 'LOD' + str(i), 'export_lods_LOD' + str(i) + '.fbx')
+        if os.path.isfile(fbx_file):
+            get_imported_objects(fbx_file, i, imported_list)

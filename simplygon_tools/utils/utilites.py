@@ -4,6 +4,7 @@ import os
 import shutil
 import traceback
 import simplygon_tools.utils.fbx as fbx
+from simplygon_tools.utils.constants import *
 
 
 class Settings():
@@ -45,6 +46,10 @@ def confirm_dialog(text, do):
         return True
 
 
+def in_viewport_massage(message):
+    cmds.inViewMessage(amg='In-view message <hl>' + message + '</hl>.', pos='botCenter', fade=True)
+
+
 def load_plugin(plugin):
     loaded = cmds.pluginInfo('plugin', q=True, loaded=True)
     registered = cmds.pluginInfo(plugin, q=True, registered=True)
@@ -56,6 +61,32 @@ def load_plugin(plugin):
 # files
 def exists_folder(path):
     return os.path.isdir(path)
+
+
+def exists_file(file):
+    return os.path.isfile(file)
+
+
+def generate_lod_path(OUTPUT_FILES):
+    result_path = None
+    for it in os.scandir(OUTPUT_FILES):
+        print('CHECK PATH', it.path)
+        if it.is_dir() and it.name == 'export':
+            print(it.path)
+            result_path = it.path
+            break
+
+        generate_lod_path(it)
+        print('WTF', result_path)
+
+    return result_path
+
+
+def generate_lod_fbx_path(path):
+    for it in os.scandir(path):
+        if it.is_file():
+            print(it.name, it.path)
+            return it.path
 
 
 def clear_folder(path):
@@ -397,9 +428,13 @@ def export_data(selection):  # prepare data in legacy script
     chassis_l = []
     chassis_r = []
 
+    # if 'lod0' selection
+    if selection and len(selection) == 1:
+        if re.match('.lod0$', selection[0]):
+            selection = cmds.listRelatives("|lod0", c=1, type="transform", f=1)
+
     # nothing selected
     if not selection:
-        # lod0 needs to exists
         # get relatives children
         selection = cmds.listRelatives("|lod0", c=1, type="transform", f=1)
 

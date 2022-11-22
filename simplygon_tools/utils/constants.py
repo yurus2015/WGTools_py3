@@ -11,7 +11,9 @@ ALT_PARENT = str(Path(CURRENT_DIR).parents[4])
 
 COMMON_FILES = os.path.join(str(ALT_PARENT), "simplygon")
 FBX_PRESET = os.path.join(COMMON_FILES, 'fbx.fbximportpreset')
-SPL_PRESET = os.path.join(COMMON_FILES, 'lods.spl')
+LODS_PRESET = os.path.join(COMMON_FILES, 'lods.spl')
+LODS_PROXY_PRESET = os.path.join(COMMON_FILES, 'lods_proxy.spl')
+PROXY_PRESET = os.path.join(COMMON_FILES, 'proxy.spl')
 
 INPUT_FILES = os.path.join(COMMON_FILES, "input", "export.fbx")
 OUTPUT_FILES = os.path.join(COMMON_FILES, "output")
