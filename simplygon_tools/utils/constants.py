@@ -20,3 +20,7 @@ OUTPUT_FILES = os.path.join(COMMON_FILES, "output")
 IMPORT_FILES = os.path.join(OUTPUT_FILES, "lods", 'export')
 
 SIMPLYGON_EXE = os.path.join(COMMON_FILES, 'SimplygonBatch.exe')
+
+
+class Storage():
+    SIMPLYGON_LOG_WINDOW = None

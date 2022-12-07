@@ -17,6 +17,7 @@ importlib.reload(modelingToolset.lib.uvChecker.gui.radio)
 from modelingToolset.lib.uvChecker.gui.radio import RadioDimensionLayout
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
+icons_yaml_file = os.path.join(current_dir, 'data.yaml')
 
 myMimeType = "application/MyWindow"
 
@@ -41,7 +42,9 @@ class GridCamouflage(QGridLayout):
             self.row_position = self.counts // self.row
             self.column_position = self.counts % self.column
 
-        icons = Util.read_yaml(current_dir, 'icons')
+        # icons = Util.read_yaml(current_dir, 'icons')
+        yaml_file = Util.read_yaml_ai(icons_yaml_file)
+        icons = yaml_file['icons']
         if icons:
             for i in icons:
                 override_position()

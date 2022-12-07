@@ -1,5 +1,6 @@
 import maya.OpenMayaUI as omu
 import maya.cmds as cmds
+import logging
 from shiboken2 import wrapInstance
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
@@ -10,14 +11,16 @@ import simplygon_tools.utils.utilites as utl
 from simplygon_tools.utils.utilites import Settings
 from simplygon_tools.utils.constants import *
 
-SUFFIX = (('AM', True),
-          ('GM', True),
-          ('AO', True),
-          ('NM', True),
-          ('MM', True),
-          ('CM', False),
-          ('BM', False),
-          ('DM', False))
+SUFFIX = {
+    'AM': True,
+    'GM': True,
+    'AO': True,
+    'NM': True,
+    'MM': True,
+    'CM': False,
+    'BM': False,
+    'DM': False
+}
 
 
 def main_window_pointer():
@@ -33,7 +36,7 @@ class TanksWindow(QDialog):
         self.setWindowFlags(Qt.Window)
         self.setObjectName('SimplygonTanksWindow')
         self.setWindowTitle('Simplygon Tools: Tanks')
-        self.setFixedHeight(300)
+        self.setFixedHeight(310)
 
         self.init_ui()
         self.script_jons_start()
@@ -80,14 +83,6 @@ class TanksWindow(QDialog):
         print('N', )
         table = self.simplygon_box.table()
         table.read_settings()
-        # utl.calculate_polycount()
-        # row = 1
-        # for col in range(1, 5):
-        #     item = table.item(row, col)
-        #     item.setText(str(Settings.lods_calculate[col-1]))
-        #
-        # item = table.item(2, 1)
-        # item.setText(str(Settings.lods_calculate[0]))
 
 
 class TanksHorizontalLayout(QHBoxLayout):
@@ -141,9 +136,6 @@ class TanksToolsBlock(TanksGroupBox):
         self._layout.addWidget(self._import_button)
         self.setLayout(self._layout)
 
-    def test(self):
-        pass
-
 
 class TanksButton(QPushButton):
     def __init__(self, label=None, icon=None, width=None, checkable=False, *args, **kwargs):
@@ -188,10 +180,10 @@ class TanksTable(QTableWidget):
                 self.setItem(row, col, item)
 
         reduce_button_auto = TanksReduceButton()
-        reduce_button_auto._reduce_button.clicked.connect(lambda: fbx.main_commands())
+        reduce_button_auto._reduce_button.clicked.connect(lambda: fbx.main_commands(1, 5))
         self.setCellWidget(1, 6, reduce_button_auto)
         reduce_button_manual = TanksReduceButton()
-        reduce_button_manual._reduce_button.clicked.connect(lambda: fbx.main_commands(True))
+        reduce_button_manual._reduce_button.clicked.connect(lambda: fbx.main_commands(1, 5, True))
         self.setCellWidget(2, 6, reduce_button_manual)
 
         self.colorize_background()
@@ -344,10 +336,55 @@ class TanksTextureBlock(TanksGroupBox):
         self._suffix_layout.addWidget(self._button_bake)
         self._suffix_layout.addLayout(self._check_box_layout)
 
-        for i in range(len(SUFFIX)):
-            check_box = QCheckBox(SUFFIX[i][0])
-            check_box.setObjectName(SUFFIX[i][0])
-            check_box.setChecked(SUFFIX[i][1])
+        for i in SUFFIX:
+            check_box = QCheckBox(i)
+            check_box.setObjectName(i)
+            check_box.setChecked(SUFFIX.get(i))
             self._check_box_layout.addWidget(check_box)
 
         self.setLayout(self._layout)
+
+
+class QPlainTextEditLogger(logging.Handler):
+    def __init__(self, parent):
+        super().__init__()
+        self.widget = QPlainTextEdit(parent)
+        self.widget.setReadOnly(True)
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.widget.appendPlainText(msg)
+
+
+class LogWindow(QDialog, QPlainTextEditLogger):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setParent(main_window_pointer())
+        self.setWindowFlags(Qt.Window)
+        self.setObjectName('SimplygonLog')
+        self.setWindowTitle('Simplygon Tools: Log')
+
+        self.log_text_box = QPlainTextEditLogger(self)
+        # You can format what is printed to text box
+        self.log_text_box.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        logging.getLogger().addHandler(self.log_text_box)
+        # You can control the logging level
+        logging.getLogger().setLevel(logging.DEBUG)
+
+        self._button = QPushButton(self)
+        self._button.setText('Test Meee-e')
+
+        layout = QVBoxLayout()
+        # Add the new logging box widget to the layout
+        layout.addWidget(self.log_text_box.widget)
+        layout.addWidget(self._button)
+        self.setLayout(layout)
+
+        # Connect signal to slot
+        self._button.clicked.connect(self.test)
+
+    def test(self):
+        logging.debug('damn, a bug')
+        logging.info('something to remember')
+        logging.warning('that\'s not right')
+        logging.error('foobar')

@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 import re
 import os
+import glob
 import shutil
 import traceback
 import simplygon_tools.utils.fbx as fbx
@@ -46,11 +47,18 @@ def confirm_dialog(text, do):
         return True
 
 
+def logging(info, message, type=None):
+    # todo type : error, info, warning
+    Storage.SIMPLYGON_LOG_WINDOW.log_text_box.emit(info)
+    Storage.SIMPLYGON_LOG_WINDOW.log_text_box.emit(str(message))
+
+
 def in_viewport_massage(message):
     cmds.inViewMessage(amg='In-view message <hl>' + message + '</hl>.', pos='botCenter', fade=True)
 
 
 def load_plugin(plugin):
+    # check if the plugin is loaded
     loaded = cmds.pluginInfo('plugin', q=True, loaded=True)
     registered = cmds.pluginInfo(plugin, q=True, registered=True)
 
@@ -67,26 +75,39 @@ def exists_file(file):
     return os.path.isfile(file)
 
 
-def generate_lod_path(OUTPUT_FILES):
-    result_path = None
-    for it in os.scandir(OUTPUT_FILES):
-        print('CHECK PATH', it.path)
-        if it.is_dir() and it.name == 'export':
-            print(it.path)
-            result_path = it.path
-            break
+# def generate_lod_path(OUTPUT_FILES):
+#     result_path = None
+#     for it in os.scandir(OUTPUT_FILES):
+#         print('CHECK PATH', it.path)
+#         if it.is_dir() and it.name == 'export':
+#             print(it.path)
+#             result_path = it.path
+#             break
+#
+#         generate_lod_path(it)
+#         print('WTF', result_path)
+#
+#     return result_path
 
-        generate_lod_path(it)
-        print('WTF', result_path)
 
-    return result_path
+# def generate_lod_fbx_path(output_dir, name_lod=None, lod=None):
+#     for it in os.scandir(output_dir):
+#         if it.is_file():
+#             if name_lod in it.name:
+#                 print('PATH', it.path)
+#                 s = it.path.replace("\\", "/")
+#                 lod = s
+#                 return lod
+#         if it.is_dir():
+#             generate_lod_fbx_path(it, name_lod)
+#     return lod
 
 
-def generate_lod_fbx_path(path):
-    for it in os.scandir(path):
-        if it.is_file():
-            print(it.name, it.path)
-            return it.path
+def generate_lod_fbx_path(lod):
+    pattern = "/**/*" + lod + ".fbx"
+    file = glob.glob(OUTPUT_FILES + pattern, recursive=True)[0]
+    file = file.replace("\\", "/")
+    return file
 
 
 def clear_folder(path):
@@ -144,6 +165,46 @@ def restore_normals(meshes):
         cmds.delete(objects, ch=1)
         cmds.selectUVBorderEdge(he=1)  # techart plugin command
         cmds.select(objects)
+
+
+def soft_restore(meshes):
+    # all_meshes = cmds.ls(typ='mesh')
+    for m in meshes:
+        mesh_long_name = cmds.ls(m, l=True)[0]
+        mesh_shape_list = cmds.filterExpand(mesh_long_name, sm=12, fp=True)
+        smooth_node = cmds.polySoftEdge(mesh_shape_list[0], a=180, ch=True)[0]
+        connected_nodes = cmds.listConnections(smooth_node, sh=1, s=1)
+        connected_nodes = cmds.ls(connected_nodes, l=True)
+
+        # todo
+        # remove duplicate
+        connected_nodes = remove_duplicate_list(connected_nodes)
+
+        # remove base shape - get original
+        original_nodes = remove_list(connected_nodes, mesh_shape_list)
+
+        cmds.transferAttributes(original_nodes[0], mesh_shape_list[0], transferNormals=1)
+        cmds.delete(mesh_long_name, ch=1)
+        cmds.select(d=True)
+
+
+def restore_soft_normals(array):
+    shapes = cmds.filterExpand(array, sm=12, fp=True)
+    print('SHAPES', shapes)
+    for s in shapes:
+        print('SHAPES2', s)
+        smooth_node = cmds.polySoftEdge(s, a=180, ch=True)[0]
+        connected_nodes = cmds.listConnections(smooth_node, sh=1, s=1)
+        print('NODE_TO SMOOTH', connected_nodes)
+        connected_nodes = cmds.ls(connected_nodes, l=True)
+        print('NODE_TO SMOOTH_longname', connected_nodes)
+        connected_nodes = remove_duplicate_list(connected_nodes)
+        print('NODE_TO SMOOTH_onlyone', connected_nodes)
+        original_nodes = remove_list(connected_nodes, s)
+        print('LAST', original_nodes)
+
+        cmds.transferAttributes(original_nodes[0], s, transferNormals=1)
+        cmds.delete(s, ch=1)
 
 
 def clear_textures():
@@ -442,11 +503,15 @@ def export_data(selection):  # prepare data in legacy script
         if cmds.listRelatives(i, c=1, type="transform"):
             if 'chassis' in i:
                 chassis_parts = cmds.listRelatives(i, c=1, type="transform", f=1)
-                for j in chassis_parts:
-                    if '_L' in j:
-                        chassis_l.append(j)
-                    if '_R' in j:
-                        chassis_r.append(j)
+                # remove track from list
+                sub = 'track_'
+                chassis_parts = ([s for s in chassis_parts if sub not in s])
+                # split list on left and right
+                sub = '_L'
+                chassis_l = ([s for s in chassis_parts if sub in s])
+                sub = '_R'
+                chassis_r = ([s for s in chassis_parts if sub in s])
+
                 if chassis_l:
                     simplygon_data.append(chassis_l)
                 if chassis_r:

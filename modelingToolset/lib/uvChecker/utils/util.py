@@ -6,16 +6,25 @@ from PySide2.QtCore import *
 from PySide2.QtWidgets import *
 
 
-def read_yaml(path, content):
-    data_file = os.path.join(path, 'data.yaml')
-    print('File:', data_file)
-    with open(data_file) as f:
-        data = yaml.load(f, Loader=yaml.FullLoader)
-        if data:
-            print(data[content])
-            return data[content]
-        else:
-            return None
+# def read_yaml(path, content):
+#     data_file = os.path.join(path, 'data.yaml')
+#     print('File:', data_file)
+#     with open(data_file) as f:
+#         data = yaml.load(f, Loader=yaml.FullLoader)
+#         if data:
+#             print(data[content])
+#             return data[content]
+#         else:
+#             return None
+
+
+# openai
+# This function takes in the filepath of the YAML file as an argument,
+# opens the file and uses the safe_load function from the yaml library to parse the file
+# and return the resulting dictionary.
+def read_yaml_ai(path: str) -> dict:
+    with open(path, 'r') as f:
+        return yaml.safe_load(f)
 
 
 def write_yaml(path, icons_list):

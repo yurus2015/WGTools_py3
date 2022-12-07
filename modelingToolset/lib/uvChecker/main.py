@@ -29,5 +29,3 @@ class ToolOptions(QWidget):
         self.central_layout.addWidget(self.radio_widget)
         self.central_layout.addWidget(self.icon_widget)
         self.central_layout.addWidget(self.restore_widget)
-
-        print('Main window')

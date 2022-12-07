@@ -122,28 +122,28 @@ def execute_command(command):
 
 
 # legacy code
-def send_to_simplygon(preset, type_reduce):
-    PRESET_PATH = posixpath.join(FILES_DIR, 'input', preset + '.spl')
-
-    # todo refactor
-    print('TYPE ', type_reduce)
-    lods_count = Settings.lods_calculate[1:]
-    lods_count = list(map(str, lods_count))
-    if type_reduce is 'Manual':
-        lods_count = Settings.lods_manual
-        print('TYPE_R', lods_count)
-
-    # edit_lods_spl(PRESET_PATH, lods_count)
-
-    cmd = SIMPLYGON_EXE + r' --Input ' + INPUT_FILES
-    cmd += ' --Output ' + OUTPUT_FILES
-    cmd += ' --OutputFileFormat fbx --Spl ' + PRESET_PATH
-    cmd += ' --Server ' + HOST + ':' + str(PORT) + ' --Verbose'
-    # todo
-    if check_socket():
-        os.system(cmd)
-    else:
-        return
+# def send_to_simplygon(preset, type_reduce):
+#     PRESET_PATH = posixpath.join(FILES_DIR, 'input', preset + '.spl')
+#
+#     # todo refactor
+#     print('TYPE ', type_reduce)
+#     lods_count = Settings.lods_calculate[1:]
+#     lods_count = list(map(str, lods_count))
+#     if type_reduce is 'Manual':
+#         lods_count = Settings.lods_manual
+#         print('TYPE_R', lods_count)
+#
+#     # edit_lods_spl(PRESET_PATH, lods_count)
+#
+#     cmd = SIMPLYGON_EXE + r' --Input ' + INPUT_FILES
+#     cmd += ' --Output ' + OUTPUT_FILES
+#     cmd += ' --OutputFileFormat fbx --Spl ' + PRESET_PATH
+#     cmd += ' --Server ' + HOST + ':' + str(PORT) + ' --Verbose'
+#     # todo
+#     if check_socket():
+#         os.system(cmd)
+#     else:
+#         return
 
 
 def import_lods():
@@ -159,19 +159,21 @@ def import_lods():
                   namespace=':')
 
 
-def main_commands(type_reduce=None):
+def main_commands(start_lod, end_lod, type_reduce=None):
+    # todo add argument proxy or crash or normal - integer value
     # type reduce - auto or manual
     # auto: by algorithm
     # get polycount from ui
     lod_list = utl.lods_coefficient(type_reduce)
-    print('\n\n\nLODS', lod_list)
+    # print('\n\n\nLODS', lod_list)
     coefficient_list = lod_list[4:]
-    print('\n\n\nCOEF', coefficient_list)
+    # print('\n\n\nCOEF', coefficient_list)
     # get selection
     selection = cmds.ls(sl=True, l=True)
 
     export_data = utl.export_data(selection)
-    print('DATA \n', export_data, '\n', len(export_data))
+    # print('DATA \n', export_data, '\n', len(export_data))
+    # utl.logging('EXPORT DATA', *export_data)
     # return
     # loop to every in export data
     for i in export_data:
@@ -187,9 +189,10 @@ def main_commands(type_reduce=None):
         lod1 = coefficient_list[0] * lod_1_coefficient
         # coeff to list and rounded to 3 digit after point
         spl_coefficient = [round(lod1, 3), round(coefficient_list[1], 3), round(coefficient_list[2], 3)]
-        print('LOD 1 COUNT', spl_coefficient)
+        # print('LOD 1 COUNT', spl_coefficient)
         edit_preset_spl(LODS_PROXY_PRESET, spl_coefficient)
 
+        # temp comment -----####
         # export to fbx
         export_selection(i)
 
@@ -197,13 +200,14 @@ def main_commands(type_reduce=None):
         cmd = batch_command(LODS_PROXY_PRESET)
         utl.clear_folder(OUTPUT_FILES)
         execute_command(cmd)
+        # temp comment -------####
         # todo inform user about process and progress
 
         # check loding is successfully otherwise repeat 10 times
         for index in range(10):
             if utl.exists_folder(OUTPUT_FILES) and os.listdir(OUTPUT_FILES):
                 utl.in_viewport_massage('Reducing successfully')
-                import_all_lods(i)
+                import_all_lods(i, start_lod, end_lod)
                 break
 
             elif index == 10:
@@ -212,27 +216,3 @@ def main_commands(type_reduce=None):
             else:
                 # todo inform user about failed
                 pass
-
-    return
-    # export selection to fbx
-    # export_selection(selection)
-    # # todo
-    # lod_list = lods_count(type_reduce)
-    # print('\n\n\nLODS', lod_list)
-    # edit_lods_spl(LODS_PRESET, lod_list)
-    # cmd = batch_command()
-    # utl.clear_folder(OUTPUT_FILES)
-    # execute_command(cmd)
-    # import_lods()
-    # data = subprocess.check_output(cmd, shell=False)
-    # print('DATE', data)
-    # delete previous simplygon`s lods
-    # if utl.exists_folder(OUTPUT_DIR):
-    #     utl.clear_folder(OUTPUT_DIR)
-    # edit xml preset
-    # send to simplygon
-    # send_to_simplygon('proxy', type_reduce)
-    # check valid generation lods
-    # import simplygon`s lods
-    # reconstruct scene - name, layers etc.
-    # pass

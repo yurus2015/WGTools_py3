@@ -9,8 +9,10 @@
 7. cmd file with arguments? for example: execute.cmd chassis
 '''
 import sys
+import importlib, types
 import maya.cmds as cmds
 import simplygon_tools.gui.main_window as wnd
+from simplygon_tools.utils.constants import *
 
 print('Simplygon_Tools')
 
@@ -21,7 +23,17 @@ def main():
 
     window = wnd.TanksWindow()
     window.show()
-    print('run')
+
+    #  log window: comments after debug
+    if cmds.window('SimplygonLog', q=True, exists=True):
+        cmds.deleteUI('SimplygonLog')
+
+    log_window = wnd.LogWindow()
+    log_window.show()
+    log_window.raise_()
+    log_window.log_text_box.emit('Start')
+    Storage.SIMPLYGON_LOG_WINDOW = log_window
+    print('run', log_window)
 
 
 def reload_all_modules():
@@ -31,6 +43,19 @@ def reload_all_modules():
             del (sys.modules[m])
 
 
+# this code generated ChatGPT
+# doesn't work for me
+def reload_project_modules(project):
+    # Import all modules in the project
+    imported_project = __import__(project)
+
+    # Reload all modules in the project
+    for module in imported_project.__dict__.values():
+        if isinstance(module, types.ModuleType):
+            importlib.reload(module)
+
+
 if __name__ == '__main__':
     reload_all_modules()
+    # reload_project_modules('simplygon_tools')
     main()
