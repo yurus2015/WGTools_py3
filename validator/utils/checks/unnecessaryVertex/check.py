@@ -8,7 +8,6 @@ def load_plugin():
             return True
         except:
             return False
-    # raise MissingPluginError('Unable to load techartAPI2018.mll!')
     else:
         return True
 
@@ -22,12 +21,9 @@ def main():
             cmds.select(mesh)
             flat_vertex = cmds.selectFlatPoint()
             cmds.select(d=1)
-            if len(flat_vertex):
-                tmp = []
+            if flat_vertex:
                 transform = cmds.listRelatives(mesh, p=1, type='transform', f=1)[0]
-                tmp.append(transform + ' has unnecessary vertex')
-                tmp.append(flat_vertex)
-
+                tmp = [transform + ' has unnecessary vertex', flat_vertex]
                 return_list.append(tmp)
 
     return return_list
