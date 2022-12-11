@@ -21,6 +21,17 @@ IMPORT_FILES = os.path.join(OUTPUT_FILES, "lods", 'export')
 
 SIMPLYGON_EXE = os.path.join(COMMON_FILES, 'SimplygonBatch.exe')
 
+SUFFIX = {
+    'AM': True,
+    'GM': True,
+    'AO': True,
+    'NM': True,
+    'MM': True,
+    'CM': False,
+    'BM': False,
+    'DM': False
+}
+
 
 class Storage():
     SIMPLYGON_LOG_WINDOW = None

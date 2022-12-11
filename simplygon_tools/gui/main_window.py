@@ -1,6 +1,8 @@
 import maya.OpenMayaUI as omu
 import maya.cmds as cmds
 import logging
+
+from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 from shiboken2 import wrapInstance
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
@@ -8,19 +10,8 @@ from PySide2.QtCore import *
 import simplygon_tools.utils.fbx as fbx
 import simplygon_tools.utils.baker as baker
 import simplygon_tools.utils.utilites as utl
-from simplygon_tools.utils.utilites import Settings
-from simplygon_tools.utils.constants import *
-
-SUFFIX = {
-    'AM': True,
-    'GM': True,
-    'AO': True,
-    'NM': True,
-    'MM': True,
-    'CM': False,
-    'BM': False,
-    'DM': False
-}
+from ..utils.utilites import Settings
+from ..utils.constants import *
 
 
 def main_window_pointer():
@@ -28,19 +19,35 @@ def main_window_pointer():
     return wrapInstance(int(point), QWidget)
 
 
-class TanksWindow(QDialog):
-    def __init__(self):
-        super(TanksWindow, self).__init__()
-
-        self.setParent(main_window_pointer())
+class MayaWindow(QDialog):
+    def __init__(self, parent=main_window_pointer(), window_name=None, window_title=None):
+        super(MayaWindow, self).__init__(parent=parent)
+        self.window_name = window_name
+        self.window_title = window_title
         self.setWindowFlags(Qt.Window)
-        self.setObjectName('SimplygonTanksWindow')
-        self.setWindowTitle('Simplygon Tools: Tanks')
+        self.setObjectName(self.window_name)
+        self.setWindowTitle(self.window_title)
+        self.save_position_window()
+
+        # I request from class
+        print(f'I request from class {self.__class__}')
+
+    def save_position_window(self):
+        self.settings = QSettings(self.window_name)
+        if self.settings.value('geometry') is not None:
+            self.restoreGeometry(self.settings.value('geometry'))
+
+    def closeEvent(self, event):
+        self.settings.setValue('geometry', self.saveGeometry())
+
+
+class TanksWindow(MayaWindow):
+    def __init__(self):
+        super().__init__(window_name='SimplygonTanksWindow', window_title='Simplygon Tools: Tanks')
         self.setFixedHeight(310)
 
         self.init_ui()
-        self.script_jons_start()
-        self.save_position_window()
+        self.script_jobs_start()
         self.calculate_polycount()
         utl.load_plugin('techartAPI')
         utl.load_plugin('fbxmaya')
@@ -60,24 +67,18 @@ class TanksWindow(QDialog):
         self.central_layout.addWidget(self.texture_box)
         self.central_layout.addWidget(self.tools_box)
 
-    def save_position_window(self):
-        self.settings = QSettings('SimplygonTanksWindow')
-        if self.settings.value('geometry') is not None:
-            self.restoreGeometry(self.settings.value('geometry'))
-
     def closeEvent(self, event):
         self.settings.setValue('geometry', self.saveGeometry())
 
-        # kill scriptJobs
-        cmds.scriptJob(k=self.sj_open_scene, force=True)
-        cmds.scriptJob(k=self.sj_change_selection, force=True)
-        cmds.scriptJob(k=self.sj_change_name, force=True)
+        # Delete script jobs
+        for event in self.script_jobs:
+            cmds.scriptJob(k=event, force=True)
 
-    def script_jons_start(self):
-        self.sj_open_scene = cmds.scriptJob(e=["SceneOpened", self.calculate_polycount], p="SimplygonTanksWindow")
-        self.sj_change_selection = cmds.scriptJob(e=["SelectionChanged", self.calculate_polycount],
-                                                  p="SimplygonTanksWindow")
-        self.sj_change_name = cmds.scriptJob(e=["NameChanged", self.calculate_polycount], p="SimplygonTanksWindow")
+    def script_jobs_start(self):
+        self.script_jobs = []
+        events = ['SceneOpened', 'SelectionChanged', 'NameChanged']
+        for event in events:
+            self.script_jobs.append(cmds.scriptJob(event=[event, self.calculate_polycount], p=self.window_name))
 
     def calculate_polycount(self):
         print('N', )
@@ -87,14 +88,14 @@ class TanksWindow(QDialog):
 
 class TanksHorizontalLayout(QHBoxLayout):
     def __init__(self, parent=None):
-        super(TanksHorizontalLayout, self).__init__(parent)
+        super(TanksHorizontalLayout, self).__init__()
         self.setSpacing(3)
         self.setContentsMargins(5, 10, 5, 5)
 
 
 class TanksVerticalLayout(QVBoxLayout):
     def __init__(self, parent=None):
-        super(TanksVerticalLayout, self).__init__(parent)
+        super(TanksVerticalLayout, self).__init__()
         self.setSpacing(3)
         self.setContentsMargins(5, 10, 5, 5)
 
@@ -129,7 +130,7 @@ class TanksToolsBlock(TanksGroupBox):
         self._proxy_button = TanksButton(label='Proxy lod generate')
         self._proxy_button.clicked.connect(fbx.export_selection)
         self._import_button = TanksButton(label='Import proxy lod')
-        self._import_button.clicked.connect(fbx.export_selection)
+        self._import_button.clicked.connect(utl.color_picker)
 
         self._layout.addWidget(self._lod_button)
         self._layout.addWidget(self._proxy_button)
@@ -154,7 +155,6 @@ class TanksTable(QTableWidget):
         self.verticalHeader().setDefaultSectionSize(25)
 
         self.setMinimumWidth(550)
-        # self.setWordWrap(0)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setFocusPolicy(Qt.NoFocus)
@@ -356,10 +356,9 @@ class QPlainTextEditLogger(logging.Handler):
         self.widget.appendPlainText(msg)
 
 
-class LogWindow(QDialog, QPlainTextEditLogger):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setParent(main_window_pointer())
+class LogWindow(MayaWindow, QPlainTextEditLogger):
+    def __init__(self):
+        super(LogWindow, self).__init__()
         self.setWindowFlags(Qt.Window)
         self.setObjectName('SimplygonLog')
         self.setWindowTitle('Simplygon Tools: Log')
@@ -388,3 +387,5 @@ class LogWindow(QDialog, QPlainTextEditLogger):
         logging.info('something to remember')
         logging.warning('that\'s not right')
         logging.error('foobar')
+
+# create dockable window using workspaceControl and MayaMixin

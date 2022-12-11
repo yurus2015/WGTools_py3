@@ -1,86 +1,72 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-from validator.utils.validator_API import *
+import re
 
 
 def main():
-    obj_list = vl_listAllTransforms()
-    obj_list = cmds.filterExpand(obj_list, sm=12, fp=1)
-    # objList = cmds.ls(objList, l=1)
-
-    track_L, track_R = vl_findTracksInLods()
-    track_list = track_L + track_R
-    track_list = cmds.filterExpand(track_list, sm=12, fp=1)
-    # trackList = cmds.ls(trackList, l=1)
-
     return_list = []
+    obj_list = cmds.ls(type='mesh', l=True)
+    obj_list = cmds.filterExpand(obj_list, sm=12, fp=1)
 
-    if obj_list:
-        # remove track objects from the objList
-        if len(track_list) > 0:
-            for i in track_list:
-                obj_list.remove(i)
+    tracks_list = cmds.ls('track_*', type='mesh', l=True)
 
-        # for all objs in objList get its uv coordinates
-        for i in obj_list:
-            if i.find("lod0") != -1 or i.find("lod1") != -1:
-                print('Current object ', i)
-                util = OpenMaya.MScriptUtil()
-                selectionList = OpenMaya.MSelectionList()
-                selectionList.add(i)
-                OpenMaya.MGlobal.setActiveSelectionList(selectionList)
+    # Remove objects in the tracks_list from the obj_list
+    obj_list = list(set(obj_list) - set(tracks_list))
 
-                DagPath = OpenMaya.MDagPath()
-                fullPath = DagPath.fullPathName()
+    # Delete duplicates from list
+    obj_list = list(set(obj_list))
 
-                selectionList.getDagPath(0, DagPath)
+    # Remove any objects from the obj_list that NOT have "lod0" or "lod1" in their name
+    obj_list = [obj for obj in obj_list if not re.search(r"lod[^0|1].", obj)]
 
-                component = OpenMaya.MObject()
+    for obj in obj_list:
+        selection_list = OpenMaya.MSelectionList()
+        selection_list.add(obj)
+        OpenMaya.MGlobal.setActiveSelectionList(selection_list)
 
-                fnMesh = OpenMaya.MFnMesh(DagPath)
-                uArray = OpenMaya.MFloatArray()
-                vArray = OpenMaya.MFloatArray()
+        dag_path = OpenMaya.MDagPath()
 
-                fnMesh.getUVs(uArray, vArray)
+        selection_list.getDagPath(0, dag_path)
 
-                status = False
-                for i in range(0, len(uArray)):
-                    if uArray[i] < 0 or uArray[i] > 1 or vArray[i] < 0 or vArray[i] > 1:
-                        status = True
-                        break
-                if status == True:
-                    tmp = [DagPath.fullPathName(), DagPath.fullPathName()]
-                    return_list.append(tmp)
+        fn_mesh = OpenMaya.MFnMesh(dag_path)
 
-        if len(track_list) > 0:
-            for i in track_list:
-                if i.find("lod0") != -1:
-                    util = OpenMaya.MScriptUtil()
-                    selectionList = OpenMaya.MSelectionList()
-                    selectionList.add(i)
-                    OpenMaya.MGlobal.setActiveSelectionList(selectionList)
+        # Arrays to store the U and V UV coordinates
+        u_array = OpenMaya.MFloatArray()
+        v_array = OpenMaya.MFloatArray()
 
-                    DagPath = OpenMaya.MDagPath()
-                    fullPath = DagPath.fullPathName()
+        fn_mesh.getUVs(u_array, v_array)
 
-                    selectionList.getDagPath(0, DagPath)
+        max_u = max(u_array)
+        min_u = min(u_array)
+        max_v = max(v_array)
+        min_v = min(v_array)
+        if max_u > 1.0 or min_u < 0.0 or max_v > 1.0 or min_v < 0.0:
+            tmp = [obj + ' - UV coordinates out of border', obj]
+            return_list.append(tmp)
 
-                    component = OpenMaya.MObject()
+    # Remove any objects from the tracks_list that NOT have "lod0" in their name
+    tracks_list = [obj for obj in tracks_list if not re.search(r"lod[^0].", obj)]
+    if tracks_list:
+        for i in tracks_list:
+            selection_list = OpenMaya.MSelectionList()
+            selection_list.add(i)
+            OpenMaya.MGlobal.setActiveSelectionList(selection_list)
 
-                    fnMesh = OpenMaya.MFnMesh(DagPath)
-                    uArray = OpenMaya.MFloatArray()
-                    vArray = OpenMaya.MFloatArray()
+            dag_path = OpenMaya.MDagPath()
 
-                    fnMesh.getUVs(uArray, vArray)
+            selection_list.getDagPath(0, dag_path)
 
-                    status = False
-                    for i in range(0, len(uArray)):
-                        if uArray[i] < 0 or uArray[i] > 1:
-                            status = True
-                            break
-                    if status == True:
-                        tmp = [DagPath.fullPathName(), DagPath.fullPathName()]
-                        return_list.append(tmp)
+            fn_mesh = OpenMaya.MFnMesh(dag_path)
+            u_array = OpenMaya.MFloatArray()
+            v_array = OpenMaya.MFloatArray()
+
+            fn_mesh.getUVs(u_array, v_array)
+
+            max_u = max(u_array)
+            min_u = min(u_array)
+            if max_u > 1.0 or min_u < 0.0:
+                tmp = [i + ' - UV coordinates out of border', i]
+                return_list.append(tmp)
 
         OpenMaya.MGlobal.clearSelectionList()
 

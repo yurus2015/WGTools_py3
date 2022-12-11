@@ -1,71 +1,47 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
-checkId = 112
-checkLabel = "4.24 Check onefold track UV scale"
-
 
 def main(*args):
-    searchThreshold = 0.05
+    print('arguments: {}'.format(args[0]))
+    if not args:
+        return None
 
-    if args:
-        for obj in args:
-            selectionList = OpenMaya.MSelectionList()
-            selectionList.clear()
-            selectionList.add(obj)
+    tracks = args
+    if isinstance(args[0], list):
+        tracks = args[0]
+    for track in tracks:
+        print('Track : ' + track)
+        selection_list = OpenMaya.MSelectionList()
+        selection_list.clear()
+        selection_list.add(track)
+        dag_path = OpenMaya.MDagPath()
+        selection_list.getDagPath(0, dag_path)
+        fn_mesh = OpenMaya.MFnMesh(dag_path)
+        u_array = OpenMaya.MFloatArray()
+        v_array = OpenMaya.MFloatArray()
+        fn_mesh.getUVs(u_array, v_array)
 
-            DagPath = OpenMaya.MDagPath()
-            selectionList.getDagPath(0, DagPath)
+        min_v = min(v_array)
+        max_v = max(v_array)
 
-            DagNode = OpenMaya.MObject()
-            DagNode = DagPath.node()
+        max_border = 0
+        min_border = 0
 
-            fnMesh = OpenMaya.MFnMesh(DagPath)
+        if abs(int(abs(max_v)) - abs(max_v)) < 0.5:
+            max_border = int(max_v)
+        else:
+            max_border = int(max_v) + (max_v / abs(max_v))
 
-            uArray = OpenMaya.MFloatArray()
-            vArray = OpenMaya.MFloatArray()
+        if abs(int(abs(min_v)) - abs(min_v)) < 0.5:
+            min_border = int(min_v)
+        else:
+            min_border = int(min_v) + (min_v / abs(min_v))
 
-            fnMesh.getUVs(uArray, vArray)
+        scale_approx = max_border - min_border
 
-            minV = 1
-            maxV = 0
-
-            for i in range(vArray.length()):
-                if vArray[i] < minV:
-                    minV = vArray[i]
-                if vArray[i] > maxV:
-                    maxV = vArray[i]
-
-            min_array = []
-            max_array = []
-
-            for i in range(vArray.length()):
-                if vArray[i] > minV - searchThreshold and vArray[i] < minV + searchThreshold:
-                    min_array.append(i)
-                elif vArray[i] < maxV + searchThreshold and vArray[i] > maxV - searchThreshold:
-                    max_array.append(i)
-
-            maxBorder = 0
-            minBorder = 0
-
-            if abs(int(abs(maxV)) - abs(maxV)) < 0.5:
-                maxBorder = int(maxV)
-            else:
-                maxBorder = int(maxV) + (maxV / abs(maxV))
-
-            if abs(int(abs(minV)) - abs(minV)) < 0.5:
-                minBorder = int(minV)
-            else:
-                minBorder = int(minV) + (minV / abs(minV))
-
-            scaleApprox = maxBorder - minBorder
-
-            scaleFactor = scaleApprox / (maxV - minV)
-
-            cmds.polyEditUV(obj + ".map[*]", pu=0, pv=0, su=1, sv=scaleFactor)
-
-            # for i in min_array:
-            #     cmds.polyEditUV(obj + ".map[" + str(i) + "]", v = minBorder, r=0)
-
-            # for i in max_array:
-            #     cmds.polyEditUV(obj + ".map[" + str(i) + "]", v = maxBorder, r=0)
+        # Add check division by zero
+        if scale_approx == 0 or (max_v - min_v) == 0:
+            return None
+        scale_factor = scale_approx / (max_v - min_v)
+        cmds.polyEditUV(track + ".map[*]", pu=0, pv=0, su=1, sv=scale_factor)

@@ -34,17 +34,29 @@ def main(autoload=True):
     ValidatorMainWindow(control_wrap)
 
 
-if __name__ == "__main__":
-    packages = ['validator']
-    for i in list(sys.modules.keys()):
-        for package in packages:
-            if i.startswith(package):
-                try:
-                    del sys.modules[i]
-                except:
-                    pass
+# if __name__ == "__main__":
+#     packages = ['validator']
+#     for i in list(sys.modules.keys()):
+#         for package in packages:
+#             if i.startswith(package):
+#                 try:
+#                     del sys.modules[i]
+#                 except:
+#                     pass
+#
+#     # import validator.main as vld
+#     #
+#     # vld.main(autoload=False)
+#     main(False)
 
-    # import validator.main as vld
-    #
-    # vld.main(autoload=False)
+
+def reload_all_modules():
+    for m in list(sys.modules):
+        if 'validator' in m:
+            print(m)
+            del (sys.modules[m])
+
+
+if __name__ == '__main__':
+    reload_all_modules()
     main(False)

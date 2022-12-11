@@ -53,6 +53,12 @@ def logging(info, message, type=None):
     Storage.SIMPLYGON_LOG_WINDOW.log_text_box.emit(str(message))
 
 
+def color_picker():
+    color = cmds.colorEditor(rgbValue=(1, 1, 1))
+    print(color)
+    return color
+
+
 def in_viewport_massage(message):
     cmds.inViewMessage(amg='In-view message <hl>' + message + '</hl>.', pos='botCenter', fade=True)
 

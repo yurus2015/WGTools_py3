@@ -7,6 +7,7 @@ import maya.OpenMayaUI as OpenMayaUI
 from shiboken2 import wrapInstance
 import maya.cmds as cmds
 import os, posixpath
+import importlib
 from .constants import *
 
 current_directory = os.path.dirname(__file__)
@@ -57,21 +58,27 @@ class CheckWidget(QWidget):
 
     def run_check(self, *args):
         isolate = cmds.optionVar(q=ISOLATEOPTION)
-        exec('import ' + CHECKS_PATH + self.action + '.check')
+        # exec('import ' + CHECKS_PATH + self.action + '.check')
+
+        # Import the module specified by the "self.action" variable
+        module = importlib.import_module(CHECKS_PATH + self.action + '.check')
+        # print('Module ', module.main())
+
         print(self.label.upper())
-        self.returnList = None
+        self.return_list = None
         try:
-            self.returnList = eval(CHECKS_PATH + self.action + '.check.main()')
+            # self.return_list = eval(CHECKS_PATH + self.action + '.check.main()')
+            self.return_list = module.main()
         except ValueError:
             self.headerWidget.setLabel('Error in script!: ' + self.label)
             return self.error, self.fixed
-        if self.returnList:
-            self.dataWidget.addItem(self.returnList)
+        if self.return_list:
+            self.dataWidget.addItem(self.return_list)
             self.headerWidget.set_color_error(self.error)
             self.headerWidget.set_fix_icon(self.fixed)
             return self.error, self.fixed
         else:
-            self.dataWidget.addItem(self.returnList)
+            self.dataWidget.addItem(self.return_list)
             self.headerWidget.set_color_error()
             if isolate:
                 self.setVisible(False)
@@ -79,35 +86,52 @@ class CheckWidget(QWidget):
             return None, None
 
     def run_fix(self, *args):
-        isolate = cmds.optionVar(q=ISOLATEOPTION)
-        exec('import ' + CHECKS_PATH + self.action + '.fix')
-        tmp = []
+        # isolate = cmds.optionVar(q=ISOLATEOPTION)
+        # exec('import ' + CHECKS_PATH + self.action + '.fix')
 
-        for x in self.returnList:
+        # Import the module specified by the "self.action" variable
+        module = importlib.import_module(CHECKS_PATH + self.action + '.fix')
+
+        # Reformat input list
+        reformat_list = []
+        for x in self.return_list:
             if not isinstance(x[1], (list, tuple)):
-                tmp.append(x[1])
+                reformat_list.append(x[1])
             else:
-                tmp.extend(x[1])
+                reformat_list.extend(x[1])
 
-        # in case these are compoments
-        if len(tmp) > 255:
+        # In case these are components
+        if len(reformat_list) > 255:
             print('MORE 255')
-            newTmp = []
-            for i in tmp:
-                newTmp.append(i.split(".")[0])
+            short_list = []
+            for i in reformat_list:
+                short_list.append(i.split(".")[0])
 
-            tmp = list(set(newTmp))
-
+            reformat_list = list(set(short_list))
+        print('Reformat list: ', reformat_list, str(reformat_list).strip("[]"))
+        # self.return_list = module.main()
+        # module_string = CHECKS_PATH + self.action + '.fix.main()'
+        # print('EXECUTE FIX', module_string)
         try:
-            self.returnList = eval(CHECKS_PATH + self.action + '.fix.main(' + str(tmp).strip("[]") + ')')
-        except:
-            self.returnList = eval(CHECKS_PATH + self.action + '.fix.main(' + str(tmp) + ')')
+            # print('EXECUTE FIX', CHECKS_PATH + self.action + '.fix.main()')
+            # self.return_list = eval(CHECKS_PATH + self.action + '.fix.main(' + str(reformat_list).strip("[]") + ')')
+            # reformat_list = str(reformat_list).strip("[]")
+            self.return_list = module.main(reformat_list)
+        except ValueError:
+            pass
+            # self.return_list = eval(CHECKS_PATH + self.action + '.fix.main(' + str(reformat_list) + ')')
 
-        if self.returnList:
-            self.dataWidget.addItem(self.returnList)
+            # self.return_list = module.main(str(reformat_list).strip("[]"))
+
+        if self.return_list:
+            print('NOT FIXED')
+            self.dataWidget.addItem(self.return_list)
         else:
-            self.dataWidget.addItem(self.returnList)
+            print('FIXED')
+            # self.dataWidget.addItem(self.return_list)
             self.headerWidget.set_color_error()
+
+            # Repeat check
             self.run_check()
 
 
@@ -261,9 +285,9 @@ class DataWidget(QWidget):
         self.dataMainLayout.addLayout(self.dataLayout)
         self.setLayout(self.dataMainLayout)
 
-    def addItem(self, returnList):
+    def addItem(self, return_list):
         self.scrollArea.clear()
-        for x in returnList:
+        for x in return_list:
             item = ExtendedQListWidgetItem(x[0], self.scrollArea)
             item.setSelection(x[1])
             self.scrollArea.addItem(item)

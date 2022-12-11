@@ -1,5 +1,4 @@
 import maya.cmds as cmds
-# import maya.api.OpenMaya as OpenMaya
 import re
 from validator.utils.checks.wheelsPivot.utilites import *
 
@@ -12,13 +11,15 @@ def replacer_pivot(wheel):
 
 
 def main(*args):
-    input_list = args
     # All scene objects
     all_objects = cmds.ls(type='transform', l=True)
 
     # All invalid wheels in lod0
-    # wheels = [obj for obj in all_objects if re.search(r"lod0.*(wd_|w_)", obj)]
-    wheels = list(input_list)
+    if args:
+        wheels = list(args)
+    else:
+        wheels = [obj for obj in all_objects if re.search(r"lod0.*(wd_|w_)", obj)]
+    print('WHEELS \n', wheels)
 
     # All wheels in other lods
     lods_wheels = [obj for obj in all_objects if re.search(r"lod[^0].*(wd_|w_)", obj)]

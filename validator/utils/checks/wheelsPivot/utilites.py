@@ -34,3 +34,10 @@ def mesh_baricentric(wheel):
     center = (center_x, center_y, center_z)
 
     return center
+
+
+# create function for check maya current units
+def maya_current_units():
+    if cmds.currentUnit(q=True, linear=True) == 'cm':
+        return 100
+    return 1

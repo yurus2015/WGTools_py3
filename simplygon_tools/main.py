@@ -14,8 +14,6 @@ import maya.cmds as cmds
 import simplygon_tools.gui.main_window as wnd
 from simplygon_tools.utils.constants import *
 
-print('Simplygon_Tools')
-
 
 def main():
     if cmds.window('SimplygonTanksWindow', q=True, exists=True):
@@ -28,12 +26,17 @@ def main():
     if cmds.window('SimplygonLog', q=True, exists=True):
         cmds.deleteUI('SimplygonLog')
 
-    log_window = wnd.LogWindow()
-    log_window.show()
-    log_window.raise_()
-    log_window.log_text_box.emit('Start')
-    Storage.SIMPLYGON_LOG_WINDOW = log_window
-    print('run', log_window)
+    # log_window = wnd.LogWindow()
+    # log_window.show()
+    # log_window.raise_()
+    # log_window.log_text_box.emit('Start')
+    # Storage.SIMPLYGON_LOG_WINDOW = log_window
+    # print('run', log_window)
+
+    # copilot_window = wnd.MainWindow()
+    # copilot_window.show()
+    # copilot_window.raise_()
+    # print('run', copilot_window)
 
 
 def reload_all_modules():
