@@ -245,6 +245,7 @@ class WGWidgetAction(QWidgetAction):
         self.mainWidget.makeBGOld()
 
         path = Utils.getCurrentDir() + "\\actions\\" + self.actionName + ".py"
+        # path_2 = importlib.import_module(CHECKS_PATH + self.action + '.fix')
         print('action! ', path)
 
         scriptFile = open(path, 'r')
