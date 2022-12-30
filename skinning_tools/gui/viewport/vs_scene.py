@@ -117,36 +117,22 @@ class GraphicsScene(QGraphicsScene):
         self._color_light = QColor('#353535')
         self._color_dark = QColor('#1a1a1a')
 
-        self.z_axis = QColor('#7876ff')
-        self.y_axis = QColor('#00c800')
+        self._color_axis_z = QColor('#7876ff')
+        self.color_axis_y = QColor('#00c800')
 
-        self.main_line = QColor('#5e5e5e')
+        self.color_main_line = QColor('#5e5e5e')
 
         self._pen_light = QPen(self._color_light)
-        self._pen_light.setWidth(1)
         self._pen_dark = QPen(self._color_dark)
+        self._pen_z_axis = QPen(self._color_axis_z)
+        self._pen_y_axis = QPen(self.color_axis_y)
+        self._pen_main = QPen(self.color_main_line)
+
+        self._pen_light.setWidth(1)
         self._pen_dark.setWidth(2)
-        self.setBackgroundBrush(self._color_background)
-
-        self._pen_z_axis = QPen(self.z_axis)
-        self._pen_y_axis = QPen(self.y_axis)
-
-        self._pen_main = QPen(self.main_line)
         self._pen_main.setWidth(2)
 
-        z_axis = AxisLine(50, 0, self._pen_z_axis)
-        self.addItem(z_axis)
-        z_axis.setZValue(-1000)
-        y_axis = AxisLine(0, -50, self._pen_y_axis)
-        self.addItem(y_axis)
-
-        self.z_letter = AxisLetter('Z', self.z_axis)
-        self.addItem(self.z_letter)
-        self.z_letter.setPos(50, -15)
-
-        self.y_letter = AxisLetter('Y', self.y_axis)
-        self.addItem(self.y_letter)
-        self.y_letter.setPos(-15, -65)
+        self.setBackgroundBrush(self._color_background)
 
         # self.selectionChanged.connect(self.on_selection_changed)
 
@@ -156,57 +142,35 @@ class GraphicsScene(QGraphicsScene):
     def set_graphics_scene(self, width, height):
         self.setSceneRect(-width / 2, -height / 2, width, height)
 
-    # todo grid to class
-    def drawBackground(self, painter, rect):
-        super().drawBackground(painter, rect)
-
-        # here we create our grid
-        left = int(math.floor(rect.left()))
-        right = int(math.floor(rect.right()))
-        top = int(math.floor(rect.top()))
-        bottom = int(math.floor(rect.bottom()))
-
-        first_left = left - (left % self.grid_size)
-        first_top = top - (top % self.grid_size)
-
+    def grid_lines(self, painter, rect):
+        left = int(rect.left()) - (int(rect.left()) % self.grid_size)
+        top = int(rect.top()) - (int(rect.top()) % self.grid_size)
         lines_light, lines_dark = [], []
-        for x in range(first_left, right, self.grid_size):
-            if x % (self.grid_size * self.grid_squares) != 0:
-                lines_light.append(QLine(x, top, x, bottom))
+        for x in range(left, int(rect.right()), self.grid_size):
+            if x % (self.grid_size * self.grid_squares) == 0:
+                lines_dark.append(QLineF(x, rect.top(), x, rect.bottom()))
             else:
-                lines_dark.append(QLine(x, top, x, bottom))
+                lines_light.append(QLineF(x, rect.top(), x, rect.bottom()))
 
-        for y in range(first_top, bottom, self.grid_size):
-            if y % (self.grid_size * self.grid_squares) != 0:
-                lines_light.append(QLine(left, y, right, y))
+        for y in range(top, int(rect.bottom()), self.grid_size):
+            if y % (self.grid_size * self.grid_squares) == 0:
+                lines_dark.append(QLineF(rect.left(), y, rect.right(), y))
             else:
-                lines_dark.append(QLine(left, y, right, y))
-        # draw lines
+                lines_light.append(QLineF(rect.left(), y, rect.right(), y))
+
         painter.setPen(self._pen_light)
         painter.drawLines(lines_light)
-
         painter.setPen(self._pen_dark)
         painter.drawLines(lines_dark)
 
-        main_lines = [QLine(0, top, 0, bottom), QLine(left, 0, right, 0)]
-
+        main_lines = [QLine(0, rect.top(), 0, rect.bottom()), QLine(rect.left(), 0, rect.right(), 0)]
         painter.setPen(self._pen_main)
         painter.drawLines(main_lines)
 
+    # def axis_group_transform(self, factor, position):
+    #     self.axis_group.setScale(factor)
+    #     self.axis_group.setPos(position.x() + 20, position.y() - 20)
 
-class AxisLine(QGraphicsLineItem):
-    def __init__(self, start, end, pen, parent=None):
-        super().__init__()
-        self.setPen(pen)
-        self.setLine(0, 0, start, end)
-
-
-class AxisLetter(QGraphicsTextItem):
-    def __init__(self, text, color, parent=None):
-        super().__init__(parent)
-        self.setPlainText(text)
-        self.setDefaultTextColor(color)
-        self.setFont(QFont('Arial', AXIS_FONT_SIZE))
-
-    def set_size(self, size):
-        self.setFont(QFont('Arial', size))
+    def drawBackground(self, painter, rect):
+        super().drawBackground(painter, rect)
+        self.grid_lines(painter, rect)
